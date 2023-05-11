@@ -9,6 +9,7 @@ public class Startup
 
     public IConfiguration Configuration { get; }
 
+    //service to adding dependency injection 
     public void ConfigureServices(IServiceCollection services)
     {
     }
