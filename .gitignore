@@ -1,3 +1,7 @@
 ﻿.idea/*
 SocialNetwork.Web/obj/*
 SocialNetwork.Web/bin/*
+SocialNetwork.BL/obj/*
+SocialNetwork.BL/bin/*
+SocialNetwork.DAL/obj/*
+SocialNetwork.DAL/bin/*
