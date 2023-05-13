@@ -24,13 +24,6 @@ public static class UserMapper
             Password = user.Password,
             IsEnabled = user.IsEnabled,
             OnlineStatus = (OnlineStatus)user.OnlineStatus,
-            AuthorizationInfo = new AuthorizationInfoModel()
-            {
-                Id = user.AuthorizationInfo.Id,
-                LoginType = (LoginType)user.AuthorizationInfo.LoginType,
-                ExpiredDate = user.AuthorizationInfo.ExpiredDate,
-                RefreshToken = user.AuthorizationInfo.RefreshToken
-            },
             Profile = new ProfileModel()
             {
                 Id = user.Profile.Id,
@@ -59,13 +52,6 @@ public static class UserMapper
             Password = user.Password,
             IsEnabled = user.IsEnabled,
             OnlineStatus = (DAL.Entity.Enums.OnlineStatus)user.OnlineStatus,
-            AuthorizationInfo = new AuthorizationInfo()
-            {
-                Id = user.AuthorizationInfo.Id,
-                LoginType = (DAL.Entity.Enums.LoginType)user.AuthorizationInfo.LoginType,
-                ExpiredDate = user.AuthorizationInfo.ExpiredDate,
-                RefreshToken = user.AuthorizationInfo.RefreshToken
-            },
             Profile = new Profile()
             {
                 Id = user.Profile.Id,
