@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using FluentValidation;
+using FluentValidation.AspNetCore;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using SocialNetwork.BL.Services;
@@ -8,6 +10,7 @@ using SocialNetwork.DAL.Repository;
 using SocialNetwork.DAL.Repository.Interfaces;
 using SocialNetwork.Web.Helpers;
 using SocialNetwork.Web.Options;
+using SocialNetwork.Web.Validators;
 
 namespace SocialNetwork.Web;
 
@@ -24,6 +27,13 @@ public class Startup
     public void ConfigureServices(IServiceCollection services)
     {
         services.AddControllers().AddNewtonsoftJson();
+        
+        //inject dependency of FluentValidation
+        services.AddFluentValidationAutoValidation();
+        services.AddFluentValidationClientsideAdapters();
+        services.AddValidatorsFromAssemblyContaining<UserValidator>();
+        services.AddValidatorsFromAssemblyContaining<UserValidator>();
+        
 
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>
