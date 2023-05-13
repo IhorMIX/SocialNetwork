@@ -1,33 +1,29 @@
 ﻿using FluentValidation;
-using SocialNetwork.DAL.Entity;
+using SocialNetwork.Web.Models;
 
-namespace SocialNetwork.BL.Models;
+namespace SocialNetwork.Web.Validators;
 
-public class ProfileValidator : AbstractValidator<ProfileModel>
+public class ProfileValidator : AbstractValidator<ProfileCreateViewModel>
 {
     public ProfileValidator()
     {
         RuleFor(x => x.Name).NotNull().NotEmpty()
-            .MinimumLength(2).MaximumLength(50)
-            .Matches(@"^[\p{L}\p{Mn}\p{Pd}'\s]+$")
-            .Must(name => char.IsUpper(name[0]) && name.Skip(1).All(char.IsLower))
-            .WithMessage("Name must start from upper letter");
-        
+            .Length(2, 50)
+            .Matches(@"^[\p{L}\p{Mn}\p{Pd}'\s]+$");
+
         RuleFor(x => x.Surname).NotNull().NotEmpty()
-            .MinimumLength(2).MaximumLength(10)
-            .Matches(@"^[\p{L}\p{Mn}\p{Pd}'\s]+$")
-            .Must(surname => char.IsUpper(surname[0]) && surname.Skip(1).All(char.IsLower))
-            .WithMessage("Surname must start from upper letter");
-        
-        RuleFor(x => x.Email).NotNull().NotEmpty()
+            .Length(2, 50)
+            .Matches(@"^[\p{L}\p{Mn}\p{Pd}'\s]+$");
+
+        RuleFor(x => x.Email).NotNull()
             .EmailAddress();
         
-        RuleFor(x => x.Birthday).NotNull()
-            .Must(date => date < DateTime.Now.AddYears(-3));
+        RuleFor(x => x.Birthday)
+            .Must(date => date < DateTime.Now.AddYears(-3) && date > DateTime.Now.AddYears(-100));
         
         RuleFor(x => x.Description)
-            .MaximumLength(200);
+            .MaximumLength(500);
 
-        RuleFor(x => x.Sex).NotNull().NotEmpty();
+        RuleFor(x => x.Sex).NotEmpty();
     }
 }

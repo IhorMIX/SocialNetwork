@@ -1,13 +1,14 @@
 ﻿using FluentValidation;
-using SocialNetwork.DAL.Entity;
+using SocialNetwork.BL.Models;
+using SocialNetwork.Web.Models;
 
-namespace SocialNetwork.BL.Models;
+namespace SocialNetwork.Web.Validators;
 
-public class UserValidator : AbstractValidator<UserModel>
+public class UserValidator : AbstractValidator<UserCreateViewModel>
 {
     public UserValidator()
     {
-        RuleFor(x => x.Id).NotNull();
+        
         RuleFor(x => x.Login).NotEmpty().NotNull()
             .Length(6,30)
             .Matches("^[a-zA-Z0-9_-]*$")
@@ -18,12 +19,8 @@ public class UserValidator : AbstractValidator<UserModel>
             .Matches("^[a-zA-Z0-9]*$")
             .WithMessage("Not a valid password format. Only Latin letters and digits are allowed.");
         
-        RuleFor(x => x.OnlineStatus).Empty();
-        
         RuleFor(x => x.Profile)
-            .NotNull();
-        
-        RuleFor(x => x.AuthorizationInfo)
-            .NotNull();
+            .NotNull()
+            .SetValidator(new ProfileValidator());
     }
 }
