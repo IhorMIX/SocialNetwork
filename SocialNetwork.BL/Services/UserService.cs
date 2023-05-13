@@ -45,8 +45,17 @@ public class UserService : IUserService
         {
             throw new UserNotFoundException($"User with Id '{user.Id}' not found");
         }
-        
-        //TODO:Needs to update fields. I will do this next time
+
+        userDb.Password = string.IsNullOrEmpty(user.Password) ? userDb.Password : PasswordHelper.HashPassword(user.Password); 
+        userDb.Login = string.IsNullOrEmpty(user.Login) ? userDb.Login : user.Login;
+        userDb.Profile.Birthday = (user.Profile.Birthday == DateTime.MinValue) ? userDb.Profile.Birthday : user.Profile.Birthday;
+        userDb.Profile.Name = string.IsNullOrEmpty(user.Profile.Name) ? userDb.Profile.Name : user.Profile.Name;
+        userDb.Profile.Surname = string.IsNullOrEmpty(user.Profile.Surname) ? userDb.Profile.Surname : user.Profile.Surname;
+        userDb.Profile.Email = string.IsNullOrEmpty(user.Profile.Email) ? userDb.Profile.Email : user.Profile.Email;
+        userDb.Profile.AvatarImage = string.IsNullOrEmpty(user.Profile.AvatarImage) ? userDb.Profile.AvatarImage : user.Profile.AvatarImage;
+        userDb.Profile.Description = string.IsNullOrEmpty(user.Profile.Description) ? userDb.Profile.Description : user.Profile.Description;
+        //userDb.Profile.Sex =;
+
 
         await _userRepository.UpdateUserAsync(userDb, cancellationToken);
 
