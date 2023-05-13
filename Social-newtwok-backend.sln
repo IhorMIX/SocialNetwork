@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SocialNetwork.DAL", "Social
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SocialNetwork.BL", "SocialNetwork.BL\SocialNetwork.BL.csproj", "{B403C7B4-4252-43EF-A672-5A4D4661F8EC}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SocialNetwork.Test", "SocialNetwork.Test\SocialNetwork.Test.csproj", "{3517DAA8-23B6-4C4F-A591-21DED6FDF733}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -30,5 +32,9 @@ Global
 		{B403C7B4-4252-43EF-A672-5A4D4661F8EC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B403C7B4-4252-43EF-A672-5A4D4661F8EC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B403C7B4-4252-43EF-A672-5A4D4661F8EC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3517DAA8-23B6-4C4F-A591-21DED6FDF733}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3517DAA8-23B6-4C4F-A591-21DED6FDF733}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3517DAA8-23B6-4C4F-A591-21DED6FDF733}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3517DAA8-23B6-4C4F-A591-21DED6FDF733}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

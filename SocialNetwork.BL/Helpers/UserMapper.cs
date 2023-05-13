@@ -24,7 +24,6 @@ public static class UserMapper
             Password = user.Password,
             IsEnabled = user.IsEnabled,
             OnlineStatus = (OnlineStatus)user.OnlineStatus,
-
             Profile = new ProfileModel()
             {
                 Id = user.Profile.Id,
@@ -53,7 +52,6 @@ public static class UserMapper
             Password = user.Password,
             IsEnabled = user.IsEnabled,
             OnlineStatus = (DAL.Entity.Enums.OnlineStatus)user.OnlineStatus,
-
             Profile = new Profile()
             {
                 Id = user.Profile.Id,

@@ -79,6 +79,7 @@ public class Startup
             app.UseExceptionHandler("/Error");
             app.UseHsts();
         }
+
         app.UseRouting();
         app.UseCors(b => b.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
 
