@@ -36,7 +36,7 @@ public class UserController : ControllerBase
     {
         var user = await _userService.GetUserByLoginAndPasswordAsync(model.Login, model.Password);
 
-        var token = _tokenHelper.GetToken(user.Id);
+        var token = _tokenHelper.GetToken(user!.Id);
 
         return Ok(token);
     }
