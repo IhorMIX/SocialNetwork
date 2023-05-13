@@ -82,9 +82,14 @@ public class UserService : IUserService
     
     public async Task<UserModel?> GetUserByLoginAndPasswordAsync(string login, string password, CancellationToken cancellationToken = default)
     {
-        var userDb = await _userRepository.GetAll().FirstAsync(i => i.Login == login && i.Password == PasswordHelper.HashPassword(password), cancellationToken);
+        var userDb = await _userRepository.GetAll().FirstOrDefaultAsync(i => i.Login == login, cancellationToken);
         
         if (userDb is null)
+        {
+            throw new UserNotFoundException($"User not found");
+        }
+
+        if (!PasswordHelper.VerifyHashedPassword(userDb.Password, password))
         {
             throw new UserNotFoundException($"User not found");
         }
@@ -94,7 +99,7 @@ public class UserService : IUserService
 
     public async Task<UserModel> GetUserByRefreshTokenAsync(string refreshToken, CancellationToken cancellationToken = default)
     {
-        var userDb = await _userRepository.GetAll().FirstAsync(i => i.AuthorizationInfo.RefreshToken == refreshToken, cancellationToken);
+        var userDb = await _userRepository.GetAll().FirstOrDefaultAsync(i => i.AuthorizationInfo.RefreshToken == refreshToken, cancellationToken);
         
         if (userDb is null)
         {
