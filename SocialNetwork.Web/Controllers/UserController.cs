@@ -31,7 +31,7 @@ public class UserController : ControllerBase
     }
 
     [AllowAnonymous]
-    [HttpGet("login")]
+    [HttpPost("login")]
     public async Task<ActionResult> AuthorizeUser([FromBody] UserAuthorizeModel model)
     {
         var user = await _userService.GetUserByLoginAndPasswordAsync(model.Login, model.Password);
