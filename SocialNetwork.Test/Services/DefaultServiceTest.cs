@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
-using SocialNetwork.BL.Services.Interfaces;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using SocialNetwork.DAL;
 using SocialNetwork.Test.Extensions;
 
@@ -37,6 +37,7 @@ namespace SocialNetwork.Test.Services
         protected virtual void SetUpAdditionalDependencies(IServiceCollection services)
         {
             services.AddScoped<TService>();
+            services.AddScoped<ILogger<TService>, NullLogger<TService>>();
         }
 
         [SetUp]
@@ -49,8 +50,9 @@ namespace SocialNetwork.Test.Services
             ServiceCollection = new ServiceCollection();
             ServiceCollection.AddDbContext<SocialNetworkDbContext>(options =>
                 options.UseInMemoryDatabase("TestSocialNetworkDB"));
-
+            ServiceCollection.AddLogging();
             SetUpAdditionalDependencies(ServiceCollection);
+            
             ServiceCollection.AddScoped<SocialNetworkDbContext>();
 
             var rootServiceProvider = ServiceCollection.BuildServiceProvider(new ServiceProviderOptions()
