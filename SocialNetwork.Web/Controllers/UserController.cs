@@ -11,7 +11,7 @@ namespace SocialNetwork.Web.Controllers;
 [ApiController]
 public class UserController : ControllerBase
 {
-    private readonly ILogger _logger;
+    private readonly ILogger<UserController> _logger;
 
     private readonly IUserService _userService;
     private readonly TokenHelper _tokenHelper;
