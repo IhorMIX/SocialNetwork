@@ -10,3 +10,4 @@ SocialNetwork.DAL/bin/*
 SocialNetwork.DAL/bin/*
 SocialNetwork.Test/obj/*
 SocialNetwork.Test/bin/*
+/SocialNetwork.Web/SocialNetwork.Web.csproj.user

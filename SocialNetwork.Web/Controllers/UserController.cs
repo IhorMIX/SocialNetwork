@@ -28,8 +28,11 @@ public class UserController : ControllerBase
     public async Task<IActionResult> CreateUser([FromBody] UserCreateViewModel user,
         CancellationToken cancellationToken)
     {
-        _logger.LogInformation("start to create user");
+        _logger.LogInformation("Start to create user");
+        
         await _userService.CreateUserAsync(UserVieModelMapper.ConvertToBlModel(user), cancellationToken);
+
+        _logger.LogInformation("User was created");
 
         return Ok();
     }
