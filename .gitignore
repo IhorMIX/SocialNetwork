@@ -5,5 +5,9 @@ SocialNetwork.BL/obj/*
 SocialNetwork.BL/bin/*
 SocialNetwork.DAL/obj/*
 SocialNetwork.DAL/bin/*
+/.vs
+
+SocialNetwork.DAL/bin/*
 SocialNetwork.Test/obj/*
 SocialNetwork.Test/bin/*
+/SocialNetwork.Web/SocialNetwork.Web.csproj.user
