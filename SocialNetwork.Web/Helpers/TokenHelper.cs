@@ -1,5 +1,6 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using Microsoft.IdentityModel.Tokens;
 using SocialNetwork.Web.Options;
 
@@ -37,5 +38,15 @@ public class TokenHelper
                 ClaimsIdentity.DefaultRoleClaimType);
         
         return claimsIdentity;
+    }
+
+    public static string GenerateRefreshToken(string token)
+    {
+        var randomNumber = new byte[32];
+        using (var rng = RandomNumberGenerator.Create())
+        {
+            rng.GetBytes(randomNumber);
+            return Convert.ToBase64String(randomNumber) + token.Substring(1,10).GetHashCode();
+        }
     }
 }
