@@ -11,13 +11,16 @@ namespace SocialNetwork.Web.Controllers;
 [ApiController]
 public class UserController : ControllerBase
 {
+    private readonly ILogger<UserController> _logger;
+
     private readonly IUserService _userService;
     private readonly TokenHelper _tokenHelper;
 
-    public UserController(IUserService userService, TokenHelper tokenHelper)
+    public UserController(IUserService userService, TokenHelper tokenHelper, ILogger<UserController> logger)
     {
         _userService = userService;
         _tokenHelper = tokenHelper;
+        _logger = logger;
     }
 
     [AllowAnonymous]
@@ -25,7 +28,11 @@ public class UserController : ControllerBase
     public async Task<IActionResult> CreateUser([FromBody] UserCreateViewModel user,
         CancellationToken cancellationToken)
     {
+        _logger.LogInformation("Start to create user");
+        
         await _userService.CreateUserAsync(UserVieModelMapper.ConvertToBlModel(user), cancellationToken);
+
+        _logger.LogInformation("User was created");
 
         return Ok();
     }
@@ -40,5 +47,6 @@ public class UserController : ControllerBase
 
         return Ok(token);
     }
+   
     
 }
