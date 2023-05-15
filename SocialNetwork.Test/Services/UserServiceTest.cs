@@ -70,9 +70,6 @@ public class UserServiceTest : DefaultServiceTest<IUserService ,UserService>
         Assert.ThrowsAsync<UserNotFoundException>(async () => await Service.GetById(3));
     }
     
-    //----------------------------update user test---------------------------- 
-    //Test_UpdateUserAsync_UserFound_ReturnsUpdatedUserModel
-    //Test_UpdateUserAsync_UserNotFound_ThrowsUserNotFoundException
     [Test]
     public async Task UpdateUser_UserFound_ReturnsUpdatedUserModel()
     {
@@ -113,11 +110,6 @@ public class UserServiceTest : DefaultServiceTest<IUserService ,UserService>
         Assert.ThrowsAsync<UserNotFoundException>(async () 
             => await Service.UpdateUserAsync((await Service.GetById(1))!));
     }
-    
-    
-    //----------------------------DeleteUser Test---------------------------- OK
-    //Test_DeleteUserAsync_UserFound_DeletesUserSuccessfully
-    //Test_DeleteUserAsync_UserNotFound_ThrowsUserNotFoundException 
 
     [Test]
     public async Task DeleteUser_UserFound_DeletesUserSuccessfully()
@@ -148,12 +140,7 @@ public class UserServiceTest : DefaultServiceTest<IUserService ,UserService>
     {
         Assert.ThrowsAsync<UserNotFoundException>(async () => 
             await Service.DeleteUserAsync((await Service.GetById(1))!));
-    }    
-    
-    
-    //----------------------------UpdateRefreshToken Test----------------------------
-    //Test_UpdateRefreshTokenAsync_UserFound_UpdatesRefreshTokenSuccessfully
-    //Test_UpdateRefreshTokenAsync_UserNotFound_ThrowsUserNotFoundException
+    }
 
     [Test]
     public async Task UpdateRefreshToken_UserFound_UpdatesRefreshTokenSuccessfully()
@@ -191,11 +178,6 @@ public class UserServiceTest : DefaultServiceTest<IUserService ,UserService>
         Assert.ThrowsAsync<UserNotFoundException>(async () 
             => await Service.UpdateRefreshTokenAsync(20, "refreshToken"));
     }
-    
-    //----------------------------GetUserByLoginAndPassword Test---------------------------- OK
-    //Test_GetUserByLoginAndPasswordAsync_UserFound_ReturnsUserModel
-    //Test_GetUserByLoginAndPasswordAsync_UserNotFound_ThrowsUserNotFoundException
-    //Test_GetUserByLoginAndPasswordAsync_IncorrectPassword_ThrowsUserNotFoundException
 
     [Test]
     public async Task GetUserByLoginAndPassword_UserFound_ReturnsUserModel()
@@ -251,10 +233,6 @@ public class UserServiceTest : DefaultServiceTest<IUserService ,UserService>
         Assert.ThrowsAsync<WrongPasswordException>(async () 
             => await Service.GetUserByLoginAndPasswordAsync(user.Login, "wrong password"));
     }
-    
-    //----------------------------GetUserByRefreshToken----------------------------
-    //Test_GetUserByRefreshTokenAsync_UserFound_ReturnsUserModel
-    //Test_GetUserByRefreshTokenAsync_UserNotFound_ThrowsUserNotFoundException
 
     [Test]
     public async Task GetUserByRefreshToken_UserFount_ReturnsUserModel()
