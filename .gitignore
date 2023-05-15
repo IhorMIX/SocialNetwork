@@ -11,3 +11,5 @@ SocialNetwork.DAL/bin/*
 SocialNetwork.Test/obj/*
 SocialNetwork.Test/bin/*
 /SocialNetwork.Web/SocialNetwork.Web.csproj.user
+SocialNetwork.DAL/bin/*
+/.vs

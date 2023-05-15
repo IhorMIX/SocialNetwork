@@ -9,6 +9,7 @@ using SocialNetwork.BL.Services.Interfaces;
 using SocialNetwork.DAL.Entity;
 using SocialNetwork.DAL.Repository.Interfaces;
 using System.Data;
+using Profile = SocialNetwork.DAL.Entity.Profile;
 
 namespace SocialNetwork.BL.Services;
 
@@ -49,8 +50,7 @@ public class UserService : IUserService
     }
 
     public async Task<UserModel> UpdateUserAsync(UserModel user, CancellationToken cancellationToken = default)
-    {
-
+    {   
         var userDb = await _userRepository.GetById(user.Id, cancellationToken);
         
         if (userDb is null)
@@ -58,13 +58,30 @@ public class UserService : IUserService
             _logger.LogError("User with this {Id} not found", user.Id);
             throw new UserNotFoundException($"User with Id '{user.Id}' not found");
         }
+
+        userDb.Password = string.IsNullOrEmpty(user.Password) ? userDb.Password : PasswordHelper.HashPassword(user.Password); 
+        userDb.Login = string.IsNullOrEmpty(user.Login) ? userDb.Login : user.Login;
         
-        //TODO:Needs to update fields. I will do this next time
+        foreach (var propertyMap in ReflectionHelper.WidgetUtil<ProfileModel, Profile>.PropertyMap)
+        {
+            var userProperty = propertyMap.Item1;
+            var userDbProperty = propertyMap.Item2;
+
+            var userSourceValue = userProperty.GetValue(user.Profile);
+            var userTargetValue = userDbProperty.GetValue(userDb.Profile);
+
+            if (userSourceValue != null && !userSourceValue.Equals(userTargetValue) )
+            {
+                userDbProperty.SetValue(userDb.Profile, userSourceValue);
+            }
+        }
 
         await _userRepository.UpdateUserAsync(userDb, cancellationToken);
         var userModel = _mapper.Map<UserModel>(userDb);
         return userModel;
     }
+
+
 
     public async Task DeleteUserAsync(UserModel user, CancellationToken cancellationToken = default)
     {
@@ -107,7 +124,7 @@ public class UserService : IUserService
         }
 
         if (!PasswordHelper.VerifyHashedPassword(userDb.Password, password))
-        {
+        {   
             throw new WrongPasswordException("Wrong login or password");
         }
         var userModel = _mapper.Map<UserModel>(userDb);
@@ -123,6 +140,36 @@ public class UserService : IUserService
             _logger.LogError("refresh token not found");
             throw new UserNotFoundException($"User not found");
         }
+        var userModel = _mapper.Map<UserModel>(userDb);
+        return userModel;
+    }
+
+    public async Task<UserModel?> GetUserByEmail(string email, CancellationToken cancellationToken = default)
+    {
+        var userDb = await _userRepository.GetAll().FirstOrDefaultAsync(i => i.Profile.Email == email , cancellationToken);
+
+        if (userDb is null)
+        {
+            _logger.LogError("User with this Login {Email} not found", email);
+            throw new UserNotFoundException($"User not found");
+        }
+
+      
+        var userModel = _mapper.Map<UserModel>(userDb);
+        return userModel;
+    }
+
+    public async Task<UserModel?> GetUserByLogin(string login, CancellationToken cancellationToken = default)
+    {
+        var userDb = await _userRepository.GetAll().FirstOrDefaultAsync(i => i.Login == login, cancellationToken);
+
+        if (userDb is null)
+        {
+            _logger.LogError("User with this Login {Login} not found", login);
+            throw new UserNotFoundException($"User not found");
+        }
+
+
         var userModel = _mapper.Map<UserModel>(userDb);
         return userModel;
     }
