@@ -1,5 +1,7 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using SocialNetwork.BL.Models;
 using SocialNetwork.BL.Services.Interfaces;
 using SocialNetwork.DAL.Entity;
 using SocialNetwork.Web.Helpers;
@@ -15,12 +17,14 @@ public class UserController : ControllerBase
 
     private readonly IUserService _userService;
     private readonly TokenHelper _tokenHelper;
+    private readonly IMapper _mapper;
 
-    public UserController(IUserService userService, TokenHelper tokenHelper, ILogger<UserController> logger)
+    public UserController(IUserService userService, TokenHelper tokenHelper, ILogger<UserController> logger, IMapper mapper)
     {
         _userService = userService;
         _tokenHelper = tokenHelper;
         _logger = logger;
+        _mapper = mapper;
     }
 
     [AllowAnonymous]
@@ -30,7 +34,7 @@ public class UserController : ControllerBase
     {
         _logger.LogInformation("Start to create user");
         
-        await _userService.CreateUserAsync(UserVieModelMapper.ConvertToBlModel(user), cancellationToken);
+        await _userService.CreateUserAsync(_mapper.Map<UserModel>(user), cancellationToken);
 
         _logger.LogInformation("User was created");
 

@@ -28,6 +28,9 @@ public class Startup
     {
         services.AddControllers().AddNewtonsoftJson();
         
+        //automapper
+        services.AddAutoMapper(typeof(Startup));
+
         //inject dependency of FluentValidation
         services.AddFluentValidationAutoValidation();
         services.AddFluentValidationClientsideAdapters();

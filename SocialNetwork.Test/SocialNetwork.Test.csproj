@@ -10,6 +10,8 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="AutoMapper" Version="12.0.1" />
+        <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.1" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="7.0.5" />
         <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="7.0.0" />
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.5.0" />
@@ -22,6 +24,7 @@
     <ItemGroup>
       <ProjectReference Include="..\SocialNetwork.BL\SocialNetwork.BL.csproj" />
       <ProjectReference Include="..\SocialNetwork.DAL\SocialNetwork.DAL.csproj" />
+      <ProjectReference Include="..\SocialNetwork.Web\SocialNetwork.Web.csproj" />
     </ItemGroup>
 
 </Project>
