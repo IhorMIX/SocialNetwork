@@ -1,4 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using AutoMapper;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.Extensions.Logging;
 using SocialNetwork.BL.Exceptions;
 using SocialNetwork.BL.Helpers;
@@ -6,6 +8,7 @@ using SocialNetwork.BL.Models;
 using SocialNetwork.BL.Services.Interfaces;
 using SocialNetwork.DAL.Entity;
 using SocialNetwork.DAL.Repository.Interfaces;
+using System.Data;
 
 namespace SocialNetwork.BL.Services;
 
@@ -13,11 +16,13 @@ public class UserService : IUserService
 {
     private readonly IUserRepository _userRepository;
     private readonly ILogger<UserService> _logger;
+    private readonly IMapper _mapper;
 
-    public UserService(IUserRepository userRepository, ILogger<UserService> logger)
+    public UserService(IUserRepository userRepository, ILogger<UserService> logger, IMapper mapper)
     {
         _userRepository = userRepository;
         _logger = logger;
+        _mapper = mapper;
     }
 
     public async Task<UserModel?> GetById(int id, CancellationToken cancellationToken = default)
@@ -30,12 +35,16 @@ public class UserService : IUserService
             throw new UserNotFoundException($"User with Id '{id}' not found");
         }
 
-        return UserMapper.ConvertUserToBlModel(user);
+        var userModel = _mapper.Map<UserModel>(user);
+        return userModel;
+        //return UserMapper.ConvertUserToBlModel(user);
     }
 
     public async Task CreateUserAsync(UserModel user, CancellationToken cancellationToken = default)
     {
-        var userDbModel = UserMapper.ConvertUserToDalModel(user);
+        //var userDbModel = UserMapper.ConvertUserToDalModel(user);
+
+        var userDbModel = _mapper.Map<User>(user);
 
         userDbModel.Password = PasswordHelper.HashPassword(userDbModel.Password);
 
@@ -56,8 +65,9 @@ public class UserService : IUserService
         //TODO:Needs to update fields. I will do this next time
 
         await _userRepository.UpdateUserAsync(userDb, cancellationToken);
-
-        return UserMapper.ConvertUserToBlModel(userDb)!;
+        var userModel = _mapper.Map<UserModel>(userDb);
+        //return UserMapper.ConvertUserToBlModel(userDb)!;
+        return userModel;
     }
 
     public async Task DeleteUserAsync(UserModel user, CancellationToken cancellationToken = default)
@@ -86,7 +96,9 @@ public class UserService : IUserService
         userDb.AuthorizationInfo.RefreshToken = refreshToken;
         await _userRepository.UpdateUserAsync(userDb, cancellationToken);
 
-        return UserMapper.ConvertUserToBlModel(userDb)!;
+        var userModel = _mapper.Map<UserModel>(userDb);
+        //return UserMapper.ConvertUserToBlModel(userDb)!;
+        return userModel;
     }
     
     public async Task<UserModel?> GetUserByLoginAndPasswordAsync(string login, string password, CancellationToken cancellationToken = default)
@@ -103,8 +115,9 @@ public class UserService : IUserService
         {
             throw new WrongPasswordException("Wrong login or password");
         }
-
-        return UserMapper.ConvertUserToBlModel(userDb)!;
+        var userModel = _mapper.Map<UserModel>(userDb);
+        return userModel;
+        //return UserMapper.ConvertUserToBlModel(userDb)!;
     }
 
     public async Task<UserModel> GetUserByRefreshTokenAsync(string refreshToken, CancellationToken cancellationToken = default)
@@ -116,7 +129,8 @@ public class UserService : IUserService
             _logger.LogError("refresh token not found");
             throw new UserNotFoundException($"User not found");
         }
-
-        return UserMapper.ConvertUserToBlModel(userDb)!;
+        var userModel = _mapper.Map<UserModel>(userDb);
+        return userModel;
+        //return UserMapper.ConvertUserToBlModel(userDb)!;
     }
 }

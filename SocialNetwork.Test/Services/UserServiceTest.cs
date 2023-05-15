@@ -7,6 +7,7 @@ using SocialNetwork.BL.Services.Interfaces;
 using SocialNetwork.DAL;
 using SocialNetwork.DAL.Repository;
 using SocialNetwork.DAL.Repository.Interfaces;
+using SocialNetwork.Web;
 
 namespace SocialNetwork.Test.Services;
 
@@ -50,7 +51,7 @@ public class UserServiceTest : DefaultServiceTest<IUserService ,UserService>
     public async Task CreateUserAndGetWithIncorrectId_ShouldFail()
     {
         var user = new UserModel()
-        {
+        {                     
             Login = "TestLogin",
             Password = "TestPassword",
             Profile = new ProfileModel()

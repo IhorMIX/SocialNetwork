@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using SocialNetwork.DAL;
 using SocialNetwork.Test.Extensions;
+using SocialNetwork.Web;
 
 namespace SocialNetwork.Test.Services
 {
@@ -19,6 +20,7 @@ namespace SocialNetwork.Test.Services
         {
             services.AddScoped<TService>();
             services.AddScoped<ILogger<TService>, NullLogger<TService>>();
+            services.AddAutoMapper(typeof(Startup));
         }
 
         [SetUp]
