@@ -32,6 +32,7 @@ public class UserService : IUserService
         
         if (user is null)
         {
+            _logger.LogError("User with this Id {Id} not found", id);
             throw new UserNotFoundException($"User with Id '{id}' not found");
         }
 
@@ -54,6 +55,7 @@ public class UserService : IUserService
         
         if (userDb is null)
         {
+            _logger.LogError("User with this {Id} not found", user.Id);
             throw new UserNotFoundException($"User with Id '{user.Id}' not found");
         }
 
@@ -87,6 +89,7 @@ public class UserService : IUserService
 
         if (userDb is null)
         {
+            _logger.LogError("User with this {Id} not found", user.Id);
             throw new UserNotFoundException($"User with Id '{user.Id}' not found");
         }
 
@@ -99,6 +102,7 @@ public class UserService : IUserService
 
         if (userDb is null)
         {
+            _logger.LogError("User with this Id {Id} not found", id);
             throw new UserNotFoundException($"User with Id '{id}' not found");
         }
 
@@ -120,7 +124,7 @@ public class UserService : IUserService
         }
 
         if (!PasswordHelper.VerifyHashedPassword(userDb.Password, password))
-        {
+        {   
             throw new WrongPasswordException("Wrong login or password");
         }
         var userModel = _mapper.Map<UserModel>(userDb);
@@ -133,6 +137,7 @@ public class UserService : IUserService
         
         if (userDb is null)
         {
+            _logger.LogError("refresh token not found");
             throw new UserNotFoundException($"User not found");
         }
         var userModel = _mapper.Map<UserModel>(userDb);
