@@ -15,4 +15,8 @@ public interface IUserService : IBaseService<UserModel>
     Task<UserModel> GetUserByRefreshTokenAsync(string refreshToken, CancellationToken cancellationToken = default);
 
     Task<UserModel?> GetUserByLoginAndPasswordAsync(string login, string password, CancellationToken cancellationToken = default);
+
+    Task<UserModel?> GetUserByEmail(string email, CancellationToken cancellationToken = default);
+
+    Task<UserModel?> GetUserByLogin(string login, CancellationToken cancellationToken = default);
 }

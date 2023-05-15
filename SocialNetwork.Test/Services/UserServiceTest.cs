@@ -90,16 +90,17 @@ public class UserServiceTest : DefaultServiceTest<IUserService ,UserService>
             }
         };
         await Service.CreateUserAsync(user);
-        var createdUser = await Service.GetById(1);
+        var createdUser = await Service.GetUserByLogin(user.Login);
         
         Assert.That(createdUser!.Login, Is.EqualTo(user.Login));
         Assert.That(createdUser!.Profile.Email, Is.EqualTo(user.Profile.Email));
         
         user.Login = "AnotherLogin";
         user.Profile.Email = "anotherMail@gmail.com";
-        await Service.UpdateUserAsync((await Service.GetById(1))!);
+        user.Id = createdUser.Id;
+        await Service.UpdateUserAsync(user);
         
-        createdUser = await Service.GetById(1);
+        createdUser = await Service.GetUserByLogin(user.Login);
         
         Assert.That(createdUser!.Login, Is.EqualTo(user.Login));
         Assert.That(createdUser!.Profile.Email, Is.EqualTo(user.Profile.Email));
@@ -163,11 +164,11 @@ public class UserServiceTest : DefaultServiceTest<IUserService ,UserService>
         };
         await Service.CreateUserAsync(user);
         
-        var createdUser = await Service.GetById(1);
+        var createdUser = await Service.GetUserByLogin(user.Login);
 
-        await Service.UpdateRefreshTokenAsync(1, "RefreshToken");
+        await Service.UpdateRefreshTokenAsync(createdUser!.Id, "RefreshToken");
         
-        createdUser = await Service.GetById(1);
+        createdUser = await Service.GetUserByLogin(user.Login);
         
         Assert.That(createdUser!.AuthorizationInfo.RefreshToken, 
             Is.EqualTo(user.AuthorizationInfo.RefreshToken));

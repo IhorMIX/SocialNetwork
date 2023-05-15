@@ -6,8 +6,10 @@ using SocialNetwork.BL.Exceptions;
 using SocialNetwork.BL.Helpers;
 using SocialNetwork.BL.Models;
 using SocialNetwork.BL.Services.Interfaces;
+using SocialNetwork.DAL.Entity;
 using SocialNetwork.DAL.Repository.Interfaces;
 using System.Data;
+using Profile = SocialNetwork.DAL.Entity.Profile;
 
 namespace SocialNetwork.BL.Services;
 
@@ -57,24 +59,18 @@ public class UserService : IUserService
 
         userDb.Password = string.IsNullOrEmpty(user.Password) ? userDb.Password : PasswordHelper.HashPassword(user.Password); 
         userDb.Login = string.IsNullOrEmpty(user.Login) ? userDb.Login : user.Login;
-        //userDb.Profile.Birthday = (user.Profile.Birthday == DateTime.MinValue) ? userDb.Profile.Birthday : user.Profile.Birthday;
-        // userDb.Profile.Name = string.IsNullOrEmpty(user.Profile.Name) ? userDb.Profile.Name : user.Profile.Name;
-        /// userDb.Profile.Surname = string.IsNullOrEmpty(user.Profile.Surname) ? userDb.Profile.Surname : user.Profile.Surname;
-        // userDb.Profile.Email = string.IsNullOrEmpty(user.Profile.Email) ? userDb.Profile.Email : user.Profile.Email;
-        //userDb.Profile.AvatarImage = string.IsNullOrEmpty(user.Profile.AvatarImage) ? userDb.Profile.AvatarImage : user.Profile.AvatarImage;
-        // userDb.Profile.Description = string.IsNullOrEmpty(user.Profile.Description) ? userDb.Profile.Description : user.Profile.Description;
-        //userDb.Profile.Sex =;
-        foreach (var propertyMap in ReflectionHelper.WidgetUtil<UserModel, ProfileModel>.PropertyMap)
+        
+        foreach (var propertyMap in ReflectionHelper.WidgetUtil<ProfileModel, Profile>.PropertyMap)
         {
-            var sourceProperty = propertyMap.Item1;
-            var targetProperty = propertyMap.Item2;
+            var userProperty = propertyMap.Item1;
+            var userDbProperty = propertyMap.Item2;
 
-            var sourceValue = sourceProperty.GetValue(user.Profile);
-            var targetValue = targetProperty.GetValue(userDb.Profile);
+            var userSourceValue = userProperty.GetValue(user.Profile);
+            var userTargetValue = userDbProperty.GetValue(userDb.Profile);
 
-            if (sourceValue != null && !sourceValue.Equals(targetValue))
+            if (userSourceValue != null && !userSourceValue.Equals(userTargetValue) )
             {
-                targetProperty.SetValue(userDb.Profile, sourceValue);
+                userDbProperty.SetValue(userDb.Profile, userSourceValue);
             }
         }
 
@@ -115,7 +111,7 @@ public class UserService : IUserService
     
     public async Task<UserModel?> GetUserByLoginAndPasswordAsync(string login, string password, CancellationToken cancellationToken = default)
     {
-        var userDb = await _userRepository.GetAll().FirstAsync(i => i.Login == login && i.Password == PasswordHelper.HashPassword(password), cancellationToken);
+        var userDb = await _userRepository.GetAll().FirstOrDefaultAsync(i => i.Login == login, cancellationToken);
         
         if (userDb is null)
         {
@@ -133,12 +129,42 @@ public class UserService : IUserService
 
     public async Task<UserModel> GetUserByRefreshTokenAsync(string refreshToken, CancellationToken cancellationToken = default)
     {
-        var userDb = await _userRepository.GetAll().FirstAsync(i => i.AuthorizationInfo.RefreshToken == refreshToken, cancellationToken);
+        var userDb = await _userRepository.GetAll().FirstOrDefaultAsync(i => i.AuthorizationInfo.RefreshToken == refreshToken, cancellationToken);
         
         if (userDb is null)
         {
             throw new UserNotFoundException($"User not found");
         }
+        var userModel = _mapper.Map<UserModel>(userDb);
+        return userModel;
+    }
+
+    public async Task<UserModel?> GetUserByEmail(string email, CancellationToken cancellationToken = default)
+    {
+        var userDb = await _userRepository.GetAll().FirstOrDefaultAsync(i => i.Profile.Email == email , cancellationToken);
+
+        if (userDb is null)
+        {
+            _logger.LogError("User with this Login {Email} not found", email);
+            throw new UserNotFoundException($"User not found");
+        }
+
+      
+        var userModel = _mapper.Map<UserModel>(userDb);
+        return userModel;
+    }
+
+    public async Task<UserModel?> GetUserByLogin(string login, CancellationToken cancellationToken = default)
+    {
+        var userDb = await _userRepository.GetAll().FirstOrDefaultAsync(i => i.Login == login, cancellationToken);
+
+        if (userDb is null)
+        {
+            _logger.LogError("User with this Login {Login} not found", login);
+            throw new UserNotFoundException($"User not found");
+        }
+
+
         var userModel = _mapper.Map<UserModel>(userDb);
         return userModel;
     }
