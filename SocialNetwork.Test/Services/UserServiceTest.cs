@@ -7,6 +7,7 @@ using SocialNetwork.BL.Services.Interfaces;
 using SocialNetwork.DAL;
 using SocialNetwork.DAL.Repository;
 using SocialNetwork.DAL.Repository.Interfaces;
+using SocialNetwork.Web;
 
 namespace SocialNetwork.Test.Services;
 
@@ -15,6 +16,7 @@ public class UserServiceTest : DefaultServiceTest<IUserService ,UserService>
     protected override void SetUpAdditionalDependencies(IServiceCollection services)
     {
         services.AddScoped<IUserRepository, UserRepository>();
+        
 
         base.SetUpAdditionalDependencies(services);
     }
@@ -50,7 +52,7 @@ public class UserServiceTest : DefaultServiceTest<IUserService ,UserService>
     public async Task CreateUserAndGetWithIncorrectId_ShouldFail()
     {
         var user = new UserModel()
-        {
+        {                     
             Login = "TestLogin",
             Password = "TestPassword",
             Profile = new ProfileModel()
@@ -69,4 +71,28 @@ public class UserServiceTest : DefaultServiceTest<IUserService ,UserService>
 
         Assert.ThrowsAsync<UserNotFoundException>(async () => await Service.GetById(3));
     }
+
+    //[Test]
+    //public async Task Map_UserToUserModel()
+    //{
+    //    var user = new UserModel()
+    //    {
+    //        Login = "TestLogin",
+    //        Password = "TestPassword",
+    //        Profile = new ProfileModel()
+    //        {
+    //            Birthday = DateTime.Now,
+    //            Description = "sdsdds",
+    //            Email = "limpopo923@gmail.com",
+    //            Name = "Test",
+    //            Sex = Sex.Male,
+    //            Surname = "Test",
+    //            AvatarImage = "Image"
+    //        }
+    //    };
+
+    //    await Service.CreateUserAsync(user);
+
+    //    Assert.ThrowsAsync<UserNotFoundException>(async () => await Service.GetById(3));
+    //}
 }
