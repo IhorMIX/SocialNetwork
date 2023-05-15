@@ -101,7 +101,7 @@ public class UserService : IUserService
 
         if (!PasswordHelper.VerifyHashedPassword(userDb.Password, password))
         {
-            throw new UserNotFoundException($"User not found");
+            throw new WrongPasswordException("Wrong password");
         }
 
         return UserMapper.ConvertUserToBlModel(userDb)!;
