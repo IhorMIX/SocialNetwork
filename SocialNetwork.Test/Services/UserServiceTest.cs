@@ -280,10 +280,11 @@ public class UserServiceTest : DefaultServiceTest<IUserService ,UserService>
     }
     
     [Test]
-    public async Task GetUserByRefreshToken_UserNotFound_ThrowsUserNotFoundException()
+    public Task GetUserByRefreshToken_UserNotFound_ThrowsUserNotFoundException()
     {
         Assert.ThrowsAsync<UserNotFoundException>(async () 
             => await Service.GetUserByRefreshTokenAsync("RefreshToken"));
+        return Task.CompletedTask;
     }
     
 }
