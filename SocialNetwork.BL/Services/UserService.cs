@@ -1,10 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using SocialNetwork.BL.Exceptions;
 using SocialNetwork.BL.Helpers;
 using SocialNetwork.BL.Models;
 using SocialNetwork.BL.Services.Interfaces;
-using SocialNetwork.DAL.Entity;
 using SocialNetwork.DAL.Repository.Interfaces;
 
 namespace SocialNetwork.BL.Services;
@@ -12,12 +10,10 @@ namespace SocialNetwork.BL.Services;
 public class UserService : IUserService
 {
     private readonly IUserRepository _userRepository;
-    private readonly ILogger<UserService> _logger;
 
-    public UserService(IUserRepository userRepository, ILogger<UserService> logger)
+    public UserService(IUserRepository userRepository)
     {
         _userRepository = userRepository;
-        _logger = logger;
     }
 
     public async Task<UserModel?> GetById(int id, CancellationToken cancellationToken = default)
@@ -26,7 +22,6 @@ public class UserService : IUserService
         
         if (user is null)
         {
-            _logger.LogError("User with this Id {Id} not found", id);
             throw new UserNotFoundException($"User with Id '{id}' not found");
         }
 
@@ -43,31 +38,43 @@ public class UserService : IUserService
     }
 
     public async Task<UserModel> UpdateUserAsync(UserModel user, CancellationToken cancellationToken = default)
-    {
-
+    {   
         var userDb = await _userRepository.GetById(user.Id, cancellationToken);
         
         if (userDb is null)
         {
-            _logger.LogError("User with this {Id} not found", user.Id);
             throw new UserNotFoundException($"User with Id '{user.Id}' not found");
         }
 
         userDb.Password = string.IsNullOrEmpty(user.Password) ? userDb.Password : PasswordHelper.HashPassword(user.Password); 
         userDb.Login = string.IsNullOrEmpty(user.Login) ? userDb.Login : user.Login;
-        userDb.Profile.Birthday = (user.Profile.Birthday == DateTime.MinValue) ? userDb.Profile.Birthday : user.Profile.Birthday;
-        userDb.Profile.Name = string.IsNullOrEmpty(user.Profile.Name) ? userDb.Profile.Name : user.Profile.Name;
-        userDb.Profile.Surname = string.IsNullOrEmpty(user.Profile.Surname) ? userDb.Profile.Surname : user.Profile.Surname;
-        userDb.Profile.Email = string.IsNullOrEmpty(user.Profile.Email) ? userDb.Profile.Email : user.Profile.Email;
-        userDb.Profile.AvatarImage = string.IsNullOrEmpty(user.Profile.AvatarImage) ? userDb.Profile.AvatarImage : user.Profile.AvatarImage;
-        userDb.Profile.Description = string.IsNullOrEmpty(user.Profile.Description) ? userDb.Profile.Description : user.Profile.Description;
+        //userDb.Profile.Birthday = (user.Profile.Birthday == DateTime.MinValue) ? userDb.Profile.Birthday : user.Profile.Birthday;
+        // userDb.Profile.Name = string.IsNullOrEmpty(user.Profile.Name) ? userDb.Profile.Name : user.Profile.Name;
+        /// userDb.Profile.Surname = string.IsNullOrEmpty(user.Profile.Surname) ? userDb.Profile.Surname : user.Profile.Surname;
+        // userDb.Profile.Email = string.IsNullOrEmpty(user.Profile.Email) ? userDb.Profile.Email : user.Profile.Email;
+        //userDb.Profile.AvatarImage = string.IsNullOrEmpty(user.Profile.AvatarImage) ? userDb.Profile.AvatarImage : user.Profile.AvatarImage;
+        // userDb.Profile.Description = string.IsNullOrEmpty(user.Profile.Description) ? userDb.Profile.Description : user.Profile.Description;
         //userDb.Profile.Sex =;
+        foreach (var propertyMap in ReflectionHelper.WidgetUtil<UserModel, ProfileModel>.PropertyMap)
+        {
+            var sourceProperty = propertyMap.Item1;
+            var targetProperty = propertyMap.Item2;
 
+            var sourceValue = sourceProperty.GetValue(user.Profile);
+            var targetValue = targetProperty.GetValue(userDb.Profile);
+
+            if (sourceValue != null && !sourceValue.Equals(targetValue))
+            {
+                targetProperty.SetValue(userDb.Profile, sourceValue);
+            }
+        }
 
         await _userRepository.UpdateUserAsync(userDb, cancellationToken);
 
         return UserMapper.ConvertUserToBlModel(userDb)!;
     }
+
+
 
     public async Task DeleteUserAsync(UserModel user, CancellationToken cancellationToken = default)
     {
@@ -75,7 +82,6 @@ public class UserService : IUserService
 
         if (userDb is null)
         {
-            _logger.LogError("User with this {Id} not found", user.Id);
             throw new UserNotFoundException($"User with Id '{user.Id}' not found");
         }
 
@@ -88,7 +94,6 @@ public class UserService : IUserService
 
         if (userDb is null)
         {
-            _logger.LogError("User with this Id {Id} not found", id);
             throw new UserNotFoundException($"User with Id '{id}' not found");
         }
 
@@ -100,15 +105,9 @@ public class UserService : IUserService
     
     public async Task<UserModel?> GetUserByLoginAndPasswordAsync(string login, string password, CancellationToken cancellationToken = default)
     {
-        var userDb = await _userRepository.GetAll().FirstOrDefaultAsync(i => i.Login == login, cancellationToken);
+        var userDb = await _userRepository.GetAll().FirstAsync(i => i.Login == login && i.Password == PasswordHelper.HashPassword(password), cancellationToken);
         
         if (userDb is null)
-        {
-            _logger.LogError("User with this Login {login} not found", login);
-            throw new UserNotFoundException($"User not found");
-        }
-
-        if (!PasswordHelper.VerifyHashedPassword(userDb.Password, password))
         {
             throw new UserNotFoundException($"User not found");
         }
@@ -118,11 +117,10 @@ public class UserService : IUserService
 
     public async Task<UserModel> GetUserByRefreshTokenAsync(string refreshToken, CancellationToken cancellationToken = default)
     {
-        var userDb = await _userRepository.GetAll().FirstOrDefaultAsync(i => i.AuthorizationInfo.RefreshToken == refreshToken, cancellationToken);
+        var userDb = await _userRepository.GetAll().FirstAsync(i => i.AuthorizationInfo.RefreshToken == refreshToken, cancellationToken);
         
         if (userDb is null)
         {
-            _logger.LogError("refresh token not found");
             throw new UserNotFoundException($"User not found");
         }
 
