@@ -37,13 +37,10 @@ public class UserService : IUserService
 
         var userModel = _mapper.Map<UserModel>(user);
         return userModel;
-        //return UserMapper.ConvertUserToBlModel(user);
     }
 
     public async Task CreateUserAsync(UserModel user, CancellationToken cancellationToken = default)
     {
-        //var userDbModel = UserMapper.ConvertUserToDalModel(user);
-
         var userDbModel = _mapper.Map<User>(user);
 
         userDbModel.Password = PasswordHelper.HashPassword(userDbModel.Password);
@@ -66,7 +63,6 @@ public class UserService : IUserService
 
         await _userRepository.UpdateUserAsync(userDb, cancellationToken);
         var userModel = _mapper.Map<UserModel>(userDb);
-        //return UserMapper.ConvertUserToBlModel(userDb)!;
         return userModel;
     }
 
@@ -97,7 +93,6 @@ public class UserService : IUserService
         await _userRepository.UpdateUserAsync(userDb, cancellationToken);
 
         var userModel = _mapper.Map<UserModel>(userDb);
-        //return UserMapper.ConvertUserToBlModel(userDb)!;
         return userModel;
     }
     
@@ -117,7 +112,6 @@ public class UserService : IUserService
         }
         var userModel = _mapper.Map<UserModel>(userDb);
         return userModel;
-        //return UserMapper.ConvertUserToBlModel(userDb)!;
     }
 
     public async Task<UserModel> GetUserByRefreshTokenAsync(string refreshToken, CancellationToken cancellationToken = default)
@@ -131,6 +125,5 @@ public class UserService : IUserService
         }
         var userModel = _mapper.Map<UserModel>(userDb);
         return userModel;
-        //return UserMapper.ConvertUserToBlModel(userDb)!;
     }
 }
