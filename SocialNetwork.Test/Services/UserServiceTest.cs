@@ -232,7 +232,7 @@ public class UserServiceTest : DefaultServiceTest<IUserService ,UserService>
 
         await Service.CreateUserAsync(user);
 
-        Assert.ThrowsAsync<WrongPasswordException>(async () 
+        Assert.ThrowsAsync<WrongLoginOrPasswordException>(async () 
             => await Service.GetUserByLoginAndPasswordAsync(user.Login, "wrong password"));
     }
 
@@ -266,5 +266,98 @@ public class UserServiceTest : DefaultServiceTest<IUserService ,UserService>
             => await Service.GetUserByRefreshTokenAsync("RefreshToken"));
         return Task.CompletedTask;
     }
+
+    [Test]
+    public async Task GetUserByEmail_UserFound_ReturnsUserModel()
+    {
+        var user = new UserModel()
+        {
+            Login = "TestLogin",
+            Password = "TestPassword",
+            Profile = new ProfileModel()
+            {
+                Birthday = DateTime.Now,
+                Description = "sdsdds",
+                Email = "limpopo923@gmail.com",
+                Name = "Test",
+                Sex = Sex.Male,
+                Surname = "Test",
+                AvatarImage = "Image"
+            }
+        };
+        await Service.CreateUserAsync(user);
+        
+        Assert.That(Service.GetUserByEmail(user.Profile.Email) is not null);
+    }
     
+    [Test]
+    public async Task GetUserByEmail_UserNotFound_ThrowsUserNotFoundException()
+    {
+        var user = new UserModel()
+        {
+            Login = "TestLogin",
+            Password = "TestPassword",
+            Profile = new ProfileModel()
+            {
+                Birthday = DateTime.Now,
+                Description = "sdsdds",
+                Email = "limpopo923@gmail.com",
+                Name = "Test",
+                Sex = Sex.Male,
+                Surname = "Test",
+                AvatarImage = "Image"
+            }
+        };
+        await Service.CreateUserAsync(user);
+        
+        Assert.ThrowsAsync<UserNotFoundException>(async() 
+            => await Service.GetUserByEmail("wrongEmail@gmail.com"));
+    }
+
+    [Test]
+    public async Task GetUserByLogin_UserFound_ReturnsUserModel()
+    {
+        var user = new UserModel()
+        {
+            Login = "TestLogin",
+            Password = "TestPassword",
+            Profile = new ProfileModel()
+            {
+                Birthday = DateTime.Now,
+                Description = "sdsdds",
+                Email = "limpopo923@gmail.com",
+                Name = "Test",
+                Sex = Sex.Male,
+                Surname = "Test",
+                AvatarImage = "Image"
+            }
+        };
+        await Service.CreateUserAsync(user);
+        
+        Assert.That(Service.GetUserByEmail(user.Login) is not null);
+    }
+    
+    [Test]
+    public async Task GetUserByLogin_UserNotFound_ThrowsUserNotFoundException()
+    {
+        var user = new UserModel()
+        {
+            Login = "TestLogin",
+            Password = "TestPassword",
+            Profile = new ProfileModel()
+            {
+                Birthday = DateTime.Now,
+                Description = "sdsdds",
+                Email = "limpopo923@gmail.com",
+                Name = "Test",
+                Sex = Sex.Male,
+                Surname = "Test",
+                AvatarImage = "Image"
+            }
+        };
+        await Service.CreateUserAsync(user);
+        
+        Assert.ThrowsAsync<UserNotFoundException>(async() 
+            => await Service.GetUserByLogin("wrongLogin"));
+    }
 }
