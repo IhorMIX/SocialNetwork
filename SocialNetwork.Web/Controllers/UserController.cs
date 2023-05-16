@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SocialNetwork.BL.Models;
+using SocialNetwork.BL.Models.Enums;
 using SocialNetwork.BL.Services.Interfaces;
 using SocialNetwork.DAL.Entity;
 using SocialNetwork.Web.Helpers;
@@ -46,9 +47,8 @@ public class UserController : ControllerBase
     public async Task<ActionResult> AuthorizeUser([FromBody] UserAuthorizeModel model)
     {
         var user = await _userService.GetUserByLoginAndPasswordAsync(model.Login, model.Password);
-
         var token = _tokenHelper.GetToken(user!.Id);
-
+        await _userService.AddAuthorizationValueAsync(user, TokenHelper.GenerateRefreshToken(token), LoginType.LocalSystem);
         return Ok(token);
     }
    
