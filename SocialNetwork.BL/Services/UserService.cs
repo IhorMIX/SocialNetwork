@@ -42,16 +42,16 @@ public class UserService : IUserService
 
     public async Task CreateUserAsync(UserModel user, CancellationToken cancellationToken = default)
     {
-        var users = await _userRepository.GetAll().Where(i => i.Login == user.Login || i.Profile.Email == user.Profile.Email).FirstOrDefaultAsync(cancellationToken);
+        var userDb = await _userRepository.GetAll().FirstOrDefaultAsync(i => i.Login == user.Login || i.Profile.Email == user.Profile.Email, cancellationToken);
 
-        if (users != null)
+        if (userDb != null)
         {
-            if (users.Login == user.Login)
+            if (userDb.Login == user.Login)
             {
                 throw new AlreadyLoginAndEmailException("Login is already used by another user");
             }
 
-            if (users.Profile.Email == user.Profile.Email)
+            if (userDb.Profile.Email == user.Profile.Email)
             {
                 throw new AlreadyLoginAndEmailException("Email is already used by another user");
             }
