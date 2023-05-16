@@ -1,11 +1,10 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using SocialNetwork.BL.Exceptions;
 using SocialNetwork.BL.Models;
 using SocialNetwork.BL.Models.Enums;
 using SocialNetwork.BL.Services.Interfaces;
-using SocialNetwork.DAL.Entity;
+using SocialNetwork.Web.Extensions;
 using SocialNetwork.Web.Helpers;
 using SocialNetwork.Web.Models;
 
@@ -62,11 +61,12 @@ public class UserController : ControllerBase
         return Ok();
     }
 
-    [AllowAnonymous]
+    [Authorize]
     [HttpPost]
     [Route(("logout"))]
-    public async Task<IActionResult> LogOutAsync([FromQuery] string refreshToken)
+    public async Task<IActionResult> LogOutAsync()
     {
+        var userId = User.GetUserId();
         await _userService.LogOutAsync(refreshToken);
         return Ok();
 
