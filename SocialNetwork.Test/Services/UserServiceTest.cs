@@ -21,6 +21,33 @@ public class UserServiceTest : DefaultServiceTest<IUserService ,UserService>
     }
 
     [Test]
+    public async Task CreateUser_SameData_ShouldFail()
+    {
+        var user = new UserModel()
+        {
+            Login = "TestLogin",
+            Password = "TestPassword",
+            Profile = new ProfileModel()
+            {
+                Birthday = DateTime.Now,
+                Description = "sdsdds",
+                Email = "limpopo923@gmail.com",
+                Name = "Test",
+                Sex = Sex.Male,
+                Surname = "Test",
+                AvatarImage = "Image"
+            }
+        };
+
+        await Service.CreateUserAsync(user);
+
+
+
+        Assert.ThrowsAsync<AlreadyLoginAndEmailException>(async () => await Service.CreateUserAsync(user));
+    }
+    
+
+    [Test]
     public async Task CreateUser_WithCorrectData_Success()
     {
         var user = new UserModel()
