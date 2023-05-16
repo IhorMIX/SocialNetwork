@@ -42,6 +42,21 @@ public class UserService : IUserService
 
     public async Task CreateUserAsync(UserModel user, CancellationToken cancellationToken = default)
     {
+        var users = await _userRepository.GetAll().Where(i => i.Login == user.Login || i.Profile.Email == user.Profile.Email).FirstOrDefaultAsync(cancellationToken);
+
+        if (users != null)
+        {
+            if (users.Login == user.Login)
+            {
+                throw new AlreadyLoginAndEmailException("Login is already used by another user");
+            }
+
+            if (users.Profile.Email == user.Profile.Email)
+            {
+                throw new AlreadyLoginAndEmailException("Email is already used by another user");
+            }
+        }
+
         var userDbModel = _mapper.Map<User>(user);
 
         userDbModel.Password = PasswordHelper.HashPassword(userDbModel.Password);
