@@ -176,23 +176,9 @@ public class UserServiceTest : DefaultServiceTest<IUserService ,UserService>
     [Test]
     public async Task AddAuthorizationValue_UserNotFound_ThrowsUserNotFoundException()
     {
-        var user = new UserModel()
-        {
-            Login = "TestLogin",
-            Password = "TestPassword",
-            Profile = new ProfileModel()
-            {
-                Birthday = DateTime.Now,
-                Description = "sdsdds",
-                Email = "limpopo923@gmail.com",
-                Name = "Test",
-                Sex = Sex.Male,
-                Surname = "Test",
-                AvatarImage = "Image"
-            }
-        };
+
         Assert.ThrowsAsync<UserNotFoundException>(async () 
-            => await Service.AddAuthorizationValueAsync(user, "", LoginType.LocalSystem));
+            => await Service.AddAuthorizationValueAsync(new UserModel(), "", LoginType.LocalSystem));
         await Task.CompletedTask;
     }
 
@@ -253,7 +239,7 @@ public class UserServiceTest : DefaultServiceTest<IUserService ,UserService>
     }
 
     [Test]
-    public async Task GetUserByRefreshToken_UserFount_ReturnsUserModel()
+    public async Task GetUserByRefreshToken_UserFound_ReturnsUserModel()
     {
         var user = new UserModel()
         {
@@ -272,8 +258,8 @@ public class UserServiceTest : DefaultServiceTest<IUserService ,UserService>
         };
         await Service.CreateUserAsync(user);
         var createdUser = await Service.GetUserByLogin(user.Login);
-        await Service.AddAuthorizationValueAsync(createdUser!, "123", LoginType.LocalSystem);
-        Assert.That(await Service.GetUserByRefreshTokenAsync("123"), Is.Not.EqualTo(null));
+        await Service.AddAuthorizationValueAsync(createdUser!, "wf4bSXeIASWIOdehipUAemKCL6BFABasZQ/briCtS3g=106729182", LoginType.LocalSystem);
+        Assert.That(await Service.GetUserByRefreshTokenAsync("wf4bSXeIASWIOdehipUAemKCL6BFABasZQ/briCtS3g=106729182"), Is.Not.EqualTo(null));
     }
     
     [Test]
@@ -303,8 +289,7 @@ public class UserServiceTest : DefaultServiceTest<IUserService ,UserService>
             }
         };
         await Service.CreateUserAsync(user);
-        
-        Assert.That(Service.GetUserByEmail(user.Profile.Email) is not null);
+        Assert.That(Service.GetUserByEmail("limpopo923@gmail.com") is not null);
     }
     
     [Test]
@@ -351,7 +336,7 @@ public class UserServiceTest : DefaultServiceTest<IUserService ,UserService>
         };
         await Service.CreateUserAsync(user);
         
-        Assert.That(Service.GetUserByEmail(user.Login) is not null);
+        Assert.That(Service.GetUserByEmail("TestLogin") is not null);
     }
     
     [Test]
@@ -376,5 +361,67 @@ public class UserServiceTest : DefaultServiceTest<IUserService ,UserService>
         
         Assert.ThrowsAsync<UserNotFoundException>(async() 
             => await Service.GetUserByLogin("wrongLogin"));
+    }
+
+    [Test]
+    public async Task LogOut_DeleteAuthorizationInfo_ReturnNull()
+    {
+        var user = new UserModel()
+        {
+            Login = "TestLogin",
+            Password = "TestPassword",
+            Profile = new ProfileModel()
+            {
+                Birthday = DateTime.Now,
+                Description = "sdsdds",
+                Email = "limpopo923@gmail.com",
+                Name = "Test",
+                Sex = Sex.Male,
+                Surname = "Test",
+                AvatarImage = "Image"
+            }
+        };
+        await Service.CreateUserAsync(user);
+        
+        var createdUser = await Service.GetUserByLogin("TestLogin");
+        await Service.AddAuthorizationValueAsync(createdUser!, "123", LoginType.LocalSystem);
+        createdUser = await Service.GetUserByLogin("TestLogin");
+        
+        if (createdUser?.AuthorizationInfo is not null)
+            await Service.LogOutAsync(createdUser.AuthorizationInfo.RefreshToken);
+        createdUser = await Service.GetUserByLogin("TestLogin");
+        
+        Assert.That(createdUser!.AuthorizationInfo is null);
+    }
+    
+    [Test]
+    public async Task LogOut_UserNotFound_ThrowsUserNotFoundException()
+    {
+        Assert.ThrowsAsync<UserNotFoundException>(async() 
+           => await Service.LogOutAsync("123"));
+        await Task.CompletedTask;
+    }
+    [Test]
+    public async Task LogOut_AuthorizationInfoTrue_ThrowsNullReferenceException()
+    {
+        var user = new UserModel()
+        {
+            Login = "TestLogin2",
+            Password = "TestPassword",
+            Profile = new ProfileModel()
+            {
+                Birthday = DateTime.Now,
+                Description = "sdsdds",
+                Email = "limpopo923@gmail.com",
+                Name = "Test",
+                Sex = Sex.Male,
+                Surname = "Test",
+                AvatarImage = "Image"
+            }
+        };
+        await Service.CreateUserAsync(user);
+        var createdUser = await Service.GetUserByLogin("TestLogin2");
+        Assert.ThrowsAsync<NullReferenceException>(async() 
+            => await Service.LogOutAsync(createdUser!.AuthorizationInfo.RefreshToken));
     }
 }

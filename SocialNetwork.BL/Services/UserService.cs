@@ -126,6 +126,25 @@ public class UserService : IUserService
         await _userRepository.UpdateUserAsync(userDb, cancellationToken);
     }
 
+    public async Task LogOutAsync(string token, CancellationToken cancellationToken = default)
+    {
+        var userDb = await _userRepository.GetAll()
+            .FirstOrDefaultAsync(i => i.AuthorizationInfo != null && i.AuthorizationInfo.RefreshToken == token, cancellationToken);
+
+        if (userDb is null)
+        {
+            _logger.LogError("User with this token not found");
+            throw new UserNotFoundException($"User with this token not found");
+        }
+            
+        if (userDb.AuthorizationInfo is not null)
+        {
+            userDb.AuthorizationInfo = null;
+            await _userRepository.UpdateUserAsync(userDb, cancellationToken);
+        }
+        else throw new NullReferenceException($"User with this token not found");
+    }
+
     public async Task<UserModel?> GetUserByLoginAndPasswordAsync(string login, string password,
         CancellationToken cancellationToken = default)
     {

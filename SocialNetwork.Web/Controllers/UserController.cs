@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using SocialNetwork.BL.Exceptions;
 using SocialNetwork.BL.Models;
 using SocialNetwork.BL.Models.Enums;
 using SocialNetwork.BL.Services.Interfaces;
@@ -52,5 +53,23 @@ public class UserController : ControllerBase
         return Ok(token);
     }
    
-    
+    [AllowAnonymous]
+    [HttpPost("authorization-info")]
+    public async Task<IActionResult> AddOrUpdateAuthorizationInfoAsync([FromQuery] string refreshToken)
+    {
+        var user = await _userService.GetUserByRefreshTokenAsync(refreshToken);
+        await _userService.AddAuthorizationValueAsync(user, TokenHelper.GenerateRefreshToken(refreshToken), LoginType.LocalSystem);
+        return Ok();
+    }
+
+    [AllowAnonymous]
+    [HttpPost]
+    [Route(("logout"))]
+    public async Task<IActionResult> LogOutAsync([FromQuery] string refreshToken)
+    {
+        await _userService.LogOutAsync(refreshToken);
+        return Ok();
+
+    }
 }
+

@@ -21,4 +21,6 @@ public interface IUserService : IBaseService<UserModel>
     
     Task AddAuthorizationValueAsync(UserModel user, string token, LoginType loginType, DateTime? expiredDate = null,
         CancellationToken cancellationToken = default);
+
+    Task LogOutAsync(string token, CancellationToken cancellationToken = default);
 }
