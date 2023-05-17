@@ -1,4 +1,5 @@
 ﻿using SocialNetwork.BL.Models;
+using SocialNetwork.BL.Models.Enums;
 
 namespace SocialNetwork.BL.Services.Interfaces;
 
@@ -9,9 +10,7 @@ public interface IUserService : IBaseService<UserModel>
     Task<UserModel> UpdateUserAsync(UserModel user, CancellationToken cancellationToken = default);
 
     Task DeleteUserAsync(UserModel user, CancellationToken cancellationToken = default);
-
-    Task<UserModel> UpdateRefreshTokenAsync(int id, string refreshToken, CancellationToken cancellationToken = default);
-
+    
     Task<UserModel> GetUserByRefreshTokenAsync(string refreshToken, CancellationToken cancellationToken = default);
 
     Task<UserModel?> GetUserByLoginAndPasswordAsync(string login, string password, CancellationToken cancellationToken = default);
@@ -19,4 +18,10 @@ public interface IUserService : IBaseService<UserModel>
     Task<UserModel?> GetUserByEmail(string email, CancellationToken cancellationToken = default);
 
     Task<UserModel?> GetUserByLogin(string login, CancellationToken cancellationToken = default);
+    
+    Task AddAuthorizationValueAsync(UserModel user, string refreshToken, LoginType loginType, DateTime? expiredDate = null,
+        CancellationToken cancellationToken = default);
+
+    Task LogOutAsync(int userId, CancellationToken cancellationToken = default);
+    
 }

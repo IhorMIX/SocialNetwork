@@ -2,8 +2,9 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SocialNetwork.BL.Models;
+using SocialNetwork.BL.Models.Enums;
 using SocialNetwork.BL.Services.Interfaces;
-using SocialNetwork.DAL.Entity;
+using SocialNetwork.Web.Extensions;
 using SocialNetwork.Web.Helpers;
 using SocialNetwork.Web.Models;
 
@@ -46,11 +47,30 @@ public class UserController : ControllerBase
     public async Task<ActionResult> AuthorizeUser([FromBody] UserAuthorizeModel model)
     {
         var user = await _userService.GetUserByLoginAndPasswordAsync(model.Login, model.Password);
-
         var token = _tokenHelper.GetToken(user!.Id);
-
+        await _userService.AddAuthorizationValueAsync(user, TokenHelper.GenerateRefreshToken(token), 
+            LoginType.LocalSystem, DateTime.Now);
         return Ok(token);
     }
    
-    
+    [AllowAnonymous]
+    [HttpPost("new-token")]
+    public async Task<IActionResult> AddOrUpdateAuthorizationInfoAsync([FromQuery] string refreshToken)
+    {
+        var user = await _userService.GetUserByRefreshTokenAsync(refreshToken);
+        var token = _tokenHelper.GetToken(user.Id);
+        return Ok(token);
+    }
+
+    [Authorize]
+    [HttpPost]
+    [Route(("logout"))]
+    public async Task<IActionResult> LogOutAsync()
+    {
+        var userId = User.GetUserId();
+        await _userService.LogOutAsync(userId);
+        return Ok();
+
+    }
 }
+

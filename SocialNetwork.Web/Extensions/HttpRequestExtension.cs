@@ -1,6 +1,6 @@
 ﻿using System.Text;
 
-namespace SocialNetwork.Web.Helpers;
+namespace SocialNetwork.Web.Extensions;
 
 public static class HttpRequestExtension
 {

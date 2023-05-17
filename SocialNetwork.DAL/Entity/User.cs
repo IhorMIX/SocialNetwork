@@ -18,5 +18,5 @@ public class User : BaseEntity
 
     public Profile Profile { get; set; }
 
-    public AuthorizationInfo AuthorizationInfo { get; set; }
+    public AuthorizationInfo? AuthorizationInfo { get; set; }
 }

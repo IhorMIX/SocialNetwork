@@ -31,7 +31,7 @@ public class TokenHelper
     {
         var claims = new List<Claim>
         {
-            new Claim("id", userId.ToString()),
+            new (AuthOption.AuthOptions.UserIdCalmName, userId.ToString()),
         };
         ClaimsIdentity claimsIdentity =
             new ClaimsIdentity(claims, "Token", ClaimsIdentity.DefaultNameClaimType,
