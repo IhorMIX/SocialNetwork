@@ -19,8 +19,9 @@ public interface IUserService : IBaseService<UserModel>
 
     Task<UserModel?> GetUserByLogin(string login, CancellationToken cancellationToken = default);
     
-    Task AddAuthorizationValueAsync(UserModel user, string token, LoginType loginType, DateTime? expiredDate = null,
+    Task AddAuthorizationValueAsync(UserModel user, string refreshToken, LoginType loginType, DateTime? expiredDate = null,
         CancellationToken cancellationToken = default);
 
-    Task LogOutAsync(string token, CancellationToken cancellationToken = default);
+    Task LogOutAsync(int userId, CancellationToken cancellationToken = default);
+    
 }

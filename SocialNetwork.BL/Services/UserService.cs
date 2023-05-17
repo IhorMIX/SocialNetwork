@@ -97,7 +97,7 @@ public class UserService : IUserService
         await _userRepository.DeleteUserAsync(userDb, cancellationToken);
     }
 
-    public async Task AddAuthorizationValueAsync(UserModel user, string token, LoginType loginType, DateTime? expiredDate = null,
+    public async Task AddAuthorizationValueAsync(UserModel user, string refreshToken, LoginType loginType, DateTime? expiredDate = null,
         CancellationToken cancellationToken = default)
     {
         var userDb = await _userRepository.GetById(user.Id, cancellationToken);
@@ -110,7 +110,7 @@ public class UserService : IUserService
             
         if (userDb.AuthorizationInfo is not null)
         {
-            userDb.AuthorizationInfo.RefreshToken = token;
+            userDb.AuthorizationInfo.RefreshToken = refreshToken;
             userDb.AuthorizationInfo.ExpiredDate = expiredDate;
             userDb.AuthorizationInfo.LoginType = (DAL.Entity.Enums.LoginType)loginType;
         }
@@ -118,18 +118,17 @@ public class UserService : IUserService
         {
             userDb.AuthorizationInfo = new AuthorizationInfo
             {
-                RefreshToken = token,
+                RefreshToken = refreshToken,
                 ExpiredDate = expiredDate,
                 LoginType = (DAL.Entity.Enums.LoginType)loginType
             };
         }
         await _userRepository.UpdateUserAsync(userDb, cancellationToken);
     }
-
-    public async Task LogOutAsync(string token, CancellationToken cancellationToken = default)
+    
+    public async Task LogOutAsync(int userId, CancellationToken cancellationToken = default)
     {
-        var userDb = await _userRepository.GetAll()
-            .FirstOrDefaultAsync(i => i.AuthorizationInfo != null && i.AuthorizationInfo.RefreshToken == token, cancellationToken);
+        var userDb = await _userRepository.GetById(userId, cancellationToken);
 
         if (userDb is null)
         {

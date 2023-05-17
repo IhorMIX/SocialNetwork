@@ -258,8 +258,8 @@ public class UserServiceTest : DefaultServiceTest<IUserService ,UserService>
         };
         await Service.CreateUserAsync(user);
         var createdUser = await Service.GetUserByLogin(user.Login);
-        await Service.AddAuthorizationValueAsync(createdUser!, "wf4bSXeIASWIOdehipUAemKCL6BFABasZQ/briCtS3g=106729182", LoginType.LocalSystem);
-        Assert.That(await Service.GetUserByRefreshTokenAsync("wf4bSXeIASWIOdehipUAemKCL6BFABasZQ/briCtS3g=106729182"), Is.Not.EqualTo(null));
+        await Service.AddAuthorizationValueAsync(createdUser!, "myzpHVRKHcWh+WB2kG/hgES9LS1PDFrUpb2IkAMtSok=-68397843", LoginType.LocalSystem);
+        Assert.That(await Service.GetUserByRefreshTokenAsync("myzpHVRKHcWh+WB2kG/hgES9LS1PDFrUpb2IkAMtSok=-68397843"), Is.Not.EqualTo(null));
     }
     
     [Test]
@@ -388,7 +388,7 @@ public class UserServiceTest : DefaultServiceTest<IUserService ,UserService>
         createdUser = await Service.GetUserByLogin("TestLogin");
         
         if (createdUser?.AuthorizationInfo is not null)
-            await Service.LogOutAsync(createdUser.AuthorizationInfo.RefreshToken);
+            await Service.LogOutAsync(createdUser.Id);
         createdUser = await Service.GetUserByLogin("TestLogin");
         
         Assert.That(createdUser!.AuthorizationInfo is null);
@@ -398,7 +398,7 @@ public class UserServiceTest : DefaultServiceTest<IUserService ,UserService>
     public async Task LogOut_UserNotFound_ThrowsUserNotFoundException()
     {
         Assert.ThrowsAsync<UserNotFoundException>(async() 
-           => await Service.LogOutAsync("123"));
+           => await Service.LogOutAsync(1));
         await Task.CompletedTask;
     }
     [Test]
@@ -422,6 +422,6 @@ public class UserServiceTest : DefaultServiceTest<IUserService ,UserService>
         await Service.CreateUserAsync(user);
         var createdUser = await Service.GetUserByLogin("TestLogin2");
         Assert.ThrowsAsync<NullReferenceException>(async() 
-            => await Service.LogOutAsync(createdUser!.AuthorizationInfo.RefreshToken));
+            => await Service.LogOutAsync(createdUser!.Id));
     }
 }

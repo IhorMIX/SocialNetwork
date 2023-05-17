@@ -48,7 +48,8 @@ public class UserController : ControllerBase
     {
         var user = await _userService.GetUserByLoginAndPasswordAsync(model.Login, model.Password);
         var token = _tokenHelper.GetToken(user!.Id);
-        await _userService.AddAuthorizationValueAsync(user, TokenHelper.GenerateRefreshToken(token), LoginType.LocalSystem);
+        await _userService.AddAuthorizationValueAsync(user, TokenHelper.GenerateRefreshToken(token), 
+            LoginType.LocalSystem, DateTime.Now);
         return Ok(token);
     }
    
@@ -57,8 +58,8 @@ public class UserController : ControllerBase
     public async Task<IActionResult> AddOrUpdateAuthorizationInfoAsync([FromQuery] string refreshToken)
     {
         var user = await _userService.GetUserByRefreshTokenAsync(refreshToken);
-        await _userService.AddAuthorizationValueAsync(user, TokenHelper.GenerateRefreshToken(refreshToken), LoginType.LocalSystem);
-        return Ok();
+        var token = _tokenHelper.GetToken(user.Id);
+        return Ok(token);
     }
 
     [Authorize]
@@ -67,7 +68,7 @@ public class UserController : ControllerBase
     public async Task<IActionResult> LogOutAsync()
     {
         var userId = User.GetUserId();
-        await _userService.LogOutAsync(refreshToken);
+        await _userService.LogOutAsync(userId);
         return Ok();
 
     }
