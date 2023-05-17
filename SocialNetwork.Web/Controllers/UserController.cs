@@ -54,7 +54,7 @@ public class UserController : ControllerBase
     }
    
     [AllowAnonymous]
-    [HttpPost("authorization-info")]
+    [HttpPost("new-token")]
     public async Task<IActionResult> AddOrUpdateAuthorizationInfoAsync([FromQuery] string refreshToken)
     {
         var user = await _userService.GetUserByRefreshTokenAsync(refreshToken);
