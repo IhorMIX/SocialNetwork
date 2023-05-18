@@ -50,7 +50,7 @@ public class UserController : ControllerBase
         var user = await _userService.GetUserByLoginAndPasswordAsync(model.Login, model.Password);
         var token = _tokenHelper.GetToken(user!.Id);
         
-        DateTime? expiredDate = model.isNeedToRemember ? null : DateTime.Now;
+        DateTime? expiredDate = model.IsNeedToRemember ? null : DateTime.Now;
         
         await _userService.AddAuthorizationValueAsync(user, TokenHelper.GenerateRefreshToken(token), 
             LoginType.LocalSystem, expiredDate);

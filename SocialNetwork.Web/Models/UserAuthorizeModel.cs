@@ -6,5 +6,5 @@ public class UserAuthorizeModel
     
     public string Password { get; set; }
 
-    public bool isNeedToRemember { get; set; }
+    public bool IsNeedToRemember { get; set; }
 }
