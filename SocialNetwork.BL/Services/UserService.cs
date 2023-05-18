@@ -125,6 +125,11 @@ public class UserService : IUserService
             
         if (userDb.AuthorizationInfo is not null)
         {
+            if (userDb.AuthorizationInfo.ExpiredDate <= DateTime.Now.AddDays(-1))
+            {
+                _logger.LogError("Time of refresh token is out");
+                throw new TimeoutException($"Time of refresh token is out");
+            }
             userDb.AuthorizationInfo.RefreshToken = refreshToken;
             userDb.AuthorizationInfo.ExpiredDate = expiredDate;
             userDb.AuthorizationInfo.LoginType = (DAL.Entity.Enums.LoginType)loginType;
