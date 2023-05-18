@@ -25,13 +25,13 @@ public class UserServiceTest : DefaultServiceTest<IUserService ,UserService>
     {
         var user = new UserModel()
         {
-            Login = "TestLogin",
+            Login = "TestLogin1",
             Password = "TestPassword",
             Profile = new ProfileModel()
             {
                 Birthday = DateTime.Now,
                 Description = "sdsdds",
-                Email = "limpopo923@gmail.com",
+                Email = "1@gmail.com",
                 Name = "Test",
                 Sex = Sex.Male,
                 Surname = "Test",
@@ -40,9 +40,6 @@ public class UserServiceTest : DefaultServiceTest<IUserService ,UserService>
         };
 
         await Service.CreateUserAsync(user);
-
-
-
         Assert.ThrowsAsync<AlreadyLoginAndEmailException>(async () => await Service.CreateUserAsync(user));
     }
     
@@ -52,13 +49,13 @@ public class UserServiceTest : DefaultServiceTest<IUserService ,UserService>
     {
         var user = new UserModel()
         {
-            Login = "TestLogin",
+            Login = "TestLogin2",
             Password = "TestPassword",
             Profile = new ProfileModel()
             {
                 Birthday = DateTime.Now,
                 Description = "sdsdds",
-                Email = "limpopo923@gmail.com",
+                Email = "2@gmail.com",
                 Name = "Test",
                 Sex = Sex.Male,
                 Surname = "Test",
@@ -68,7 +65,7 @@ public class UserServiceTest : DefaultServiceTest<IUserService ,UserService>
 
         await Service.CreateUserAsync(user);
 
-        var createdUser = await Service.GetById(1);
+        var createdUser = await Service.GetUserByLogin(user.Login);
 
         Assert.That(createdUser!.Login, Is.EqualTo(user.Login));
         Assert.That(createdUser!.Profile.Email, Is.EqualTo(user.Profile.Email));
@@ -79,13 +76,13 @@ public class UserServiceTest : DefaultServiceTest<IUserService ,UserService>
     {
         var user = new UserModel()
         {                     
-            Login = "TestLogin",
+            Login = "TestLogin3",
             Password = "TestPassword",
             Profile = new ProfileModel()
             {
                 Birthday = DateTime.Now,
                 Description = "sdsdds",
-                Email = "limpopo923@gmail.com",
+                Email = "3@gmail.com",
                 Name = "Test",
                 Sex = Sex.Male,
                 Surname = "Test",
@@ -103,13 +100,13 @@ public class UserServiceTest : DefaultServiceTest<IUserService ,UserService>
     {
         var user = new UserModel()
         {
-            Login = "TestLogin",
+            Login = "TestLogin4",
             Password = "TestPassword",
             Profile = new ProfileModel()
             {
                 Birthday = DateTime.Now,
                 Description = "sdsdds",
-                Email = "limpopo923@gmail.com",
+                Email = "4@gmail.com",
                 Name = "Test",
                 Sex = Sex.Male,
                 Surname = "Test",
@@ -145,13 +142,13 @@ public class UserServiceTest : DefaultServiceTest<IUserService ,UserService>
     {
         var user = new UserModel()
         {
-            Login = "TestLogin",
+            Login = "TestLogin5",
             Password = "TestPassword",
             Profile = new ProfileModel()
             {
                 Birthday = DateTime.Now,
                 Description = "sdsdds",
-                Email = "limpopo923@gmail.com",
+                Email = "5@gmail.com",
                 Name = "Test",
                 Sex = Sex.Male,
                 Surname = "Test",
@@ -172,17 +169,17 @@ public class UserServiceTest : DefaultServiceTest<IUserService ,UserService>
     }
 
     [Test]
-    public async Task AddAuthorizationValue_UserFound_UpdatesRefreshTokenSuccessfully()
+    public async Task AddAuthorizationValue_UserFoundNullAuthorizationInfo_AddsRefreshTokenSuccessfully()
     {
         var user = new UserModel()
         {
-            Login = "TestLogin",
+            Login = "TestLogin6",
             Password = "TestPassword",
             Profile = new ProfileModel()
             {
                 Birthday = DateTime.Now,
                 Description = "sdsdds",
-                Email = "limpopo923@gmail.com",
+                Email = "6@gmail.com",
                 Name = "Test",
                 Sex = Sex.Male,
                 Surname = "Test",
@@ -190,14 +187,73 @@ public class UserServiceTest : DefaultServiceTest<IUserService ,UserService>
             }
         };
         await Service.CreateUserAsync(user);
-        
         var createdUser = await Service.GetUserByLogin(user.Login);
-    
+        
+        Assert.That(createdUser!.AuthorizationInfo is null);
         await Service.AddAuthorizationValueAsync(createdUser!, "", LoginType.LocalSystem);
-        
         createdUser = await Service.GetUserByLogin(user.Login);
-        
+        Assert.That(createdUser!.AuthorizationInfo.RefreshToken is "");
         Assert.That(createdUser!.AuthorizationInfo is not null);
+    }
+    
+    [Test]
+    public async Task AddAuthorizationValue_UserFoundWithAuthorizationInfo_UpdatesRefreshTokenSuccessfully()
+    {
+        var user = new UserModel()
+        {
+            Login = "TestLogin7",
+            Password = "TestPassword",
+            Profile = new ProfileModel()
+            {
+                Birthday = DateTime.Now,
+                Description = "sdsdds",
+                Email = "23@gmail.com",
+                Name = "Test",
+                Sex = Sex.Male,
+                Surname = "Test",
+                AvatarImage = "Image"
+            }
+        };
+        await Service.CreateUserAsync(user);
+        var createdUser = await Service.GetUserByLogin(user.Login);
+        Assert.That(createdUser!.AuthorizationInfo is null);
+        await Service.AddAuthorizationValueAsync(createdUser!, "1111", LoginType.LocalSystem);
+        
+        var createdUser2 = await Service.GetUserByLogin(user.Login);
+        Assert.That(createdUser2!.AuthorizationInfo is not null);
+        await Service.AddAuthorizationValueAsync(createdUser2!, "2222", LoginType.LocalSystem);
+        
+        Assert.That(createdUser2!.AuthorizationInfo?.RefreshToken != createdUser!.AuthorizationInfo?.RefreshToken);
+    }
+    
+    [Test]
+    public async Task AddAuthorizationValue_UserFoundWithAuthorizationInfo_ThrowsTimeoutException()
+    {
+        var user = new UserModel()
+        {
+            Login = "TestLogin8",
+            Password = "TestPassword",
+            Profile = new ProfileModel()
+            {
+                Birthday = DateTime.Now,
+                Description = "sdsdds",
+                Email = "24@gmail.com",
+                Name = "Test",
+                Sex = Sex.Male,
+                Surname = "Test",
+                AvatarImage = "Image"
+            }
+        };
+        await Service.CreateUserAsync(user);
+        var createdUser = await Service.GetUserByLogin(user.Login);
+        Assert.That(createdUser!.AuthorizationInfo is null);
+        await Service.AddAuthorizationValueAsync(createdUser!, "1111", LoginType.LocalSystem, DateTime.Now.AddHours(-26));
+        
+        var createdUser2 = await Service.GetUserByLogin(user.Login);
+        Assert.That(createdUser2!.AuthorizationInfo is not null);
+        
+        Assert.ThrowsAsync<TimeoutException>(async () =>
+            await Service.AddAuthorizationValueAsync(createdUser2!, "2222", LoginType.LocalSystem));
     }
     
     [Test]
@@ -214,13 +270,13 @@ public class UserServiceTest : DefaultServiceTest<IUserService ,UserService>
     {
         var user = new UserModel()
         {
-            Login = "TestLogin",
+            Login = "TestLogin9",
             Password = "TestPassword",
             Profile = new ProfileModel()
             {
                 Birthday = DateTime.Now,
                 Description = "sdsdds",
-                Email = "limpopo923@gmail.com",
+                Email = "25@gmail.com",
                 Name = "Test",
                 Sex = Sex.Male,
                 Surname = "Test",
@@ -245,13 +301,13 @@ public class UserServiceTest : DefaultServiceTest<IUserService ,UserService>
     {
         var user = new UserModel()
         {
-            Login = "TestLogin",
+            Login = "TestLogin10",
             Password = "TestPassword",
             Profile = new ProfileModel()
             {
                 Birthday = DateTime.Now,
                 Description = "sdsdds",
-                Email = "limpopo923@gmail.com",
+                Email = "62@gmail.com",
                 Name = "Test",
                 Sex = Sex.Male,
                 Surname = "Test",
@@ -270,13 +326,13 @@ public class UserServiceTest : DefaultServiceTest<IUserService ,UserService>
     {
         var user = new UserModel()
         {
-            Login = "TestLogin",
+            Login = "TestLogin11",
             Password = "TestPassword",
             Profile = new ProfileModel()
             {
                 Birthday = DateTime.Now,
                 Description = "sdsdds",
-                Email = "limpopo923@gmail.com",
+                Email = "72@gmail.com",
                 Name = "Test",
                 Sex = Sex.Male,
                 Surname = "Test",
@@ -302,13 +358,13 @@ public class UserServiceTest : DefaultServiceTest<IUserService ,UserService>
     {
         var user = new UserModel()
         {
-            Login = "TestLogin",
+            Login = "TestLogin12",
             Password = "TestPassword",
             Profile = new ProfileModel()
             {
                 Birthday = DateTime.Now,
                 Description = "sdsdds",
-                Email = "limpopo923@gmail.com",
+                Email = "8@gmail.com",
                 Name = "Test",
                 Sex = Sex.Male,
                 Surname = "Test",
@@ -324,13 +380,13 @@ public class UserServiceTest : DefaultServiceTest<IUserService ,UserService>
     {
         var user = new UserModel()
         {
-            Login = "TestLogin",
+            Login = "TestLogin13",
             Password = "TestPassword",
             Profile = new ProfileModel()
             {
                 Birthday = DateTime.Now,
                 Description = "sdsdds",
-                Email = "limpopo923@gmail.com",
+                Email = "9@gmail.com",
                 Name = "Test",
                 Sex = Sex.Male,
                 Surname = "Test",
@@ -348,13 +404,13 @@ public class UserServiceTest : DefaultServiceTest<IUserService ,UserService>
     {
         var user = new UserModel()
         {
-            Login = "TestLogin",
+            Login = "TestLogin14",
             Password = "TestPassword",
             Profile = new ProfileModel()
             {
                 Birthday = DateTime.Now,
                 Description = "sdsdds",
-                Email = "limpopo923@gmail.com",
+                Email = "10@gmail.com",
                 Name = "Test",
                 Sex = Sex.Male,
                 Surname = "Test",
@@ -371,13 +427,13 @@ public class UserServiceTest : DefaultServiceTest<IUserService ,UserService>
     {
         var user = new UserModel()
         {
-            Login = "TestLogin",
+            Login = "TestLogin15",
             Password = "TestPassword",
             Profile = new ProfileModel()
             {
                 Birthday = DateTime.Now,
                 Description = "sdsdds",
-                Email = "limpopo923@gmail.com",
+                Email = "11@gmail.com",
                 Name = "Test",
                 Sex = Sex.Male,
                 Surname = "Test",
@@ -395,13 +451,13 @@ public class UserServiceTest : DefaultServiceTest<IUserService ,UserService>
     {
         var user = new UserModel()
         {
-            Login = "TestLogin",
+            Login = "TestLogin16",
             Password = "TestPassword",
             Profile = new ProfileModel()
             {
                 Birthday = DateTime.Now,
                 Description = "sdsdds",
-                Email = "limpopo923@gmail.com",
+                Email = "12@gmail.com",
                 Name = "Test",
                 Sex = Sex.Male,
                 Surname = "Test",
@@ -410,13 +466,13 @@ public class UserServiceTest : DefaultServiceTest<IUserService ,UserService>
         };
         await Service.CreateUserAsync(user);
         
-        var createdUser = await Service.GetUserByLogin("TestLogin");
+        var createdUser = await Service.GetUserByLogin("TestLogin16");
         await Service.AddAuthorizationValueAsync(createdUser!, "123", LoginType.LocalSystem);
-        createdUser = await Service.GetUserByLogin("TestLogin");
+        createdUser = await Service.GetUserByLogin("TestLogin16");
         
         if (createdUser?.AuthorizationInfo is not null)
             await Service.LogOutAsync(createdUser.Id);
-        createdUser = await Service.GetUserByLogin("TestLogin");
+        createdUser = await Service.GetUserByLogin("TestLogin16");
         
         Assert.That(createdUser!.AuthorizationInfo is null);
     }
@@ -433,13 +489,13 @@ public class UserServiceTest : DefaultServiceTest<IUserService ,UserService>
     {
         var user = new UserModel()
         {
-            Login = "TestLogin2",
+            Login = "TestLogin17",
             Password = "TestPassword",
             Profile = new ProfileModel()
             {
                 Birthday = DateTime.Now,
                 Description = "sdsdds",
-                Email = "limpopo923@gmail.com",
+                Email = "13@gmail.com",
                 Name = "Test",
                 Sex = Sex.Male,
                 Surname = "Test",
@@ -447,7 +503,7 @@ public class UserServiceTest : DefaultServiceTest<IUserService ,UserService>
             }
         };
         await Service.CreateUserAsync(user);
-        var createdUser = await Service.GetUserByLogin("TestLogin2");
+        var createdUser = await Service.GetUserByLogin("TestLogin17");
         Assert.ThrowsAsync<NullReferenceException>(async() 
             => await Service.LogOutAsync(createdUser!.Id));
     }
