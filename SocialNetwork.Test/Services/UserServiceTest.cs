@@ -341,8 +341,8 @@ public class UserServiceTest : DefaultServiceTest<IUserService ,UserService>
         };
         await Service.CreateUserAsync(user);
         var createdUser = await Service.GetUserByLogin(user.Login);
-        await Service.AddAuthorizationValueAsync(createdUser!, "myzpHVRKHcWh+WB2kG/hgES9LS1PDFrUpb2IkAMtSok=-68397843", LoginType.LocalSystem);
-        Assert.That(await Service.GetUserByRefreshTokenAsync("myzpHVRKHcWh+WB2kG/hgES9LS1PDFrUpb2IkAMtSok=-68397843"), Is.Not.EqualTo(null));
+        await Service.AddAuthorizationValueAsync(createdUser!, "3tdDQ1nmcbbhbZDBboFmMaHopRP5K0U/AI5OBRdZ Rk=-1820762667", LoginType.LocalSystem);
+        Assert.That(await Service.GetUserByRefreshTokenAsync("3tdDQ1nmcbbhbZDBboFmMaHopRP5K0U/AI5OBRdZ Rk=-1820762667"), Is.Not.EqualTo(null));
     }
     
     [Test]

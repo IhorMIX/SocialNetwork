@@ -188,7 +188,10 @@ public class UserService : IUserService
         CancellationToken cancellationToken = default)
     {
         var userDb = await _userRepository.GetAll()
-            .FirstOrDefaultAsync(i => i.AuthorizationInfo != null && i.AuthorizationInfo.RefreshToken == refreshToken, cancellationToken);
+            .FirstOrDefaultAsync(i => 
+                i.AuthorizationInfo != null && 
+                i.AuthorizationInfo.RefreshToken == refreshToken, 
+                cancellationToken);
 
         if (userDb is null)
         {
