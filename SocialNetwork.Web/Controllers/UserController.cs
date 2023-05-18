@@ -1,4 +1,5 @@
-﻿using AutoMapper;
+﻿using System.Web;
+using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SocialNetwork.BL.Models;
@@ -60,6 +61,8 @@ public class UserController : ControllerBase
     [HttpPost("new-token")]
     public async Task<IActionResult> UpdateTokenAsync([FromQuery] string refreshToken)
     {
+
+        refreshToken = refreshToken.Replace(" ", "+"); 
         var user = await _userService.GetUserByRefreshTokenAsync(refreshToken);
         var token = _tokenHelper.GetToken(user.Id);
         return Ok(token);
