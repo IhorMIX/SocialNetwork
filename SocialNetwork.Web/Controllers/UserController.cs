@@ -48,14 +48,17 @@ public class UserController : ControllerBase
     {
         var user = await _userService.GetUserByLoginAndPasswordAsync(model.Login, model.Password);
         var token = _tokenHelper.GetToken(user!.Id);
+        
+        DateTime? expiredDate = model.isNeedToRemember ? null : DateTime.Now;
+        
         await _userService.AddAuthorizationValueAsync(user, TokenHelper.GenerateRefreshToken(token), 
-            LoginType.LocalSystem, DateTime.Now);
+            LoginType.LocalSystem, expiredDate);
         return Ok(token);
     }
    
     [AllowAnonymous]
     [HttpPost("new-token")]
-    public async Task<IActionResult> AddOrUpdateAuthorizationInfoAsync([FromQuery] string refreshToken)
+    public async Task<IActionResult> UpdateTokenAsync([FromQuery] string refreshToken)
     {
         var user = await _userService.GetUserByRefreshTokenAsync(refreshToken);
         var token = _tokenHelper.GetToken(user.Id);
