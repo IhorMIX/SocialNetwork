@@ -189,11 +189,11 @@ public class UserServiceTest : DefaultServiceTest<IUserService ,UserService>
         await Service.CreateUserAsync(user);
         var createdUser = await Service.GetUserByLogin(user.Login);
         
-        Assert.That(createdUser!.AuthorizationInfo is null);
+        Assert.That(createdUser!.AuthorizationInfo, Is.EqualTo(null));
         await Service.AddAuthorizationValueAsync(createdUser!, "", LoginType.LocalSystem);
         createdUser = await Service.GetUserByLogin(user.Login);
         Assert.That(createdUser!.AuthorizationInfo.RefreshToken is "");
-        Assert.That(createdUser!.AuthorizationInfo is not null);
+        Assert.That(createdUser!.AuthorizationInfo, Is.Not.EqualTo(null));
     }
     
     [Test]
@@ -216,11 +216,11 @@ public class UserServiceTest : DefaultServiceTest<IUserService ,UserService>
         };
         await Service.CreateUserAsync(user);
         var createdUser = await Service.GetUserByLogin(user.Login);
-        Assert.That(createdUser!.AuthorizationInfo is null);
+        Assert.That(createdUser!.AuthorizationInfo, Is.EqualTo(null));
         await Service.AddAuthorizationValueAsync(createdUser!, "1111", LoginType.LocalSystem);
         
         var createdUser2 = await Service.GetUserByLogin(user.Login);
-        Assert.That(createdUser2!.AuthorizationInfo is not null);
+        Assert.That(createdUser2!.AuthorizationInfo, Is.Not.EqualTo(null));
         await Service.AddAuthorizationValueAsync(createdUser2!, "2222", LoginType.LocalSystem);
         
         Assert.That(createdUser2!.AuthorizationInfo?.RefreshToken != createdUser!.AuthorizationInfo?.RefreshToken);
@@ -246,11 +246,11 @@ public class UserServiceTest : DefaultServiceTest<IUserService ,UserService>
         };
         await Service.CreateUserAsync(user);
         var createdUser = await Service.GetUserByLogin(user.Login);
-        Assert.That(createdUser!.AuthorizationInfo is null);
+        Assert.That(createdUser!.AuthorizationInfo, Is.EqualTo(null));
         await Service.AddAuthorizationValueAsync(createdUser!, "1111", LoginType.LocalSystem, DateTime.Now.AddHours(-26));
         
         var createdUser2 = await Service.GetUserByLogin(user.Login);
-        Assert.That(createdUser2!.AuthorizationInfo is not null);
+        Assert.That(createdUser2!.AuthorizationInfo, Is.Not.EqualTo(null));
         
         Assert.ThrowsAsync<TimeoutException>(async () =>
             await Service.AddAuthorizationValueAsync(createdUser2!, "2222", LoginType.LocalSystem));
@@ -285,7 +285,7 @@ public class UserServiceTest : DefaultServiceTest<IUserService ,UserService>
         };
 
         await Service.CreateUserAsync(user);
-        Assert.That(Service.GetUserByLoginAndPasswordAsync(user.Login, user.Password) != null);
+        Assert.That(Service.GetUserByLoginAndPasswordAsync(user.Login, user.Password), Is.Not.EqualTo(null));
     }
 
     [Test]
@@ -341,8 +341,8 @@ public class UserServiceTest : DefaultServiceTest<IUserService ,UserService>
         };
         await Service.CreateUserAsync(user);
         var createdUser = await Service.GetUserByLogin(user.Login);
-        await Service.AddAuthorizationValueAsync(createdUser!, "3tdDQ1nmcbbhbZDBboFmMaHopRP5K0U/AI5OBRdZ Rk=-1820762667", LoginType.LocalSystem);
-        Assert.That(await Service.GetUserByRefreshTokenAsync("3tdDQ1nmcbbhbZDBboFmMaHopRP5K0U/AI5OBRdZ Rk=-1820762667"), Is.Not.EqualTo(null));
+        await Service.AddAuthorizationValueAsync(createdUser!, "cNJPGDP69Z/fsk6Wm5rP+02Jl+SSgxPPckvk/OKY1hc=-1098260020", LoginType.LocalSystem);
+        Assert.That(await Service.GetUserByRefreshTokenAsync("cNJPGDP69Z/fsk6Wm5rP+02Jl+SSgxPPckvk/OKY1hc=-1098260020"), Is.Not.EqualTo(null));
     }
     
     [Test]
