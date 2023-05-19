@@ -31,8 +31,7 @@ public class UserController : ControllerBase
 
     [AllowAnonymous]
     [HttpPost]
-    public async Task<IActionResult> CreateUser([FromBody] UserCreateViewModel user,
-        CancellationToken cancellationToken)
+    public async Task<IActionResult> CreateUser([FromBody] UserCreateViewModel user, CancellationToken cancellationToken)
     {
         _logger.LogInformation("Start to create user");
         
@@ -45,25 +44,29 @@ public class UserController : ControllerBase
 
     [AllowAnonymous]
     [HttpPost("login")]
-    public async Task<ActionResult> AuthorizeUser([FromBody] UserAuthorizeModel model)
+    public async Task<ActionResult> AuthorizeUser([FromBody] UserAuthorizeModel model, CancellationToken cancellationToken)
     {
-        var user = await _userService.GetUserByLoginAndPasswordAsync(model.Login, model.Password);
+        var user = await _userService.GetUserByLoginAndPasswordAsync(model.Login, model.Password, cancellationToken);
         var token = _tokenHelper.GetToken(user!.Id);
         
         DateTime? expiredDate = model.IsNeedToRemember ? null : DateTime.Now;
         
-        await _userService.AddAuthorizationValueAsync(user, TokenHelper.GenerateRefreshToken(token), 
-            LoginType.LocalSystem, expiredDate);
+        await _userService.AddAuthorizationValueAsync(
+            user, 
+            TokenHelper.GenerateRefreshToken(token), 
+            LoginType.LocalSystem, 
+            expiredDate, 
+            cancellationToken);
         return Ok(token);
     }
    
     [AllowAnonymous]
     [HttpPost("new-token")]
-    public async Task<IActionResult> UpdateTokenAsync([FromQuery] string refreshToken)
+    public async Task<IActionResult> UpdateTokenAsync([FromQuery] string refreshToken, CancellationToken cancellationToken)
     {
 
         refreshToken = refreshToken.Replace(" ", "+"); 
-        var user = await _userService.GetUserByRefreshTokenAsync(refreshToken);
+        var user = await _userService.GetUserByRefreshTokenAsync(refreshToken, cancellationToken);
         var token = _tokenHelper.GetToken(user.Id);
         return Ok(token);
     }
@@ -71,10 +74,10 @@ public class UserController : ControllerBase
     [Authorize]
     [HttpPost]
     [Route(("logout"))]
-    public async Task<IActionResult> LogOutAsync()
+    public async Task<IActionResult> LogOutAsync(CancellationToken cancellationToken)
     {
         var userId = User.GetUserId();
-        await _userService.LogOutAsync(userId);
+        await _userService.LogOutAsync(userId, cancellationToken);
         return Ok();
 
     }
