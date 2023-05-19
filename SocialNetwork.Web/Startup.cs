@@ -73,15 +73,15 @@ public class Startup
     public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
     {
         //check current project configuration
-        //if (env.IsDevelopment())
-        //{
-        //    app.UseDeveloperExceptionPage();
-        //}
-        //else
-        //{
-        //    app.UseExceptionHandler("/Error");
-        //    app.UseHsts();
-        //}
+        if (env.IsDevelopment())
+        {
+            app.UseDeveloperExceptionPage();
+        }
+        else
+        {
+            app.UseExceptionHandler("/Error");
+            app.UseHsts();
+        }
         app.UseMiddleware<ErrorHandlingMiddleware>(); 
 
         app.UseRouting();

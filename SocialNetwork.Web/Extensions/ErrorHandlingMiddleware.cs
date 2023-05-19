@@ -33,16 +33,8 @@ namespace SocialNetwork.Web.Extensions
         public (HttpStatusCode, string) GetResponse(Exception exception)
         {
             HttpStatusCode code = HttpStatusCode.BadRequest; // default code 
-            string error = "Internal Server Error"; // default error
-            string exceptionType = exception.GetType().Name; // give type of exception
 
-            error = exception.Message; //if we have NOT default error we set in error our exception
-
-            var errorModel = new ErrorModel 
-            {
-                Error = error,
-                ExceptionType = exceptionType
-            };
+            var errorModel = new ErrorModel { Error = exception.Message, ExceptionType = exception.GetType().Name };
 
             var responseJson = JsonConvert.SerializeObject(errorModel); // in format to json 
             return (code, responseJson); // return code and our variable which we formated to json
