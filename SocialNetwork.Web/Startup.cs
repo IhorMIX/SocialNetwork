@@ -8,6 +8,7 @@ using SocialNetwork.BL.Services.Interfaces;
 using SocialNetwork.DAL;
 using SocialNetwork.DAL.Repository;
 using SocialNetwork.DAL.Repository.Interfaces;
+using SocialNetwork.Web.Extensions;
 using SocialNetwork.Web.Helpers;
 using SocialNetwork.Web.Options;
 using SocialNetwork.Web.Validators;
@@ -81,6 +82,7 @@ public class Startup
             app.UseExceptionHandler("/Error");
             app.UseHsts();
         }
+        app.UseMiddleware<ErrorHandlingMiddleware>(); 
 
         app.UseRouting();
         app.UseCors(b => b.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
