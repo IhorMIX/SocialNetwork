@@ -88,7 +88,8 @@ public class UserService : IUserService
             var userSourceValue = userProperty.GetValue(user.Profile);
             var userTargetValue = userDbProperty.GetValue(userDb.Profile);
 
-            if (userSourceValue != null && !userSourceValue.Equals(userTargetValue))
+            if (userSourceValue !="" && userSourceValue != null && !userSourceValue.Equals(userTargetValue))
+              
             {
                 userDbProperty.SetValue(userDb.Profile, userSourceValue);
             }

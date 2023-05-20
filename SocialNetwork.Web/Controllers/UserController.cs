@@ -11,6 +11,7 @@ using SocialNetwork.Web.Models;
 
 namespace SocialNetwork.Web.Controllers;
 
+[Authorize]
 [Route("api/[controller]")]
 [ApiController]
 public class UserController : ControllerBase
@@ -35,10 +36,52 @@ public class UserController : ControllerBase
         CancellationToken cancellationToken)
     {
         _logger.LogInformation("Start to create user");
-        
+
         await _userService.CreateUserAsync(_mapper.Map<UserModel>(user), cancellationToken);
 
         _logger.LogInformation("User was created");
+
+        return Ok();
+    }
+
+    [HttpPut]
+    public async Task<IActionResult> UpdateUser([FromBody] UserUpdateViewModel user,
+       CancellationToken cancellationToken)
+    {
+         _logger.LogInformation("Start to update user");
+
+        var userId = User.GetUserId();
+        user.Id= userId;
+        await _userService.UpdateUserAsync(_mapper.Map<UserModel>(user), cancellationToken);
+
+        _logger.LogInformation("User was updated");
+
+        return Ok(user);
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> GetUser([FromBody] ProfileGetViewModel user,
+      CancellationToken cancellationToken)
+    {
+         _logger.LogInformation("Get user");
+        //var userId = User.GetUserId();
+
+        await _userService.UpdateUserAsync(_mapper.Map<UserModel>(user), cancellationToken);
+
+        _logger.LogInformation("User was updated");
+
+        return Ok(user);
+    }
+
+    [HttpDelete]
+    public async Task<IActionResult> DeleteUser()
+    {
+        //_logger.LogInformation("Start to create user");
+        var userId = User.GetUserId();
+       // await _userService.DeleteUserAsync(userId, cancellationToken);
+        await _userService.DeleteUserAsync(_mapper.Map<UserModel>(userId));
+
+        _logger.LogInformation("User was deleted");
 
         return Ok();
     }
@@ -54,6 +97,9 @@ public class UserController : ControllerBase
         
         await _userService.AddAuthorizationValueAsync(user, TokenHelper.GenerateRefreshToken(token), 
             LoginType.LocalSystem, expiredDate);
+
+        _logger.LogInformation("User was logined");
+
         return Ok(token);
     }
    
@@ -68,7 +114,7 @@ public class UserController : ControllerBase
         return Ok(token);
     }
 
-    [Authorize]
+   
     [HttpPost]
     [Route(("logout"))]
     public async Task<IActionResult> LogOutAsync()

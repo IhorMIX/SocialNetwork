@@ -35,6 +35,7 @@ public class Startup
         services.AddFluentValidationAutoValidation();
         services.AddFluentValidationClientsideAdapters();
         services.AddValidatorsFromAssemblyContaining<UserValidator>();
+        services.AddValidatorsFromAssemblyContaining<UserUpdateValidator>(); //added update validator in controller
         services.AddValidatorsFromAssemblyContaining<AuthorizeValidator>();
 
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
