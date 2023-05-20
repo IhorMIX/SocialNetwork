@@ -4,5 +4,5 @@ public interface IBasicRepository<TEntity> where TEntity : class
 {
     IQueryable<TEntity> GetAll();
 
-    Task<TEntity?> GetById(int id, CancellationToken cancellationToken = default);
+    Task<TEntity?> GetByIdAsync(int id, CancellationToken cancellationToken = default);
 }

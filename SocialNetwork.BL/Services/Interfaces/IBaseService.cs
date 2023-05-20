@@ -2,5 +2,5 @@
 
 public interface IBaseService<TModel> where TModel : class
 {
-    Task<TModel?> GetById(int id, CancellationToken cancellationToken = default);
+    Task<TModel?> GetByIdAsync(int id, CancellationToken cancellationToken = default);
 }
