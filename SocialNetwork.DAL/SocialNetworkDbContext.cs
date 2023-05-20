@@ -14,6 +14,8 @@ public class SocialNetworkDbContext : DbContext
 
     public DbSet<Profile> Profiles { get; set; }
 
+    public DbSet<Friendship> Friends { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(SocialNetworkDbContext).Assembly);

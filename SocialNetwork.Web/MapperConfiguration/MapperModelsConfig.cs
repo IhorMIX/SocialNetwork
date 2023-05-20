@@ -17,6 +17,8 @@ namespace SocialNetwork.Web.MapperConfiguration
                 .ForMember(dest => dest.AuthorizationInfoId, opt => opt.Ignore())
                 .ReverseMap();
 
+            CreateMap<FriendshipModel, Friendship>().ReverseMap();
+            
             CreateMap<AuthorizationInfoModel, AuthorizationInfo>().ReverseMap();
             CreateMap<ProfileModel, SocialNetwork.DAL.Entity.Profile>().ReverseMap();
         }
