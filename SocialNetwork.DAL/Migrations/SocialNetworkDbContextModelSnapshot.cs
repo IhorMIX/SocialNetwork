@@ -51,6 +51,24 @@ namespace SocialNetwork.DAL.Migrations
                     b.ToTable("AuthorizationInfo");
                 });
 
+            modelBuilder.Entity("SocialNetwork.DAL.Entity.Friendship", b =>
+                {
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("FriendId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Id")
+                        .HasColumnType("int");
+
+                    b.HasKey("UserId", "FriendId");
+
+                    b.HasIndex("FriendId");
+
+                    b.ToTable("Friends");
+                });
+
             modelBuilder.Entity("SocialNetwork.DAL.Entity.Profile", b =>
                 {
                     b.Property<int>("Id")
@@ -140,6 +158,25 @@ namespace SocialNetwork.DAL.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("SocialNetwork.DAL.Entity.Friendship", b =>
+                {
+                    b.HasOne("SocialNetwork.DAL.Entity.User", "FriendUser")
+                        .WithMany()
+                        .HasForeignKey("FriendId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("SocialNetwork.DAL.Entity.User", "User")
+                        .WithMany("Friends")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("FriendUser");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("SocialNetwork.DAL.Entity.Profile", b =>
                 {
                     b.HasOne("SocialNetwork.DAL.Entity.User", "User")
@@ -153,8 +190,9 @@ namespace SocialNetwork.DAL.Migrations
 
             modelBuilder.Entity("SocialNetwork.DAL.Entity.User", b =>
                 {
-                    b.Navigation("AuthorizationInfo")
-                        .IsRequired();
+                    b.Navigation("AuthorizationInfo");
+
+                    b.Navigation("Friends");
 
                     b.Navigation("Profile")
                         .IsRequired();
