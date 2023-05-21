@@ -7,6 +7,8 @@ public interface IUserService : IBaseService<UserModel>
 {
     Task CreateUserAsync(UserModel user, CancellationToken cancellationToken = default);
 
+    Task DeleteUserAsync(int id, CancellationToken cancellationToken = default);
+
     Task<UserModel> UpdateUserAsync(UserModel user, CancellationToken cancellationToken = default);
     
     Task<UserModel> GetUserByRefreshTokenAsync(string refreshToken, CancellationToken cancellationToken = default);
