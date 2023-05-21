@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using SocialNetwork.BL.Services.Interfaces;
 using SocialNetwork.Web.Extensions;
 using SocialNetwork.Web.Helpers;
+using SocialNetwork.Web.Models;
 
 namespace SocialNetwork.Web.Controllers;
 
@@ -43,8 +44,4 @@ public class FriendshipController : ControllerBase
         await _friendshipService.DeleteFriendshipAsync(userId, model.Email, cancellationToken);
         return Ok();
     }
-}
-public class AddFriendModel
-{
-    public string Email { get; set; }
 }
