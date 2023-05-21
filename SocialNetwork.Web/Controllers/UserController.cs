@@ -45,14 +45,13 @@ public class UserController : ControllerBase
     }
 
     [HttpPut]
-    public async Task<IActionResult> UpdateUser([FromBody] UserUpdateViewModel user,
+    public async Task<IActionResult> UpdateUserAsync([FromBody] UserUpdateViewModel user,
        CancellationToken cancellationToken)
     {
          _logger.LogInformation("Start to update user");
 
         var userId = User.GetUserId(); //get user id by token
-        user.Id= userId; //put id in User  model
-        await _userService.UpdateUserAsync(_mapper.Map<UserModel>(user), cancellationToken); //searching and updating process
+        await _userService.UpdateUserAsync(userId,_mapper.Map<UserModel>(user), cancellationToken); //searching and updating process
 
         _logger.LogInformation("User was updated");
 
@@ -60,13 +59,13 @@ public class UserController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetUser(CancellationToken cancellationToken)
+    public async Task<IActionResult> GetUserAsync(CancellationToken cancellationToken)
     {
          _logger.LogInformation("Get user");
 
         var userId = User.GetUserId(); //get user id by token
         var user = await _userService.GetById(userId, cancellationToken); //find user by id
-        var viewModel = _mapper.Map<UserGetViewModel>(user); // put user in userViewModel
+        var viewModel = _mapper.Map<UserViewModel>(user); // put user in userViewModel
 
         _logger.LogInformation("Get user");
 
@@ -74,12 +73,11 @@ public class UserController : ControllerBase
     }
 
     [HttpDelete]
-    public async Task<IActionResult> DeleteUser()
+    public async Task<IActionResult> DeleteUserAsync(CancellationToken cancellationToken)
     {
         _logger.LogInformation("Start to delete user");
 
-        var userId = User.GetUserId(); //get user id by token
-        await _userService.DeleteUserAsync(User.GetUserId()); //delete user by id
+        await _userService.DeleteUserAsync(User.GetUserId(), cancellationToken); //delete user by id
 
         _logger.LogInformation("User was deleted");
 
