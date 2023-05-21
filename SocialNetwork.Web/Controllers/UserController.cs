@@ -50,9 +50,9 @@ public class UserController : ControllerBase
     {
          _logger.LogInformation("Start to update user");
 
-        var userId = User.GetUserId();
-        user.Id= userId;
-        await _userService.UpdateUserAsync(_mapper.Map<UserModel>(user), cancellationToken);
+        var userId = User.GetUserId(); //get user id by token
+        user.Id= userId; //put id in User  model
+        await _userService.UpdateUserAsync(_mapper.Map<UserModel>(user), cancellationToken); //searching and updating process
 
         _logger.LogInformation("User was updated");
 
@@ -60,30 +60,30 @@ public class UserController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetUser([FromBody] ProfileGetViewModel user,
-      CancellationToken cancellationToken)
+    public async Task<IActionResult> GetUser(CancellationToken cancellationToken)
     {
          _logger.LogInformation("Get user");
-        //var userId = User.GetUserId();
 
-        await _userService.UpdateUserAsync(_mapper.Map<UserModel>(user), cancellationToken);
+        var userId = User.GetUserId(); //get user id by token
+        var user = await _userService.GetById(userId, cancellationToken); //find user by id
+        var viewModel = _mapper.Map<UserGetViewModel>(user); // put user in userViewModel
 
-        _logger.LogInformation("User was updated");
+        _logger.LogInformation("Get user");
 
-        return Ok(user);
+        return Ok(viewModel);
     }
 
     [HttpDelete]
     public async Task<IActionResult> DeleteUser()
     {
-        //_logger.LogInformation("Start to create user");
-        var userId = User.GetUserId();
-       // await _userService.DeleteUserAsync(userId, cancellationToken);
-        await _userService.DeleteUserAsync(_mapper.Map<UserModel>(userId));
+        _logger.LogInformation("Start to delete user");
+
+        var userId = User.GetUserId(); //get user id by token
+        await _userService.DeleteUserAsync(User.GetUserId()); //delete user by id
 
         _logger.LogInformation("User was deleted");
 
-        return Ok();
+        return Ok("User was deleted");
     }
 
     [AllowAnonymous]

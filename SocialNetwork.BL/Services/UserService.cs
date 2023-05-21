@@ -78,7 +78,6 @@ public class UserService : IUserService
         userDb.Password = string.IsNullOrEmpty(user.Password)
             ? userDb.Password
             : PasswordHelper.HashPassword(user.Password);
-        userDb.Login = string.IsNullOrEmpty(user.Login) ? userDb.Login : user.Login;
 
         foreach (var propertyMap in ReflectionHelper.WidgetUtil<ProfileModel, Profile>.PropertyMap)
         {
@@ -100,14 +99,14 @@ public class UserService : IUserService
         return userModel;
     }
 
-    public async Task DeleteUserAsync(UserModel user, CancellationToken cancellationToken = default)
+    public async Task DeleteUserAsync(int id, CancellationToken cancellationToken = default)
     {
-        var userDb = await _userRepository.GetById(user.Id, cancellationToken);
+        var userDb = await _userRepository.GetById(id, cancellationToken);
 
         if (userDb is null)
         {
-            _logger.LogError("User with this {Id} not found", user.Id);
-            throw new UserNotFoundException($"User with Id '{user.Id}' not found");
+            _logger.LogError("User with this {Id} not found", id);
+            throw new UserNotFoundException($"User with Id '{id}' not found");
         }
 
         await _userRepository.DeleteUserAsync(userDb, cancellationToken);

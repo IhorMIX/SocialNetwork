@@ -10,11 +10,13 @@ namespace SocialNetwork.Web.MapperConfiguration
         public MapperModelsConfig()
         {
             CreateMap<UserCreateViewModel, UserModel>();
-            CreateMap<UserUpdateViewModel, UserModel>(); //created map model based on UserUpdateViewModel
             CreateMap<ProfileCreateViewModel, ProfileModel>();  
-            CreateMap<ProfileUpdateViewModel, ProfileModel>(); //created map model based on ProfileUpdateViewModel
-            CreateMap<ProfileGetViewModel, ProfileModel>(); //created map model based on ProfileGetViewModel
 
+            CreateMap<ProfileUpdateViewModel, ProfileModel>(); //created map model based on ProfileUpdateViewModel
+            CreateMap<UserUpdateViewModel, UserModel>(); //created map model based on UserUpdateViewModel
+
+            CreateMap<ProfileModel, ProfileGetViewModel>(); //created map model based on ProfileGetViewModel
+            CreateMap<UserModel, UserGetViewModel>(); //created map model based on UserGetViewModel
 
             CreateMap<UserModel, User>()
                 .ForMember(dest => dest.ProfileId, opt => opt.Ignore())
