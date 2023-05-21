@@ -11,6 +11,7 @@ using SocialNetwork.DAL.Repository.Interfaces;
 using System.Data;
 using SocialNetwork.BL.Models.Enums;
 using Profile = SocialNetwork.DAL.Entity.Profile;
+using Microsoft.IdentityModel.Tokens;
 
 namespace SocialNetwork.BL.Services;
 
@@ -65,20 +66,19 @@ public class UserService : IUserService
         await _userRepository.CreateUser(userDbModel, cancellationToken);
     }
 
-    public async Task<UserModel> UpdateUserAsync(UserModel user, CancellationToken cancellationToken = default)
+    public async Task<UserModel> UpdateUserAsync(int id, UserModel user, CancellationToken cancellationToken = default)
     {
-        var userDb = await _userRepository.GetById(user.Id, cancellationToken);
+        var userDb = await _userRepository.GetById(id, cancellationToken);
 
         if (userDb is null)
         {
-            _logger.LogError("User with this {Id} not found", user.Id);
-            throw new UserNotFoundException($"User with Id '{user.Id}' not found");
+            _logger.LogError("User with this {Id} not found", id);
+            throw new UserNotFoundException($"User with Id '{id}' not found");
         }
 
         userDb.Password = string.IsNullOrEmpty(user.Password)
             ? userDb.Password
             : PasswordHelper.HashPassword(user.Password);
-        userDb.Login = string.IsNullOrEmpty(user.Login) ? userDb.Login : user.Login;
 
         foreach (var propertyMap in ReflectionHelper.WidgetUtil<ProfileModel, Profile>.PropertyMap)
         {
@@ -88,7 +88,8 @@ public class UserService : IUserService
             var userSourceValue = userProperty.GetValue(user.Profile);
             var userTargetValue = userDbProperty.GetValue(userDb.Profile);
 
-            if (userSourceValue != null && !userSourceValue.Equals(userTargetValue))
+            if (userSourceValue != null && userSourceValue != "" && !userSourceValue.Equals(userTargetValue))
+              
             {
                 userDbProperty.SetValue(userDb.Profile, userSourceValue);
             }
@@ -99,14 +100,14 @@ public class UserService : IUserService
         return userModel;
     }
 
-    public async Task DeleteUserAsync(UserModel user, CancellationToken cancellationToken = default)
+    public async Task DeleteUserAsync(int id, CancellationToken cancellationToken = default)
     {
-        var userDb = await _userRepository.GetById(user.Id, cancellationToken);
+        var userDb = await _userRepository.GetById(id, cancellationToken);
 
         if (userDb is null)
         {
-            _logger.LogError("User with this {Id} not found", user.Id);
-            throw new UserNotFoundException($"User with Id '{user.Id}' not found");
+            _logger.LogError("User with this {Id} not found", id);
+            throw new UserNotFoundException($"User with Id '{id}' not found");
         }
 
         await _userRepository.DeleteUserAsync(userDb, cancellationToken);
