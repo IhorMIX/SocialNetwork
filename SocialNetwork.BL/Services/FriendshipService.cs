@@ -13,12 +13,14 @@ namespace SocialNetwork.BL.Services;
 public class FriendshipService : IFriendshipService
 {
     private readonly IUserRepository _userRepository;
+    private readonly IUserService _userService;
     private readonly IFriendshipRepository _friendshipRepository;
     private readonly ILogger<FriendshipService> _logger;
     private readonly IMapper _mapper;
 
-    public FriendshipService(IUserRepository userRepository, IFriendshipRepository friendshipRepository, ILogger<FriendshipService> logger, IMapper mapper)
+    public FriendshipService(IUserService userService, IUserRepository userRepository, IFriendshipRepository friendshipRepository, ILogger<FriendshipService> logger, IMapper mapper)
     {
+        _userService = userService;
         _userRepository = userRepository;
         _friendshipRepository = friendshipRepository;
         _logger = logger;
@@ -38,13 +40,27 @@ public class FriendshipService : IFriendshipService
         return friendModel;
     }
 
-    public async Task AddFriendshipAsync(UserModel? userModel, UserModel? user2Model, CancellationToken cancellationToken = default)
+    public async Task AddFriendshipAsync(int userId, string friendEmail, CancellationToken cancellationToken = default)
     {
+        var userModel = await _userService.GetByIdAsync(userId);
+        var user2Model = await _userService.GetUserByEmail(friendEmail);
+
+        if (userModel is null)
+        {
+            _logger.LogError("User with this Id {Id} not found", userId);
+            throw new FriendNotFoundException($"Friends not found");
+        }
+        if (user2Model is null)
+        {
+            _logger.LogError("User with this email {friendEmail} not found", friendEmail);
+            throw new FriendNotFoundException($"Friends not found");
+        }
+        
         var friendship = new FriendshipModel()
         {
-            UserId = userModel.Id,
-            FriendId = user2Model.Id,
-            UserModel = userModel,
+            UserId = userModel!.Id,
+            FriendId = user2Model!.Id,
+            UserModel = _mapper.Map<UserModel>(userModel),
             FriendUserModel = user2Model
         };
         
