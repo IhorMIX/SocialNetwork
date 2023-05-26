@@ -28,20 +28,19 @@ public class FriendshipController : ControllerBase
     
     
     [HttpPost]
-    [Route("AddFriend")]
-    public async Task<IActionResult> CreateFriendship([FromBody]AddFriendModel model, CancellationToken cancellationToken)
+    public async Task<IActionResult> CreateFriendship([FromQuery] int FriendID, CancellationToken cancellationToken)
     {
         var userId = User.GetUserId();
-        await _friendshipService.AddFriendshipAsync(userId, model.Email, cancellationToken);
+        await _friendshipService.AddFriendshipAsync(userId, FriendID, cancellationToken);
         return Ok();
     }
     
-    [HttpPost]
-    [Route("DelFriend")]
-    public async Task<IActionResult> DelFriendship([FromBody]AddFriendModel model, CancellationToken cancellationToken)
+    [HttpDelete]
+    public async Task<IActionResult> DelFriendship([FromQuery] int FriendID, CancellationToken cancellationToken)
     {
         var userId = User.GetUserId();
-        await _friendshipService.DeleteFriendshipAsync(userId, model.Email, cancellationToken);
+        await _friendshipService.DeleteFriendshipAsync(userId, FriendID, cancellationToken);
         return Ok();
     }
 }
+

@@ -40,10 +40,10 @@ public class FriendshipService : IFriendshipService
         return friendModel;
     }
 
-    public async Task AddFriendshipAsync(int userId, string friendEmail, CancellationToken cancellationToken = default)
+    public async Task AddFriendshipAsync(int userId, int firendId, CancellationToken cancellationToken = default)
     {
         var userModel = await _userService.GetByIdAsync(userId);
-        var user2Model = await _userService.GetUserByEmail(friendEmail);
+        var user2Model = await _userService.GetByIdAsync(firendId);
 
         if (userModel is null)
         {
@@ -52,7 +52,7 @@ public class FriendshipService : IFriendshipService
         }
         if (user2Model is null)
         {
-            _logger.LogError("User with this email {friendEmail} not found", friendEmail);
+            _logger.LogError("User with this email {firendId} not found", firendId);
             throw new FriendNotFoundException($"Friends not found");
         }
         
@@ -67,10 +67,11 @@ public class FriendshipService : IFriendshipService
         await _friendshipRepository.CreateFriendshipAsync(_mapper.Map<Friendship>(friendship), cancellationToken);
     }
 
-    public async Task DeleteFriendshipAsync(int userId, string friendEmail, CancellationToken cancellationToken = default)
+    // delete by ID !!!!!!!!!
+    public async Task DeleteFriendshipAsync(int userId, int firendId, CancellationToken cancellationToken = default)
     {
         var userModel = await _userService.GetByIdAsync(userId);
-        var user2Model = await _userService.GetUserByEmail(friendEmail);
+        var user2Model = await _userService.GetByIdAsync(firendId);
         
         var userDb = await _userRepository.GetByIdAsync(userModel.Id, cancellationToken);
         var user2Db = await _userRepository.GetByIdAsync(user2Model.Id, cancellationToken);

@@ -34,21 +34,7 @@ public class FriendshipRepository : IFriendshipRepository
         await _socialNetworkDbContext.Friends.AddAsync(friendship, cancellationToken);
         await _socialNetworkDbContext.SaveChangesAsync(cancellationToken);
     }
-
-    public async Task<Friendship?> GetByFriendIdsAsync(Friendship friendship, CancellationToken cancellationToken = default)
-    {
-        
-        //looking for friend and chet that it can be in user and in friend
-        //because user could add friend and his friend could add him, it will be different records
-        return await _socialNetworkDbContext.Friends
-            .Include(f => f.FriendUser)
-            .Include(f => f.User)
-            .FirstOrDefaultAsync(f => 
-                    (f.UserId == friendship.UserId || f.FriendId == friendship.UserId) &&
-                    (f.UserId == friendship.FriendId || f.FriendId == friendship.FriendId),
-                cancellationToken);
-    }
-
+    
     public async Task<IEnumerable<User>> GetAllFriendsAsync(int id, CancellationToken cancellationToken = default)
     {
         var userFriends = await _socialNetworkDbContext.Friends
@@ -57,6 +43,7 @@ public class FriendshipRepository : IFriendshipRepository
             .Select(f => f.FriendUser)
             .ToListAsync(cancellationToken);
         
+        // only userFriends check!!!!!!!!!!!!!
         var friendFriends = await _socialNetworkDbContext.Friends
             .Include(f => f.User)
             .Where(f => f.FriendId == id)
@@ -65,14 +52,16 @@ public class FriendshipRepository : IFriendshipRepository
         
         var allFriends = userFriends.Concat(friendFriends).ToList();
         return allFriends;
-        
-        var combinedFriends = await _socialNetworkDbContext.Friends
-            .Where(f => f.UserId == id || f.FriendId == id)
-            .Select(f => f.UserId == id ? f.FriendUser : f.User)
-            .ToListAsync(cancellationToken);
-        return combinedFriends;
-    }
 
+        //_socialNetworkDbContext.Users.Include(i => i.Friends);
+
+        // var combinedFriends = await _socialNetworkDbContext.Friends
+        //     .Where(f => f.UserId == id || f.FriendId == id)
+        //     .Select(f => f.UserId == id ? f.FriendUser : f.User)
+        //     .ToListAsync(cancellationToken);
+        // return combinedFriends;
+    }
+    
     public async Task<bool> DeleteFriendsAsync(Friendship friendship, CancellationToken cancellationToken = default)
     {
         
@@ -84,7 +73,7 @@ public class FriendshipRepository : IFriendshipRepository
             .ToListAsync(cancellationToken);
 
         //deleting this records if we found somth
-        if(friendsToRemove != null && friendsToRemove.Count > 0)
+        if(friendsToRemove.Count > 0)
         {
             _socialNetworkDbContext.Friends.RemoveRange(friendsToRemove);
             await _socialNetworkDbContext.SaveChangesAsync(cancellationToken);

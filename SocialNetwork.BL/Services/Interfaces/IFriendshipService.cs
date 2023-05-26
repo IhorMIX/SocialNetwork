@@ -5,8 +5,8 @@ namespace SocialNetwork.BL.Services.Interfaces;
 
 public interface IFriendshipService : IBaseService<FriendshipModel>
 {
-    Task AddFriendshipAsync(int userId, string friendEmail, CancellationToken cancellationToken = default);
-    Task DeleteFriendshipAsync(int userId, string friendEmail, CancellationToken cancellationToken = default);
+    Task AddFriendshipAsync(int userId, int firendId, CancellationToken cancellationToken = default);
+    Task DeleteFriendshipAsync(int userId, int firendId, CancellationToken cancellationToken = default);
 
     Task<IEnumerable<User>> GetFriendship(UserModel userModel, CancellationToken cancellationToken = default);
     

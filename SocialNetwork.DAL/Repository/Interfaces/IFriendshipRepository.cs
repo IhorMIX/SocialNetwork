@@ -8,8 +8,6 @@ public interface IFriendshipRepository : IBasicRepository<Friendship>
 
     Task CreateFriendshipAsync(Friendship friendship, CancellationToken cancellationToken = default);
     
-    Task<Friendship?> GetByFriendIdsAsync(Friendship friendship, CancellationToken cancellationToken = default);
-
     Task<IEnumerable<User>> GetAllFriendsAsync(int id, CancellationToken cancellationToken = default);
     
 }
