@@ -1,7 +1,9 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using SocialNetwork.BL.Models;
 using SocialNetwork.BL.Services.Interfaces;
+using SocialNetwork.DAL.Entity;
 using SocialNetwork.Web.Extensions;
 using SocialNetwork.Web.Helpers;
 using SocialNetwork.Web.Models;
@@ -41,6 +43,24 @@ public class FriendshipController : ControllerBase
         var userId = User.GetUserId();
         await _friendshipService.DeleteFriendshipAsync(userId, FriendID, cancellationToken);
         return Ok();
+    }
+    
+    [HttpGet("NameSurname")]
+    public async Task<IActionResult> GetFriendshipByNameSurname([FromQuery] string nameSurname, CancellationToken cancellationToken)
+    {
+        var userId = User.GetUserId();
+        var userModelFriends = await _friendshipService.FindFriendByNameSurname(userId, nameSurname, cancellationToken);
+        //var friends = _mapper.Map<IEnumerable<FriendViewModel>>(userModelFriends);
+        return Ok(userModelFriends);
+    }
+    
+    [HttpGet("email")]
+    public async Task<IActionResult> GetFriendshipByEmail([FromQuery] string email, CancellationToken cancellationToken)
+    {
+        var userId = User.GetUserId();
+        var userModelFriends = await _friendshipService.FindFriendByEmail(userId, email, cancellationToken);
+        var friend = _mapper.Map<FriendViewModel>(userModelFriends);
+        return Ok(friend);
     }
 }
 
