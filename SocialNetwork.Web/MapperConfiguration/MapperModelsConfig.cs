@@ -11,13 +11,22 @@ namespace SocialNetwork.Web.MapperConfiguration
         {
             CreateMap<UserCreateViewModel, UserModel>();
             CreateMap<ProfileCreateViewModel, ProfileModel>();
-            
+            CreateMap<FriendshipModel, Friendship>().ReverseMap();
+            CreateMap<ProfileFriendViewModel, ProfileModel>()
+                .ForMember(dest =>dest.Birthday, opt=> opt.Ignore())
+                .ForMember(dest =>dest.Description, opt=> opt.Ignore())
+                .ReverseMap();
+            CreateMap<FriendViewModel, UserModel>()
+                .ForMember(dest =>dest.Login, opt=> opt.Ignore())
+                .ForMember(dest =>dest.Password, opt=> opt.Ignore())
+                .ForMember(dest =>dest.IsEnabled, opt=> opt.Ignore())
+                .ForMember(dest =>dest.AuthorizationInfo, opt=> opt.Ignore())
+                .ForMember(dest =>dest.Friends, opt=> opt.Ignore())
+                .ReverseMap();
             CreateMap<UserModel, User>()
                 .ForMember(dest => dest.ProfileId, opt => opt.Ignore())
                 .ForMember(dest => dest.AuthorizationInfoId, opt => opt.Ignore())
                 .ReverseMap();
-
-            CreateMap<FriendshipModel, Friendship>().ReverseMap();
             
             CreateMap<AuthorizationInfoModel, AuthorizationInfo>().ReverseMap();
             CreateMap<ProfileModel, SocialNetwork.DAL.Entity.Profile>().ReverseMap();
