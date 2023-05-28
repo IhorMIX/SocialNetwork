@@ -149,15 +149,15 @@ public class FriendServiceTest : DefaultServiceTest<IFriendshipService, Friendsh
         await Service.AddFriendshipAsync(user1!.Id,user2!.Id);
         
         Assert.That(
-            Service.GetFriendship(await userService.GetUserByLogin("User123")), 
+            Service.GetAllFriends(user1.Id), 
             Is.Not.EqualTo(null));
         
-        var friendList =await Service.GetFriendship(await userService.GetUserByLogin("User123"));
+        var friendList =await Service.GetAllFriends(user1.Id);
         Assert.That(friendList.Count() == 2);
     }
     
     [Test]
-    public async Task GetFriendsByEmail_UserFound_ReturnFriend()
+    public async Task GetFriendByEmail_UserFound_ReturnFriend()
     {
         var user1 = new UserModel()
         {
@@ -194,15 +194,63 @@ public class FriendServiceTest : DefaultServiceTest<IFriendshipService, Friendsh
         await Service.AddFriendshipAsync(user1!.Id,user2!.Id);
         
         Assert.That(
-            Service.FindFriendByEmail(await userService.GetUserByLogin("User111"), "USER333@gmail.com"), 
+            Service.FindFriendByEmail(user2.Id, "USER333@gmail.com"), 
             Is.Not.EqualTo(null));
         
         var Friend = await Service.FindFriendByEmail(
-            await userService.GetUserByLogin("User111"),"USER333@gmail.com");
+            user2.Id,"USER333@gmail.com");
         
         var friendUser = await userService.GetUserByLogin("User333");
         
         Assert.That(Friend.Profile.Email == friendUser?.Profile.Email);
         Assert.That(Friend.Login == friendUser?.Login);
+    }
+    
+    [Test]
+    public async Task GetAllFriendsByNameSurname_UserFound_ReturnFriends()
+    {
+        var user1 = new UserModel()
+        {
+            Login = "UserNameSurname1",
+            Password = "TestPassword",
+            Profile = new ProfileModel()
+            {
+                Birthday = DateTime.Now,
+                Description = "sdsdds",
+                Email = "1NameSurname@gmail.com",
+                Name = "Name1",
+                Sex = Sex.Male,
+                Surname = "Surname1",
+                AvatarImage = "Image"
+            }
+        };
+        var userService = ServiceProvider.GetRequiredService<IUserService>();
+        await userService.CreateUserAsync(user1);
+
+        for (int i = 2; i < 12; i++)
+        {
+            user1.Login = "UserNameSurname" + i;
+            user1.Profile.Email = i + "USER@gmail.com";
+            user1.Profile.Surname = "Surname" + i;
+            user1.Profile.Name = "Name" + i;
+            await userService.CreateUserAsync(user1);
+        }
+
+        for (int i = 2; i < 12; i++)
+        {
+            var tempuser = await userService.GetUserByLogin("UserNameSurname1");
+            var tempuser2 = await userService.GetUserByLogin("UserNameSurname" + i);
+            await Service.AddFriendshipAsync(tempuser!.Id,tempuser2!.Id);
+        }
+        
+        var user = await userService.GetUserByLogin("UserNameSurname1");
+        Assert.That(
+            Service.GetAllFriends(user.Id), 
+            Is.Not.EqualTo(null));
+        var friendList = await Service.GetAllFriends(user.Id);
+        Assert.That(friendList.Count() == 10);
+        
+        friendList = await Service.FindFriendByNameSurname(user.Id, "Name ");
+        Assert.That(friendList.Count() == 10);
     }
 }
