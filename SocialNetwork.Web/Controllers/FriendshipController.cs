@@ -7,6 +7,8 @@ using SocialNetwork.DAL.Entity;
 using SocialNetwork.Web.Extensions;
 using SocialNetwork.Web.Helpers;
 using SocialNetwork.Web.Models;
+using System.Net.Mail;
+using System.Runtime.CompilerServices;
 
 namespace SocialNetwork.Web.Controllers;
 
@@ -45,22 +47,28 @@ public class FriendshipController : ControllerBase
         return Ok();
     }
     
-    [HttpGet("NameSurname")]
-    public async Task<IActionResult> GetFriendshipByNameSurname([FromQuery] string nameSurname, CancellationToken cancellationToken)
+    [HttpGet] 
+    public async Task<IActionResult> GetFriendship([FromQuery] string? request, CancellationToken cancellationToken)
     {
         var userId = User.GetUserId();
-        var userModelFriends = await _friendshipService.FindFriendByNameSurname(userId, nameSurname, cancellationToken);
-        //var friends = _mapper.Map<IEnumerable<FriendViewModel>>(userModelFriends);
-        return Ok(userModelFriends);
-    }
-    
-    [HttpGet("email")]
-    public async Task<IActionResult> GetFriendshipByEmail([FromQuery] string email, CancellationToken cancellationToken)
-    {
-        var userId = User.GetUserId();
-        var userModelFriends = await _friendshipService.FindFriendByEmail(userId, email, cancellationToken);
-        var friend = _mapper.Map<FriendViewModel>(userModelFriends);
-        return Ok(friend);
+        if(string.IsNullOrEmpty(request))
+        {
+            var userModelFriends = await _friendshipService.GetAllFriends(userId, cancellationToken);
+            var friend = _mapper.Map<IEnumerable<FriendViewModel>>(userModelFriends);
+            return Ok(friend);
+        }
+        if (request.Contains('@'))
+        {
+            var userModelFriends = await _friendshipService.FindFriendByEmail(userId, request, cancellationToken);
+            var friend = _mapper.Map<FriendViewModel>(userModelFriends);
+            return Ok(friend);
+        }
+        else
+        {
+            var userModelFriends = await _friendshipService.FindFriendByNameSurname(userId, request, cancellationToken);
+            var friend = _mapper.Map<IEnumerable<FriendViewModel>>(userModelFriends);
+            return Ok(friend);
+        }
     }
 }
 
