@@ -17,12 +17,14 @@ namespace SocialNetwork.Web.MapperConfiguration
                 .ForMember(dest =>dest.Description, opt=> opt.Ignore())
                 .ReverseMap();
             CreateMap<FriendViewModel, UserModel>()
+                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.id))
                 .ForMember(dest =>dest.Login, opt=> opt.Ignore())
                 .ForMember(dest =>dest.Password, opt=> opt.Ignore())
                 .ForMember(dest =>dest.IsEnabled, opt=> opt.Ignore())
                 .ForMember(dest =>dest.AuthorizationInfo, opt=> opt.Ignore())
-                .ForMember(dest =>dest.Friends, opt=> opt.Ignore())
-                .ReverseMap();
+                .ReverseMap()
+                .ForMember(dest => dest.id, opt => opt.MapFrom(src => src.Id));
+
             CreateMap<UserModel, User>()
                 .ForMember(dest => dest.ProfileId, opt => opt.Ignore())
                 .ForMember(dest => dest.AuthorizationInfoId, opt => opt.Ignore())
