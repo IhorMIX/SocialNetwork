@@ -35,33 +35,6 @@ public class FriendshipRepository : IFriendshipRepository
         await _socialNetworkDbContext.SaveChangesAsync(cancellationToken);
     }
     
-    public async Task<IEnumerable<User>> GetAllFriendsAsync(int id, CancellationToken cancellationToken = default)
-    {
-        var userFriends = await _socialNetworkDbContext.Friends
-            .Include(f => f.FriendUser)
-            .Where(f => f.UserId == id)
-            .Select(f => f.FriendUser)
-            .ToListAsync(cancellationToken);
-        
-        // only userFriends check!!!!!!!!!!!!!
-        var friendFriends = await _socialNetworkDbContext.Friends
-            .Include(f => f.User)
-            .Where(f => f.FriendId == id)
-            .Select(f => f.User)
-            .ToListAsync(cancellationToken);
-        
-        var allFriends = userFriends.Concat(friendFriends).ToList();
-        return allFriends;
-
-        //_socialNetworkDbContext.Users.Include(i => i.Friends);
-
-        // var combinedFriends = await _socialNetworkDbContext.Friends
-        //     .Where(f => f.UserId == id || f.FriendId == id)
-        //     .Select(f => f.UserId == id ? f.FriendUser : f.User)
-        //     .ToListAsync(cancellationToken);
-        // return combinedFriends;
-    }
-    
     public async Task<bool> DeleteFriendsAsync(Friendship friendship, CancellationToken cancellationToken = default)
     {
         
@@ -82,4 +55,21 @@ public class FriendshipRepository : IFriendshipRepository
 
         return false;
     }
+    
+    public IQueryable<User> GetAllFriends(int id)
+    {
+        var friends = _socialNetworkDbContext.Friends
+            .Include(f => f.FriendUser.Profile)
+            .Include(f => f.User.Profile)
+            .Where(f => f.UserId == id || f.FriendId == id)
+            .Select(f => f.UserId == id ? f.FriendUser : f.User)
+            .AsQueryable();
+        // var combinedFriends2 = _socialNetworkDbContext.Users
+        //     .Include(f => f.Friends)
+        //     .Where(f => f.Id == id)
+        //     .SelectMany(f => f.Friends!.Select(i=>i.FriendUser))
+        //     .ToListAsync().Result;
+        return friends;
+    }
+
 }
