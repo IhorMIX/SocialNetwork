@@ -56,20 +56,15 @@ public class FriendshipRepository : IFriendshipRepository
         return false;
     }
     
-    public IQueryable<User> GetAllFriends(int id)
+    
+    public IQueryable<Friendship> GetAllFriends(int id)
     {
-        var friends = _socialNetworkDbContext.Friends
-            .Include(f => f.FriendUser.Profile)
+        var query = _socialNetworkDbContext.Friends
             .Include(f => f.User.Profile)
-            .Where(f => f.UserId == id || f.FriendId == id)
-            .Select(f => f.UserId == id ? f.FriendUser : f.User)
-            .AsQueryable();
-        // var combinedFriends2 = _socialNetworkDbContext.Users
-        //     .Include(f => f.Friends)
-        //     .Where(f => f.Id == id)
-        //     .SelectMany(f => f.Friends!.Select(i=>i.FriendUser))
-        //     .ToListAsync().Result;
-        return friends;
+            .Include(f => f.FriendUser.Profile)
+            .Where(f => f.UserId == id || f.FriendId == id);
+    
+        return query;
     }
 
 }

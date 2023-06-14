@@ -8,5 +8,5 @@ public interface IFriendshipRepository : IBasicRepository<Friendship>
 
     Task CreateFriendshipAsync(Friendship friendship, CancellationToken cancellationToken = default);
     
-    IQueryable<User> GetAllFriends(int id);
+    IQueryable<Friendship> GetAllFriends(int id);
 }
