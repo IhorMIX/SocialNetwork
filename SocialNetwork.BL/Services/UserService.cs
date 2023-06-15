@@ -69,7 +69,7 @@ public class UserService : IUserService
     public async Task<UserModel> UpdateUserAsync(int id, UserModel user, CancellationToken cancellationToken = default)
     {
 
-        var userDb = await _userRepository.GetByIdAsync(user.Id, cancellationToken);
+        var userDb = await _userRepository.GetByIdAsync(id, cancellationToken);
 
         if (userDb is null)
         {

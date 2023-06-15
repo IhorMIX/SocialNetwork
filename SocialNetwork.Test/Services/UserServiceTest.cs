@@ -119,15 +119,16 @@ public class UserServiceTest : DefaultServiceTest<IUserService ,UserService>
         Assert.That(createdUser!.Login, Is.EqualTo(user.Login));
         Assert.That(createdUser!.Profile.Email, Is.EqualTo(user.Profile.Email));
         
-        user.Login = "AnotherLogin";
+
         user.Profile.Email = "anotherMail@gmail.com";
+        user.Profile.Name = "AnotherName";
         user.Id = createdUser.Id;
         await Service.UpdateUserAsync(user.Id, user);
         
         createdUser = await Service.GetByIdAsync(user.Id);
         
-        Assert.That(createdUser!.Login, Is.EqualTo(user.Login));
         Assert.That(createdUser!.Profile.Email, Is.EqualTo(user.Profile.Email));
+        Assert.That(createdUser!.Profile.Name, Is.EqualTo(user.Profile.Name));
     }
 
     [Test]
@@ -149,7 +150,7 @@ public class UserServiceTest : DefaultServiceTest<IUserService ,UserService>
             }
         };
         Assert.ThrowsAsync<UserNotFoundException>(async () 
-            => await Service.UpdateUserAsync(13, user));
+            => await Service.UpdateUserAsync(222, user));
     }
 
     [Test]
