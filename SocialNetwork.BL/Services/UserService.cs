@@ -90,7 +90,6 @@ public class UserService : IUserService
             var userTargetValue = userDbProperty.GetValue(userDb.Profile);
 
             if (userSourceValue != null && userSourceValue != "" && !userSourceValue.Equals(userTargetValue))
-              
             {
                 userDbProperty.SetValue(userDb.Profile, userSourceValue);
             }
@@ -104,7 +103,7 @@ public class UserService : IUserService
     public async Task DeleteUserAsync(int id, CancellationToken cancellationToken = default)
     {
 
-        var userDb = await _userRepository.GetByIdAsync(user.Id, cancellationToken);
+        var userDb = await _userRepository.GetByIdAsync(id, cancellationToken);
 
         if (userDb is null)
         {

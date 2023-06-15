@@ -63,7 +63,7 @@ public class UserController : ControllerBase
          _logger.LogInformation("Get user");
 
         var userId = User.GetUserId(); //get user id by token
-        var user = await _userService.GetById(userId, cancellationToken); //find user by id
+        var user = await _userService.GetByIdAsync(userId, cancellationToken); //find user by id
         var viewModel = _mapper.Map<UserViewModel>(user); // put user in userViewModel
 
         _logger.LogInformation("Get user");
