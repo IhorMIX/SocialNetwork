@@ -138,20 +138,20 @@ public class FriendshipService : IFriendshipService
         if (parts.Length == 1)
         {
             string name = parts[0].ToLower();
-            matchingUsers = _friendshipRepository.GetAllFriends(userDb.Id)
+            matchingUsers = await _friendshipRepository.GetAllFriends(userDb.Id)
                 .Where(f => f.User.Profile.Name.ToLower().StartsWith(name)
                             || f.User.Profile.Surname.ToLower().StartsWith(name)
                             || f.FriendUser.Profile.Name.ToLower().StartsWith(name)
                             || f.FriendUser.Profile.Surname.ToLower().StartsWith(name))
                 .Select(f => f.UserId == userDb.Id ? f.FriendUser : f.User)
-                .ToList();
+                .ToListAsync(cancellationToken);
         }
         else if (parts.Length == 2)
         {
             string firstName = parts[0].ToLower();
             string lastName = parts[1].ToLower();
 
-            matchingUsers = _friendshipRepository.GetAllFriends(userDb.Id)
+            matchingUsers = await _friendshipRepository.GetAllFriends(userDb.Id)
                 .Where(f => ((f.User.Profile.Name.ToLower().StartsWith(firstName)
                               && f.User.Profile.Surname.ToLower().StartsWith(lastName))
                              || f.User.Profile.Name.ToLower().StartsWith(lastName)
@@ -162,7 +162,7 @@ public class FriendshipService : IFriendshipService
                             || f.FriendUser.Profile.Name.ToLower().StartsWith(lastName)
                             && f.FriendUser.Profile.Surname.ToLower().StartsWith(firstName))
                 .Select(f => f.UserId == userDb.Id ? f.FriendUser : f.User)
-                .ToList();
+                .ToListAsync(cancellationToken);
         }
 
         var friends = _mapper.Map<IEnumerable<UserModel>>(matchingUsers);
