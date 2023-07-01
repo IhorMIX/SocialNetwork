@@ -4,5 +4,9 @@ namespace SocialNetwork.DAL.Repository.Interfaces;
 
 public interface IFriendRequestRepository : IBasicRepository<FriendRequest>
 {
+    Task<bool> DeleteFriendRequestAsync(FriendRequest friendRequest, CancellationToken cancellationToken = default);
+
+    Task CreateFriendRequestAsync(FriendRequest friendRequest, CancellationToken cancellationToken = default);
     
+    IQueryable<FriendRequest> GetAllFriendRequests(int id);
 }
