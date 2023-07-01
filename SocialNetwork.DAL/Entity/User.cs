@@ -1,4 +1,5 @@
-﻿using SocialNetwork.DAL.Entity.Enums;
+﻿using Azure.Core;
+using SocialNetwork.DAL.Entity.Enums;
 
 namespace SocialNetwork.DAL.Entity;
 
@@ -19,6 +20,8 @@ public class User : BaseEntity
     public Profile Profile { get; set; }
 
     public AuthorizationInfo? AuthorizationInfo { get; set; }
-    
+
     public IEnumerable<Friendship>? Friends { get; set; }
+    
+    public IEnumerable<FriendRequest>? Requests { get; set; }
 }

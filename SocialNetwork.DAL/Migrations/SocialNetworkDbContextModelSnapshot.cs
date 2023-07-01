@@ -51,6 +51,24 @@ namespace SocialNetwork.DAL.Migrations
                     b.ToTable("AuthorizationInfo");
                 });
 
+            modelBuilder.Entity("SocialNetwork.DAL.Entity.FriendRequest", b =>
+                {
+                    b.Property<int>("SenderId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ReceiverId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Id")
+                        .HasColumnType("int");
+
+                    b.HasKey("SenderId", "ReceiverId");
+
+                    b.HasIndex("ReceiverId");
+
+                    b.ToTable("FriendRequests");
+                });
+
             modelBuilder.Entity("SocialNetwork.DAL.Entity.Friendship", b =>
                 {
                     b.Property<int>("UserId")
@@ -158,6 +176,25 @@ namespace SocialNetwork.DAL.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("SocialNetwork.DAL.Entity.FriendRequest", b =>
+                {
+                    b.HasOne("SocialNetwork.DAL.Entity.User", "Receiver")
+                        .WithMany()
+                        .HasForeignKey("ReceiverId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("SocialNetwork.DAL.Entity.User", "Sender")
+                        .WithMany("Requests")
+                        .HasForeignKey("SenderId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Receiver");
+
+                    b.Navigation("Sender");
+                });
+
             modelBuilder.Entity("SocialNetwork.DAL.Entity.Friendship", b =>
                 {
                     b.HasOne("SocialNetwork.DAL.Entity.User", "FriendUser")
@@ -196,6 +233,8 @@ namespace SocialNetwork.DAL.Migrations
 
                     b.Navigation("Profile")
                         .IsRequired();
+
+                    b.Navigation("Requests");
                 });
 #pragma warning restore 612, 618
         }

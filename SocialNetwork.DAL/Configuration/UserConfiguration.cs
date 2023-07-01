@@ -9,7 +9,7 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
     public void Configure(EntityTypeBuilder<User> builder)
     {
         builder.HasKey(i => i.Id);
-
+        //need we do ".OnDelete(DeleteBehavior.Restrict)"?
         builder.HasOne(i => i.Profile)
             .WithOne(i => i.User)
             .HasForeignKey<Profile>(i => i.UserId);
@@ -21,7 +21,11 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         builder.HasMany(u => u.Friends)
             .WithOne(f => f.User)
             .HasForeignKey(f => f.UserId)
-            .OnDelete(DeleteBehavior.Restrict);
+            .OnDelete(DeleteBehavior.Restrict);  
         
+        builder.HasMany(u => u.Requests)
+            .WithOne(f => f.Sender)
+            .HasForeignKey(f => f.SenderId)
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }
