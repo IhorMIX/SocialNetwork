@@ -89,20 +89,19 @@ public class UserController : ControllerBase
     {
         var user = await _userService.GetUserByLoginAndPasswordAsync(model.Login, model.Password, cancellationToken);
         var token = _tokenHelper.GetToken(user!.Id);
-        
+        var refreshToken = TokenHelper.GenerateRefreshToken(token);
         DateTime? expiredDate = model.IsNeedToRemember ? null : DateTime.Now;
         
-
         await _userService.AddAuthorizationValueAsync(
             user, 
-            TokenHelper.GenerateRefreshToken(token), 
+            refreshToken, 
             LoginType.LocalSystem, 
             expiredDate, 
             cancellationToken);
 
         _logger.LogInformation("User was logined");
 
-        return Ok(token);
+        return Ok(new { accessKey = token, refresh_token = refreshToken, expiredDate = expiredDate });
     }
    
     [AllowAnonymous]
@@ -113,7 +112,7 @@ public class UserController : ControllerBase
         refreshToken = refreshToken.Replace(" ", "+"); 
         var user = await _userService.GetUserByRefreshTokenAsync(refreshToken, cancellationToken);
         var token = _tokenHelper.GetToken(user.Id);
-        return Ok(token);
+        return Ok(new { accessKey = token, refresh_token = refreshToken, expiredDate = user.AuthorizationInfo.ExpiredDate });
     }
 
    
