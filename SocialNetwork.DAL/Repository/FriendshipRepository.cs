@@ -38,17 +38,17 @@ public class FriendshipRepository : IFriendshipRepository
     public async Task<bool> DeleteFriendsAsync(Friendship friendship, CancellationToken cancellationToken = default)
     {
         
-        //looking for all records that they are friends
-        var friendsToRemove = await _socialNetworkDbContext.Friends
+        
+        var friendToRemove = await _socialNetworkDbContext.Friends
             .Where(f =>
                 (f.UserId == friendship.UserId && f.FriendId == friendship.FriendId) ||
                 (f.UserId == friendship.FriendId && f.FriendId == friendship.UserId))
-            .ToListAsync(cancellationToken);
+            .SingleOrDefaultAsync(cancellationToken);
 
-        //deleting this records if we found somth
-        if(friendsToRemove.Count > 0)
+        
+        if(friendToRemove is not null)
         {
-            _socialNetworkDbContext.Friends.RemoveRange(friendsToRemove);
+            _socialNetworkDbContext.Friends.Remove(friendToRemove);
             await _socialNetworkDbContext.SaveChangesAsync(cancellationToken);
             return true;
         }
@@ -57,7 +57,7 @@ public class FriendshipRepository : IFriendshipRepository
     }
     
     
-    public IQueryable<Friendship> GetAllFriends(int id)
+    public IQueryable<Friendship> GetAllFriendsByUserId(int id)
     {
         var query = _socialNetworkDbContext.Friends
             .Include(f => f.User.Profile)
