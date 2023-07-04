@@ -18,5 +18,4 @@ public class UserModel : BaseModel
 
     public AuthorizationInfoModel AuthorizationInfo { get; set; }
     
-    public IEnumerable<Friendship>? Friends { get; set; }
 }
