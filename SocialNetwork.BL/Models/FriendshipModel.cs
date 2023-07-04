@@ -1,6 +1,4 @@
-﻿using SocialNetwork.DAL.Entity;
-
-namespace SocialNetwork.BL.Models;
+﻿namespace SocialNetwork.BL.Models;
 
 public class FriendshipModel
 {
