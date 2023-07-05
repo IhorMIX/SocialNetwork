@@ -137,8 +137,8 @@ public class FriendshipService : IFriendshipService
         var user2Model = await _userService.GetUserByEmail(friendEmail, cancellationToken);
         var userDb = await _userRepository.GetByIdAsync(userId, cancellationToken);
         
-        IsExistsHelper.IsExists(userDb, new UserNotFoundException("User not found"));
         IsExistsHelper.IsExists(user2Model, new UserNotFoundException("User not found"));
+        IsExistsHelper.IsExists(userDb, new UserNotFoundException("User not found"));
         var friend = await _friendshipRepository.GetAll()
             .Where(f => f.UserId == userDb.Id && f.FriendUser.Profile.Email == friendEmail)
             .Select(f => f.FriendUser)
@@ -148,7 +148,7 @@ public class FriendshipService : IFriendshipService
             .SingleOrDefaultAsync(cancellationToken);
 
         
-        IsExistsHelper.IsExists(userDb, new FriendNotFoundException("Friend not found"));
+        IsExistsHelper.IsExists(friend, new FriendNotFoundException("Friend not found"));
 
         var userModel = _mapper.Map<UserModel>(friend);
         return userModel;
