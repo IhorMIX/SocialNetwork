@@ -18,7 +18,7 @@ public class UserRepository : IUserRepository
         return _socialNetworkDbContext.Users.Include(i => i.Profile).Include(i => i.AuthorizationInfo).AsQueryable();
     }
 
-    public async Task<User?> GetById(int id, CancellationToken cancellationToken = default)
+    public async Task<User?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
     {
         return await _socialNetworkDbContext.Users.Include(i => i.Profile).Include(i => i.AuthorizationInfo)
             .FirstOrDefaultAsync(i => i.Id == id, cancellationToken);

@@ -28,9 +28,9 @@ public class UserService : IUserService
         _mapper = mapper;
     }
 
-    public async Task<UserModel?> GetById(int id, CancellationToken cancellationToken = default)
+    public async Task<UserModel?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
     {
-        var user = await _userRepository.GetById(id, cancellationToken);
+        var user = await _userRepository.GetByIdAsync(id, cancellationToken);
 
         if (user is null)
         {
@@ -68,7 +68,8 @@ public class UserService : IUserService
 
     public async Task<UserModel> UpdateUserAsync(int id, UserModel user, CancellationToken cancellationToken = default)
     {
-        var userDb = await _userRepository.GetById(id, cancellationToken);
+
+        var userDb = await _userRepository.GetByIdAsync(id, cancellationToken);
 
         if (userDb is null)
         {
@@ -89,7 +90,6 @@ public class UserService : IUserService
             var userTargetValue = userDbProperty.GetValue(userDb.Profile);
 
             if (userSourceValue != null && userSourceValue != "" && !userSourceValue.Equals(userTargetValue))
-              
             {
                 userDbProperty.SetValue(userDb.Profile, userSourceValue);
             }
@@ -102,7 +102,8 @@ public class UserService : IUserService
 
     public async Task DeleteUserAsync(int id, CancellationToken cancellationToken = default)
     {
-        var userDb = await _userRepository.GetById(id, cancellationToken);
+
+        var userDb = await _userRepository.GetByIdAsync(id, cancellationToken);
 
         if (userDb is null)
         {
@@ -116,7 +117,7 @@ public class UserService : IUserService
     public async Task AddAuthorizationValueAsync(UserModel user, string refreshToken, LoginType loginType, DateTime? expiredDate = null,
         CancellationToken cancellationToken = default)
     {
-        var userDb = await _userRepository.GetById(user.Id, cancellationToken);
+        var userDb = await _userRepository.GetByIdAsync(user.Id, cancellationToken);
 
         if (userDb is null)
         {
@@ -128,6 +129,7 @@ public class UserService : IUserService
         {
             if (userDb.AuthorizationInfo.ExpiredDate <= DateTime.Now.AddDays(-1))
             {
+                await LogOutAsync(user.Id, cancellationToken);
                 _logger.LogError("Time of refresh token is out");
                 throw new TimeoutException($"Time of refresh token is out");
             }
@@ -149,7 +151,7 @@ public class UserService : IUserService
     
     public async Task LogOutAsync(int userId, CancellationToken cancellationToken = default)
     {
-        var userDb = await _userRepository.GetById(userId, cancellationToken);
+        var userDb = await _userRepository.GetByIdAsync(userId, cancellationToken);
 
         if (userDb is null)
         {
@@ -229,8 +231,7 @@ public class UserService : IUserService
             _logger.LogError("User with this Login {Login} not found", login);
             throw new UserNotFoundException($"User not found");
         }
-
-
+        
         var userModel = _mapper.Map<UserModel>(userDb);
         return userModel;
     }

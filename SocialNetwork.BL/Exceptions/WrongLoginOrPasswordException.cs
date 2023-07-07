@@ -1,6 +1,6 @@
 ﻿namespace SocialNetwork.BL.Exceptions;
 
-public class WrongLoginOrPasswordException : Exception
+public class WrongLoginOrPasswordException : CustomException
 {
     public WrongLoginOrPasswordException(string message) : base(message)
     {

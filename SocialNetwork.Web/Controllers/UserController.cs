@@ -32,8 +32,7 @@ public class UserController : ControllerBase
 
     [AllowAnonymous]
     [HttpPost]
-    public async Task<IActionResult> CreateUser([FromBody] UserCreateViewModel user,
-        CancellationToken cancellationToken)
+    public async Task<IActionResult> CreateUser([FromBody] UserCreateViewModel user, CancellationToken cancellationToken)
     {
         _logger.LogInformation("Start to create user");
 
@@ -64,7 +63,7 @@ public class UserController : ControllerBase
          _logger.LogInformation("Get user");
 
         var userId = User.GetUserId(); //get user id by token
-        var user = await _userService.GetById(userId, cancellationToken); //find user by id
+        var user = await _userService.GetByIdAsync(userId, cancellationToken); //find user by id
         var viewModel = _mapper.Map<UserViewModel>(user); // put user in userViewModel
 
         _logger.LogInformation("Get user");
@@ -86,39 +85,43 @@ public class UserController : ControllerBase
 
     [AllowAnonymous]
     [HttpPost("login")]
-    public async Task<ActionResult> AuthorizeUser([FromBody] UserAuthorizeModel model)
+    public async Task<ActionResult> AuthorizeUser([FromBody] UserAuthorizeModel model, CancellationToken cancellationToken)
     {
-        var user = await _userService.GetUserByLoginAndPasswordAsync(model.Login, model.Password);
+        var user = await _userService.GetUserByLoginAndPasswordAsync(model.Login, model.Password, cancellationToken);
         var token = _tokenHelper.GetToken(user!.Id);
-        
+        var refreshToken = TokenHelper.GenerateRefreshToken(token);
         DateTime? expiredDate = model.IsNeedToRemember ? null : DateTime.Now;
         
-        await _userService.AddAuthorizationValueAsync(user, TokenHelper.GenerateRefreshToken(token), 
-            LoginType.LocalSystem, expiredDate);
+        await _userService.AddAuthorizationValueAsync(
+            user, 
+            refreshToken, 
+            LoginType.LocalSystem, 
+            expiredDate, 
+            cancellationToken);
 
         _logger.LogInformation("User was logined");
 
-        return Ok(token);
+        return Ok(new { accessKey = token, refresh_token = refreshToken, expiredDate = expiredDate });
     }
    
     [AllowAnonymous]
     [HttpPost("new-token")]
-    public async Task<IActionResult> UpdateTokenAsync([FromQuery] string refreshToken)
+    public async Task<IActionResult> UpdateTokenAsync([FromQuery] string refreshToken, CancellationToken cancellationToken)
     {
 
         refreshToken = refreshToken.Replace(" ", "+"); 
-        var user = await _userService.GetUserByRefreshTokenAsync(refreshToken);
+        var user = await _userService.GetUserByRefreshTokenAsync(refreshToken, cancellationToken);
         var token = _tokenHelper.GetToken(user.Id);
-        return Ok(token);
+        return Ok(new { accessKey = token, refresh_token = refreshToken, expiredDate = user.AuthorizationInfo.ExpiredDate });
     }
 
    
     [HttpPost]
     [Route(("logout"))]
-    public async Task<IActionResult> LogOutAsync()
+    public async Task<IActionResult> LogOutAsync(CancellationToken cancellationToken)
     {
         var userId = User.GetUserId();
-        await _userService.LogOutAsync(userId);
+        await _userService.LogOutAsync(userId, cancellationToken);
         return Ok();
 
     }

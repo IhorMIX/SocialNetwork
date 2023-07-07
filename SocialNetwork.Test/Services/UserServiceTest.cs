@@ -92,7 +92,7 @@ public class UserServiceTest : DefaultServiceTest<IUserService ,UserService>
 
         await Service.CreateUserAsync(user);
 
-        Assert.ThrowsAsync<UserNotFoundException>(async () => await Service.GetById(10));
+        Assert.ThrowsAsync<UserNotFoundException>(async () => await Service.GetByIdAsync(10));
     }
     
     [Test]
@@ -119,22 +119,38 @@ public class UserServiceTest : DefaultServiceTest<IUserService ,UserService>
         Assert.That(createdUser!.Login, Is.EqualTo(user.Login));
         Assert.That(createdUser!.Profile.Email, Is.EqualTo(user.Profile.Email));
         
-        user.Login = "AnotherLogin";
+
         user.Profile.Email = "anotherMail@gmail.com";
+        user.Profile.Name = "AnotherName";
         user.Id = createdUser.Id;
-        await Service.UpdateUserAsync(user);
+        await Service.UpdateUserAsync(user.Id, user);
         
-        createdUser = await Service.GetUserByLogin(user.Login);
+        createdUser = await Service.GetByIdAsync(user.Id);
         
-        Assert.That(createdUser!.Login, Is.EqualTo(user.Login));
         Assert.That(createdUser!.Profile.Email, Is.EqualTo(user.Profile.Email));
+        Assert.That(createdUser!.Profile.Name, Is.EqualTo(user.Profile.Name));
     }
 
     [Test]
     public async Task UpdateUser_UserNotFound_ThrowsUserNotFoundException()
     {
+        var user = new UserModel()
+        {
+            Login = "TestLogin4",
+            Password = "TestPassword",
+            Profile = new ProfileModel()
+            {
+                Birthday = DateTime.Now,
+                Description = "sdsdds",
+                Email = "4@gmail.com",
+                Name = "Test",
+                Sex = Sex.Male,
+                Surname = "Test",
+                AvatarImage = "Image"
+            }
+        };
         Assert.ThrowsAsync<UserNotFoundException>(async () 
-            => await Service.UpdateUserAsync((await Service.GetById(1))!));
+            => await Service.UpdateUserAsync(222, user));
     }
 
     [Test]
@@ -157,15 +173,15 @@ public class UserServiceTest : DefaultServiceTest<IUserService ,UserService>
         };
         await Service.CreateUserAsync(user);
         
-        await Service.DeleteUserAsync((await Service.GetById(1))!);
+        await Service.DeleteUserAsync(1);
         Assert.ThrowsAsync<UserNotFoundException>(async () => 
-            await Service.DeleteUserAsync((await Service.GetById(1))!));
+            await Service.DeleteUserAsync(1));
     }    
     [Test]
     public async Task DeleteUser_UserNotFound_ThrowsUserNotFoundException()
     {
         Assert.ThrowsAsync<UserNotFoundException>(async () => 
-            await Service.DeleteUserAsync((await Service.GetById(1))!));
+            await Service.DeleteUserAsync(1));
     }
 
     [Test]
@@ -249,11 +265,13 @@ public class UserServiceTest : DefaultServiceTest<IUserService ,UserService>
         Assert.That(createdUser!.AuthorizationInfo, Is.EqualTo(null));
         await Service.AddAuthorizationValueAsync(createdUser!, "1111", LoginType.LocalSystem, DateTime.Now.AddHours(-26));
         
-        var createdUser2 = await Service.GetUserByLogin(user.Login);
-        Assert.That(createdUser2!.AuthorizationInfo, Is.Not.EqualTo(null));
+        createdUser = await Service.GetUserByLogin(user.Login);
+        Assert.That(createdUser!.AuthorizationInfo, Is.Not.EqualTo(null));
         
         Assert.ThrowsAsync<TimeoutException>(async () =>
-            await Service.AddAuthorizationValueAsync(createdUser2!, "2222", LoginType.LocalSystem));
+            await Service.AddAuthorizationValueAsync(createdUser!, "2222", LoginType.LocalSystem));
+        createdUser = await Service.GetUserByLogin(user.Login);
+        Assert.That(createdUser!.AuthorizationInfo, Is.EqualTo(null));
     }
     
     [Test]

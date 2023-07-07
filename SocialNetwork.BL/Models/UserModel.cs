@@ -1,4 +1,5 @@
 ﻿using SocialNetwork.BL.Models.Enums;
+using SocialNetwork.DAL.Entity;
 
 namespace SocialNetwork.BL.Models;
 
@@ -16,4 +17,5 @@ public class UserModel : BaseModel
     public ProfileModel Profile { get; set; }
 
     public AuthorizationInfoModel AuthorizationInfo { get; set; }
+    
 }
