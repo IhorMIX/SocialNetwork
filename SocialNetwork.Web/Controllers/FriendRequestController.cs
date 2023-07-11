@@ -33,24 +33,31 @@ public class FriendRequestController : ControllerBase
         return Ok();
     }
     [HttpPost("accept")]
-    public async Task<IActionResult> AcceptRequest([FromQuery]int senderId, CancellationToken cancellationToken)
+    public async Task<IActionResult> AcceptRequest([FromQuery]int requestId, CancellationToken cancellationToken)
     {
         var userId = User.GetUserId();
-        await _friendRequestService.AcceptRequest(userId, senderId, cancellationToken);
+        await _friendRequestService.AcceptRequest(userId, requestId, cancellationToken);
         return Ok();
     }
     [HttpPost("cancel")]
-    public async Task<IActionResult> CancelRequest([FromQuery]int senderId, CancellationToken cancellationToken)
+    public async Task<IActionResult> CancelRequest([FromQuery]int requestId, CancellationToken cancellationToken)
     {
         var userId = User.GetUserId();
-        await _friendRequestService.CancelRequest(userId, senderId, cancellationToken);
+        await _friendRequestService.CancelRequest(userId, requestId, cancellationToken);
         return Ok();
     }
-    [HttpGet]
-    public async Task<IActionResult> GetAllRequest(CancellationToken cancellationToken)
+    [HttpGet("get-incomes")]
+    public async Task<IActionResult> GetAllIncomeRequest(CancellationToken cancellationToken)
     {
         var userId = User.GetUserId();
-        var requests = await _friendRequestService.GetAllRequest(userId, cancellationToken);
+        var requests = await _friendRequestService.GetAllIncomeRequest(userId, cancellationToken);
+        return Ok(_mapper.Map<List<FriendRequestViewModel>>(requests));
+    }
+    [HttpGet("get-sent")]
+    public async Task<IActionResult> GetAllSentRequest(CancellationToken cancellationToken)
+    {
+        var userId = User.GetUserId();
+        var requests = await _friendRequestService.GetAllSentRequest(userId, cancellationToken);
         return Ok(_mapper.Map<List<FriendRequestViewModel>>(requests));
     }
 }
