@@ -29,16 +29,7 @@ public class FriendshipController : ControllerBase
         _logger = logger;
         _mapper = mapper;
     }
-    
-    
-    [HttpPost]
-    public async Task<IActionResult> CreateFriendship([FromQuery] int FriendID, CancellationToken cancellationToken)
-    {
-        var userId = User.GetUserId();
-        await _friendshipService.AddFriendshipAsync(userId, FriendID, cancellationToken);
-        return Ok();
-    }
-    
+
     [HttpDelete]
     public async Task<IActionResult> DelFriendship([FromQuery] int FriendID, CancellationToken cancellationToken)
     {
