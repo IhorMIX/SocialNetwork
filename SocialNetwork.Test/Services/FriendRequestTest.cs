@@ -100,7 +100,7 @@ public class FriendRequestTest : DefaultServiceTest<IFriendRequestService, Frien
         Assert.That(Service.GetByUsersId(createdUser2.Id, createdUser1.Id), Is.Not.EqualTo(null));
         Assert.That(Service.GetByUsersId(createdUser3.Id, createdUser1.Id), Is.Not.EqualTo(null));
         
-        var request = await Service.GetAllRequest(createdUser1.Id);
+        var request = await Service.GetAllIncomeRequest(createdUser1.Id);
         Assert.That(request.Count() == 2);
     }
     

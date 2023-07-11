@@ -29,9 +29,9 @@ public class FriendRequestService : IFriendRequestService
     
     public async Task<FriendRequestModel?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
     {
-        var receiver = await _friendRequestRepository.GetByIdAsync(id, cancellationToken);
-        IsExistsHelper.IsExists(receiver, new FriendRequestNotFoundException("Friend request not found"), _logger);
-        return _mapper.Map<FriendRequestModel>(receiver);
+        var friendRequest = await _friendRequestRepository.GetByIdAsync(id, cancellationToken);
+        IsExistsHelper.IsExists(friendRequest, new FriendRequestNotFoundException("Friend request not found"), _logger);
+        return _mapper.Map<FriendRequestModel>(friendRequest);
     }
     
     public async Task<FriendRequestModel> GetByUsersId(int senderId, int receiverId, CancellationToken cancellationToken = default)
@@ -52,6 +52,18 @@ public class FriendRequestService : IFriendRequestService
         IsExistsHelper.IsExists(senderModel, new UserNotFoundException("User not found"), _logger);
         IsExistsHelper.IsExists(receiverModel, new UserNotFoundException("User not found"), _logger);
         
+        var friends = await _friendshipRepository
+            .GetAllFriendsByUserId(userId)
+            .Where(f => f.UserId == userId && f.FriendId == receiverId || f.UserId == receiverId && f.FriendId == userId)
+            .Select(f => f.UserId == userId ? f.FriendUser : f.User)
+            .FirstOrDefaultAsync(cancellationToken);
+        
+        if (friends is not null)
+        {
+            _logger.LogError("You cant send a friend request to yourself");
+            throw new FriendRequestNotFoundException("Friendship is already created");
+        }
+
         if (senderModel!.Id != receiverModel!.Id)
         {
             await _friendRequestRepository.CreateFriendRequestAsync(new FriendRequest()
@@ -66,49 +78,89 @@ public class FriendRequestService : IFriendRequestService
         }
     }
 
-    public async Task AcceptRequest(int userId, int senderId, CancellationToken cancellationToken = default)
+    public async Task AcceptRequest(int userId, int requestId, CancellationToken cancellationToken = default)
     {
         var userModel = await _userService.GetByIdAsync(userId, cancellationToken);
-        var senderModel = await _userService.GetByIdAsync(senderId, cancellationToken);
+        var friendRequest = await _friendRequestRepository.GetByIdAsync(requestId, cancellationToken);
         
         IsExistsHelper.IsExists(userModel, new UserNotFoundException("User not found"), _logger);
-        IsExistsHelper.IsExists(senderModel, new UserNotFoundException("User not found"), _logger);
+        IsExistsHelper.IsExists(friendRequest, new FriendRequestNotFoundException("Friend request not found"), _logger);
 
-        await _friendshipRepository.CreateFriendshipAsync(new Friendship()
+        var friends = await _friendshipRepository
+            .GetAllFriendsByUserId(userId)
+            .Where(f => f.UserId == userId && f.FriendId == friendRequest!.ReceiverId || f.UserId == friendRequest!.ReceiverId && f.FriendId == userId)
+            .Select(f => f.UserId == userId ? f.FriendUser : f.User)
+            .FirstOrDefaultAsync(cancellationToken);
+        
+        if (friends is not null)
         {
-            UserId = userModel!.Id,
-            FriendId = senderModel!.Id,   
-        }, cancellationToken);
+            _logger.LogError("You cant send a friend request to yourself");
+            throw new FriendRequestNotFoundException("Friendship is already created");
+        }
+        
+        if (friendRequest!.ReceiverId == userModel!.Id)
+        {
+            await _friendshipRepository.CreateFriendshipAsync(new Friendship()
+            {
+                UserId = userModel!.Id,
+                FriendId = friendRequest!.Sender.Id,   
+            }, cancellationToken);
 
-        await _friendRequestRepository.DeleteFriendRequestAsync(new FriendRequest()
+            await _friendRequestRepository.DeleteFriendRequestAsync(new FriendRequest()
+            {
+                SenderId = friendRequest!.Sender.Id,
+                ReceiverId = userModel.Id
+            }, cancellationToken);
+        }
+        else
         {
-            SenderId = senderModel.Id,
-            ReceiverId = userModel.Id
-        }, cancellationToken);
+            _logger.LogError("User is not receiver");
+            throw new FriendRequestNotFoundException("User is not receiver");
+        }
+           
     }
 
-    public async Task CancelRequest(int userId, int senderId, CancellationToken cancellationToken = default)
+    public async Task CancelRequest(int userId, int requestId, CancellationToken cancellationToken = default)
     {
         var userModel = await _userService.GetByIdAsync(userId, cancellationToken);
-        var senderModel = await _userService.GetByIdAsync(senderId, cancellationToken);
+        var friendRequest = await _friendRequestRepository.GetByIdAsync(requestId, cancellationToken);
         
         IsExistsHelper.IsExists(userModel, new UserNotFoundException("User not found"), _logger);
-        IsExistsHelper.IsExists(senderModel, new UserNotFoundException("User not found"), _logger);
+        IsExistsHelper.IsExists(friendRequest, new FriendRequestNotFoundException("Friend request not found"), _logger);
         
-        await _friendRequestRepository.DeleteFriendRequestAsync(new FriendRequest()
+        if (friendRequest!.ReceiverId == userModel!.Id)
         {
-            SenderId = senderModel!.Id,
-            ReceiverId = userModel!.Id
-        }, cancellationToken);
+            await _friendRequestRepository.DeleteFriendRequestAsync(new FriendRequest()
+            {
+                SenderId = friendRequest!.Sender.Id,
+                ReceiverId = userModel.Id
+            }, cancellationToken);
+        }
+        else
+        {
+            _logger.LogError("User is not receiver");
+            throw new FriendRequestNotFoundException("User is not receiver");
+        }
     }
 
-    public async Task<IEnumerable<FriendRequestModel>> GetAllRequest(int userId, CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<FriendRequestModel>> GetAllIncomeRequest(int userId, CancellationToken cancellationToken = default)
     {
         var userRequests = await _friendRequestRepository.GetAll()
             .Include(u=>u.Sender.Profile)
             .Include(u=>u.Receiver.Profile)
             .Where(u => u.ReceiverId == userId)
             .ToListAsync(cancellationToken);
+        return _mapper.Map<List<FriendRequestModel>>(userRequests);
+    }
+
+    public async Task<IEnumerable<FriendRequestModel>> GetAllSentRequest(int userId, CancellationToken cancellationToken)
+    {
+        var userRequests = await _friendRequestRepository.GetAll()
+            .Include(u=>u.Sender.Profile)
+            .Include(u=>u.Receiver.Profile)
+            .Where(u => u.SenderId == userId)
+            .ToListAsync(cancellationToken);
+        
         return _mapper.Map<List<FriendRequestModel>>(userRequests);
     }
 }
