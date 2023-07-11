@@ -15,7 +15,8 @@ namespace SocialNetwork.Web.MapperConfiguration
             CreateMap<FriendshipModel, Friendship>().ReverseMap();
             CreateMap<FriendRequestModel, FriendRequest>().ReverseMap();
             
-            CreateMap<FriendRequestModel, FriendRequestViewModel>().ReverseMap();
+            CreateMap<FriendRequestModel, FriendRequestViewModel>()
+                .ReverseMap();
             
             CreateMap<ProfileFriendViewModel, ProfileModel>()
                 .ForMember(dest =>dest.Birthday, opt=> opt.Ignore())
