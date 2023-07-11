@@ -8,7 +8,10 @@ public class FriendRequestConfiguration : IEntityTypeConfiguration<FriendRequest
 {
     public void Configure(EntityTypeBuilder<FriendRequest> builder)
     {
-        builder.HasKey(f => new { f.SenderId, f.ReceiverId });
+        builder.HasKey(f => new { f.Id, f.SenderId, f.ReceiverId });
+        
+        builder.Property(f => f.Id)
+            .ValueGeneratedOnAdd();
         
         builder.HasOne(i => i.Sender)
             .WithMany(i => i.Requests)

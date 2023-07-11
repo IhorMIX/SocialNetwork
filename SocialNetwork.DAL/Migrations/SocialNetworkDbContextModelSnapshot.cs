@@ -53,18 +53,23 @@ namespace SocialNetwork.DAL.Migrations
 
             modelBuilder.Entity("SocialNetwork.DAL.Entity.FriendRequest", b =>
                 {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
                     b.Property<int>("SenderId")
                         .HasColumnType("int");
 
                     b.Property<int>("ReceiverId")
                         .HasColumnType("int");
 
-                    b.Property<int>("Id")
-                        .HasColumnType("int");
-
-                    b.HasKey("SenderId", "ReceiverId");
+                    b.HasKey("Id", "SenderId", "ReceiverId");
 
                     b.HasIndex("ReceiverId");
+
+                    b.HasIndex("SenderId");
 
                     b.ToTable("FriendRequests");
                 });
