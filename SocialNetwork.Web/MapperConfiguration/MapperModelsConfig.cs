@@ -13,6 +13,10 @@ namespace SocialNetwork.Web.MapperConfiguration
 
             CreateMap<ProfileCreateViewModel, ProfileModel>();
             CreateMap<FriendshipModel, Friendship>().ReverseMap();
+            CreateMap<FriendRequestModel, FriendRequest>().ReverseMap();
+            
+            CreateMap<FriendRequestModel, FriendRequestViewModel>().ReverseMap();
+            
             CreateMap<ProfileFriendViewModel, ProfileModel>()
                 .ForMember(dest =>dest.Birthday, opt=> opt.Ignore())
                 .ForMember(dest =>dest.Description, opt=> opt.Ignore())

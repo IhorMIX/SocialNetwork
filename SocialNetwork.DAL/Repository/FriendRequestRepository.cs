@@ -30,13 +30,14 @@ public class FriendRequestRepository : IFriendRequestRepository
 
     public async Task<bool> DeleteFriendRequestAsync(FriendRequest friendRequest, CancellationToken cancellationToken = default)
     {
-        var friendReqestToRemove = await _socialNetworkDbContext.FriendRequests
+        var friendRequestToRemove = await _socialNetworkDbContext.FriendRequests
             .Where(f =>
                 (f.SenderId == friendRequest.SenderId && f.ReceiverId == friendRequest.ReceiverId))
-                .FirstOrDefaultAsync(cancellationToken);
-        if (friendReqestToRemove != null)
+                .SingleOrDefaultAsync(cancellationToken);
+       
+        if (friendRequestToRemove != null)
         {
-            _socialNetworkDbContext.FriendRequests.Remove(friendReqestToRemove);
+            _socialNetworkDbContext.FriendRequests.Remove(friendRequestToRemove);
             await _socialNetworkDbContext.SaveChangesAsync(cancellationToken);
             return true;
         }

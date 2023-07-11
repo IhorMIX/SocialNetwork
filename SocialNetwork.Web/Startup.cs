@@ -67,7 +67,8 @@ public class Startup
         services.AddScoped<IFriendshipRepository, FriendshipRepository>();
         services.AddScoped<IFriendshipService, FriendshipService>();
         services.AddScoped<IFriendRequestRepository, FriendRequestRepository>();
-        
+        services.AddScoped<IFriendRequestService, FriendRequestService>();
+
         var connectionString = Environment.GetEnvironmentVariable("SQLSERVER_CONNECTION_STRING") ?? Configuration.GetConnectionString("ConnectionString");
 
         services.AddDbContext<SocialNetworkDbContext>(options =>
