@@ -5,12 +5,10 @@ namespace SocialNetwork.BL.Helpers;
 
 public static class IsExistsHelper
 {
-    private static readonly ILogger _logger;
-    
-    public static void IsExists(Object? model, CustomException exceptionType)
+    public static void IsExists(Object? model, CustomException exceptionType, ILogger logger)
     {
         if (model is not null) return;
-        _logger.LogError(exceptionType.Message);
+        logger.LogError(exceptionType.Message);
         throw exceptionType;
     }
 }
