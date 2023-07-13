@@ -43,7 +43,22 @@ public class FriendRequestRepository : IFriendRequestRepository
         }
         return false;
     }
-    
+
+    public async Task<bool> DeleteAllFriendRequestAsync(int userId, CancellationToken cancellationToken = default)
+    {
+        var friendsRequestToRemove = await _socialNetworkDbContext.FriendRequests
+            .Where(f => f.SenderId == userId || f.ReceiverId == userId)
+            .ToListAsync(cancellationToken);
+       
+        if (friendsRequestToRemove.Any())
+        {
+            _socialNetworkDbContext.FriendRequests.RemoveRange(friendsRequestToRemove);
+            await _socialNetworkDbContext.SaveChangesAsync(cancellationToken);
+            return true;
+        }
+        return false;
+    }
+
     public async Task CreateFriendRequestAsync(FriendRequest friendRequest, CancellationToken cancellationToken = default)
     {
         await _socialNetworkDbContext.FriendRequests.AddAsync(friendRequest, cancellationToken);

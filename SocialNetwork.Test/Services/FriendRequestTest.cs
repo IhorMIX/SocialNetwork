@@ -54,7 +54,7 @@ public class FriendRequestTest : DefaultServiceTest<IFriendRequestService, Frien
         await Service.AcceptRequest(request.ReceiverId, request.SenderId);
         Assert.That(friendService.FindFriendByNameSurname(createdUser1.Id, "Test"), Is.Not.EqualTo(null));
         Assert.That(friendService.FindFriendByNameSurname(createdUser2.Id, "Test"), Is.Not.EqualTo(null));
-        Assert.ThrowsAsync<FriendRequestNotFoundException>(() => Service.GetByUsersId(createdUser1.Id, createdUser2.Id));
+        Assert.ThrowsAsync<FriendRequestException>(() => Service.GetByUsersId(createdUser1.Id, createdUser2.Id));
     }
     [Test]
     public async Task CancelFriendRequest()
@@ -75,7 +75,7 @@ public class FriendRequestTest : DefaultServiceTest<IFriendRequestService, Frien
         await Service.CancelRequest(request.ReceiverId, request.SenderId);
         Assert.That(!(await friendService.FindFriendByNameSurname(createdUser1.Id, "Test")).Any());
         Assert.That(!(await friendService.FindFriendByNameSurname(createdUser2.Id, "Test")).Any());
-        Assert.ThrowsAsync<FriendRequestNotFoundException>(() => Service.GetByUsersId(createdUser1.Id, createdUser2.Id));
+        Assert.ThrowsAsync<FriendRequestException>(() => Service.GetByUsersId(createdUser1.Id, createdUser2.Id));
     }
     
     [Test]

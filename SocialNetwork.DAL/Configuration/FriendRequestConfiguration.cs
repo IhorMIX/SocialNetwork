@@ -16,11 +16,11 @@ public class FriendRequestConfiguration : IEntityTypeConfiguration<FriendRequest
         builder.HasOne(i => i.Sender)
             .WithMany(i => i.Requests)
             .HasForeignKey(i => i.SenderId)
-            .OnDelete(DeleteBehavior.Restrict);
+            .OnDelete(DeleteBehavior.NoAction);
         
         builder.HasOne(i => i.Receiver)
             .WithMany()
             .HasForeignKey(i => i.ReceiverId)
-            .OnDelete(DeleteBehavior.Restrict);
+            .OnDelete(DeleteBehavior.NoAction);
     }
 }
