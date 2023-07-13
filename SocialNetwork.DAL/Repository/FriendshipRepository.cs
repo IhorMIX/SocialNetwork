@@ -37,14 +37,11 @@ public class FriendshipRepository : IFriendshipRepository
     
     public async Task<bool> DeleteFriendsAsync(Friendship friendship, CancellationToken cancellationToken = default)
     {
-        
-        
         var friendToRemove = await _socialNetworkDbContext.Friends
             .Where(f =>
                 (f.UserId == friendship.UserId && f.FriendId == friendship.FriendId) ||
                 (f.UserId == friendship.FriendId && f.FriendId == friendship.UserId))
             .SingleOrDefaultAsync(cancellationToken);
-
         
         if(friendToRemove is not null)
         {
@@ -55,7 +52,21 @@ public class FriendshipRepository : IFriendshipRepository
 
         return false;
     }
-    
+    public async Task<bool> DeleteAllFriendsAsync(int userId, CancellationToken cancellationToken = default)
+    {
+        var friendsToRemove = await _socialNetworkDbContext.Friends
+            .Where(f => f.UserId == userId || f.FriendId == userId)
+            .ToListAsync(cancellationToken);
+        
+        if(friendsToRemove.Any())
+        {
+            _socialNetworkDbContext.Friends.RemoveRange(friendsToRemove);
+            await _socialNetworkDbContext.SaveChangesAsync(cancellationToken);
+            return true;
+        }
+
+        return false;
+    }
     
     public IQueryable<Friendship> GetAllFriendsByUserId(int id)
     {
