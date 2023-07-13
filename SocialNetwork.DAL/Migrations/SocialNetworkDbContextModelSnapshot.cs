@@ -186,13 +186,13 @@ namespace SocialNetwork.DAL.Migrations
                     b.HasOne("SocialNetwork.DAL.Entity.User", "Receiver")
                         .WithMany()
                         .HasForeignKey("ReceiverId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.HasOne("SocialNetwork.DAL.Entity.User", "Sender")
                         .WithMany("Requests")
                         .HasForeignKey("SenderId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("Receiver");
@@ -205,13 +205,13 @@ namespace SocialNetwork.DAL.Migrations
                     b.HasOne("SocialNetwork.DAL.Entity.User", "FriendUser")
                         .WithMany()
                         .HasForeignKey("FriendId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.HasOne("SocialNetwork.DAL.Entity.User", "User")
                         .WithMany("Friends")
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("FriendUser");

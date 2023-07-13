@@ -7,10 +7,14 @@ namespace SocialNetwork.DAL.Repository;
 public class UserRepository : IUserRepository
 {
     private readonly SocialNetworkDbContext _socialNetworkDbContext;
+    private readonly IFriendshipRepository _friendshipRepository;
+    private readonly IFriendRequestRepository _friendRequestRepository;
 
-    public UserRepository(SocialNetworkDbContext socialNetworkDbContext)
+    public UserRepository(SocialNetworkDbContext socialNetworkDbContext, IFriendshipRepository friendshipRepository, IFriendRequestRepository friendRequestRepository)
     {
         _socialNetworkDbContext = socialNetworkDbContext;
+        _friendshipRepository = friendshipRepository;
+        _friendRequestRepository = friendRequestRepository;
     }
 
     public IQueryable<User> GetAll()
@@ -45,6 +49,9 @@ public class UserRepository : IUserRepository
 
     public async Task DeleteUserAsync(User user, CancellationToken cancellationToken = default)
     {
+        await _friendshipRepository.DeleteAllFriendsAsync(user.Id, cancellationToken);
+        await _friendRequestRepository.DeleteAllFriendRequestAsync(user.Id, cancellationToken);
+        
         _socialNetworkDbContext.Users.Remove(user);
 
         await _socialNetworkDbContext.SaveChangesAsync(cancellationToken);
