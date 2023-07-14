@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SocialNetwork.DAL;
 
@@ -11,9 +12,11 @@ using SocialNetwork.DAL;
 namespace SocialNetwork.DAL.Migrations
 {
     [DbContext(typeof(SocialNetworkDbContext))]
-    partial class SocialNetworkDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230711201313_FriendRequest_Migration")]
+    partial class FriendRequest_Migration
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -186,13 +189,13 @@ namespace SocialNetwork.DAL.Migrations
                     b.HasOne("SocialNetwork.DAL.Entity.User", "Receiver")
                         .WithMany()
                         .HasForeignKey("ReceiverId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("SocialNetwork.DAL.Entity.User", "Sender")
                         .WithMany("Requests")
                         .HasForeignKey("SenderId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Receiver");
@@ -205,13 +208,13 @@ namespace SocialNetwork.DAL.Migrations
                     b.HasOne("SocialNetwork.DAL.Entity.User", "FriendUser")
                         .WithMany()
                         .HasForeignKey("FriendId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("SocialNetwork.DAL.Entity.User", "User")
                         .WithMany("Friends")
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("FriendUser");

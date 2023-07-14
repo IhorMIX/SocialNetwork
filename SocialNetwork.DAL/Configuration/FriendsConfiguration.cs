@@ -13,12 +13,12 @@ public class FriendsConfiguration : IEntityTypeConfiguration<Friendship>
         builder.HasOne(i => i.User)
             .WithMany(i => i.Friends)
             .HasForeignKey(i => i.UserId)
-            .OnDelete(DeleteBehavior.Restrict);
+            .OnDelete(DeleteBehavior.NoAction);
         
         builder.HasOne(i => i.FriendUser)
             .WithMany()
             .HasForeignKey(i => i.FriendId)
-            .OnDelete(DeleteBehavior.Restrict);
+            .OnDelete(DeleteBehavior.NoAction);
        
     }
 }

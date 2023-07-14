@@ -20,8 +20,10 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         
         builder.HasMany(u => u.Friends)
             .WithOne(f => f.User)
-            .HasForeignKey(f => f.UserId)
-            .OnDelete(DeleteBehavior.Restrict);
+            .HasForeignKey(f => f.UserId);  
         
+        builder.HasMany(u => u.Requests)
+            .WithOne(f => f.Sender)
+            .HasForeignKey(f => f.SenderId);
     }
 }
