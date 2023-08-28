@@ -7,6 +7,7 @@ using SocialNetwork.BL.Services.Interfaces;
 using SocialNetwork.DAL;
 using SocialNetwork.DAL.Repository;
 using SocialNetwork.DAL.Repository.Interfaces;
+using SocialNetwork.Test.Helpers;
 using SocialNetwork.Web;
 
 namespace SocialNetwork.Test.Services;
@@ -15,8 +16,16 @@ public class UserServiceTest : DefaultServiceTest<IUserService ,UserService>
 {
     protected override void SetUpAdditionalDependencies(IServiceCollection services)
     {
+        services.AddScoped<IFriendRequestRepository, FriendRequestRepository>();
         services.AddScoped<IUserRepository, UserRepository>();
-
+        services.AddScoped<IUserService, UserService>();
+        services.AddScoped<IFriendshipService, FriendshipService>();
+        services.AddScoped<IFriendshipRepository, FriendshipRepository>();
+        
+        services.AddScoped<IChatService, ChatService>();
+        services.AddScoped<IRoleRepository, RoleRepository>();
+        services.AddScoped<IChatRepository, ChatRepository>();
+        services.AddScoped<IChatMemberRepository, ChatMemberRepository>();
         base.SetUpAdditionalDependencies(services);
     }
 
@@ -74,25 +83,7 @@ public class UserServiceTest : DefaultServiceTest<IUserService ,UserService>
     [Test]
     public async Task CreateUserAndGetWithIncorrectId_ShouldFail()
     {
-        var user = new UserModel()
-        {                     
-            Login = "TestLogin3",
-            Password = "TestPassword",
-            Profile = new ProfileModel()
-            {
-                Birthday = DateTime.Now,
-                Description = "sdsdds",
-                Email = "3@gmail.com",
-                Name = "Test",
-                Sex = Sex.Male,
-                Surname = "Test",
-                AvatarImage = "Image"
-            }
-        };
-
-        await Service.CreateUserAsync(user);
-
-        Assert.ThrowsAsync<UserNotFoundException>(async () => await Service.GetByIdAsync(10));
+        Assert.ThrowsAsync<UserNotFoundException>(async () => await Service.GetByIdAsync(1000000));
     }
     
     [Test]

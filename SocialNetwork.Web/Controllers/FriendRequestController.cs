@@ -13,14 +13,12 @@ namespace SocialNetwork.Web.Controllers;
 public class FriendRequestController : ControllerBase
 {
     private readonly ILogger<FriendshipController> _logger;
-    private readonly TokenHelper _tokenHelper;
     private readonly IMapper _mapper;
     private readonly IFriendRequestService _friendRequestService;
 
-    public FriendRequestController(ILogger<FriendshipController> logger, TokenHelper tokenHelper, IMapper mapper, IFriendRequestService friendRequestService)
+    public FriendRequestController(ILogger<FriendshipController> logger, IMapper mapper, IFriendRequestService friendRequestService)
     {
         _logger = logger;
-        _tokenHelper = tokenHelper;
         _mapper = mapper;
         _friendRequestService = friendRequestService;
     }
@@ -46,14 +44,14 @@ public class FriendRequestController : ControllerBase
         await _friendRequestService.CancelRequest(userId, requestId, cancellationToken);
         return Ok();
     }
-    [HttpGet("get-incomes")]
+    [HttpGet("received")]
     public async Task<IActionResult> GetAllIncomeRequest(CancellationToken cancellationToken)
     {
         var userId = User.GetUserId();
         var requests = await _friendRequestService.GetAllIncomeRequest(userId, cancellationToken);
         return Ok(_mapper.Map<List<FriendRequestViewModel>>(requests));
     }
-    [HttpGet("get-sent")]
+    [HttpGet("sent")]
     public async Task<IActionResult> GetAllSentRequest(CancellationToken cancellationToken)
     {
         var userId = User.GetUserId();

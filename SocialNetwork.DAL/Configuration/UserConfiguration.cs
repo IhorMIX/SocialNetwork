@@ -26,4 +26,4 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
             .WithOne(f => f.Sender)
             .HasForeignKey(f => f.SenderId);
     }
-}
+} 

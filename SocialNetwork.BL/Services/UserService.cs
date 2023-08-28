@@ -125,27 +125,15 @@ public class UserService : IUserService
             throw new UserNotFoundException($"User with Id '{user.Id}' not found");
         }
             
-        if (userDb.AuthorizationInfo is not null)
+        if (userDb.AuthorizationInfo is not null && userDb.AuthorizationInfo.ExpiredDate <= DateTime.Now.AddDays(-1))
+            await LogOutAsync(user.Id, cancellationToken);
+        
+        userDb.AuthorizationInfo = new AuthorizationInfo
         {
-            if (userDb.AuthorizationInfo.ExpiredDate <= DateTime.Now.AddDays(-1))
-            {
-                await LogOutAsync(user.Id, cancellationToken);
-                _logger.LogError("Time of refresh token is out");
-                throw new TimeoutException($"Time of refresh token is out");
-            }
-            userDb.AuthorizationInfo.RefreshToken = refreshToken;
-            userDb.AuthorizationInfo.ExpiredDate = expiredDate;
-            userDb.AuthorizationInfo.LoginType = (DAL.Entity.Enums.LoginType)loginType;
-        }
-        else
-        {
-            userDb.AuthorizationInfo = new AuthorizationInfo
-            {
-                RefreshToken = refreshToken,
-                ExpiredDate = expiredDate,
-                LoginType = (DAL.Entity.Enums.LoginType)loginType
-            };
-        }
+            RefreshToken = refreshToken,
+            ExpiredDate = expiredDate,
+            LoginType = (DAL.Entity.Enums.LoginType)loginType
+        };
         await _userRepository.UpdateUserAsync(userDb, cancellationToken);
     }
     

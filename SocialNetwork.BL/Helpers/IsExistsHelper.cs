@@ -5,7 +5,7 @@ namespace SocialNetwork.BL.Helpers;
 
 public static class IsExistsHelper
 {
-    public static void IsExists(Object? model, CustomException exceptionType, ILogger logger)
+    public static void IsExists(this ILogger logger, Object? model, CustomException exceptionType)
     {
         if (model is not null) return;
         logger.LogError(exceptionType.Message);

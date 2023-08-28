@@ -17,14 +17,19 @@ public class FriendRequestTest : DefaultServiceTest<IFriendRequestService, Frien
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<IFriendshipService, FriendshipService>();
         services.AddScoped<IFriendshipRepository, FriendshipRepository>();
+        
+        services.AddScoped<IChatService, ChatService>();
+        services.AddScoped<IRoleRepository, RoleRepository>();
+        services.AddScoped<IChatRepository, ChatRepository>();
+        services.AddScoped<IChatMemberRepository, ChatMemberRepository>();
         base.SetUpAdditionalDependencies(services);
     }
 
     [Test]
     public async Task CreateFriendRequest()
     {
-        var user1 = UserModelHelper.CreateTestData();
-        var user2 = UserModelHelper.CreateTestData();
+        var user1 = await UserModelHelper.CreateTestData();
+        var user2 = await UserModelHelper.CreateTestData();
         var userService = ServiceProvider.GetRequiredService<IUserService>();
         await userService.CreateUserAsync(user1);
         await userService.CreateUserAsync(user2);
@@ -38,8 +43,8 @@ public class FriendRequestTest : DefaultServiceTest<IFriendRequestService, Frien
     [Test]
     public async Task AcceptFriendRequest()
     {
-        var user1 = UserModelHelper.CreateTestData();
-        var user2 = UserModelHelper.CreateTestData();
+        var user1 = await UserModelHelper.CreateTestData();
+        var user2 = await UserModelHelper.CreateTestData();
         var userService = ServiceProvider.GetRequiredService<IUserService>();
         var friendService = ServiceProvider.GetRequiredService<IFriendshipService>();
         await userService.CreateUserAsync(user1);
@@ -51,7 +56,7 @@ public class FriendRequestTest : DefaultServiceTest<IFriendRequestService, Frien
         Assert.That(Service.GetByUsersId(createdUser1.Id, createdUser2.Id), Is.Not.EqualTo(null));
         
         var request = await Service.GetByUsersId(createdUser1.Id, createdUser2.Id);
-        await Service.AcceptRequest(request.ReceiverId, request.SenderId);
+        await Service.AcceptRequest(request.ReceiverId, request.Id);
         Assert.That(friendService.FindFriendByNameSurname(createdUser1.Id, "Test"), Is.Not.EqualTo(null));
         Assert.That(friendService.FindFriendByNameSurname(createdUser2.Id, "Test"), Is.Not.EqualTo(null));
         Assert.ThrowsAsync<FriendRequestException>(() => Service.GetByUsersId(createdUser1.Id, createdUser2.Id));
@@ -59,8 +64,8 @@ public class FriendRequestTest : DefaultServiceTest<IFriendRequestService, Frien
     [Test]
     public async Task CancelFriendRequest()
     {
-        var user1 = UserModelHelper.CreateTestData();
-        var user2 = UserModelHelper.CreateTestData();
+        var user1 = await UserModelHelper.CreateTestData();
+        var user2 = await UserModelHelper.CreateTestData();
         var userService = ServiceProvider.GetRequiredService<IUserService>();
         var friendService = ServiceProvider.GetRequiredService<IFriendshipService>();
         await userService.CreateUserAsync(user1);
@@ -72,7 +77,7 @@ public class FriendRequestTest : DefaultServiceTest<IFriendRequestService, Frien
         Assert.That(Service.GetByUsersId(createdUser1.Id, createdUser2.Id), Is.Not.EqualTo(null));
         
         var request = await Service.GetByUsersId(createdUser1.Id, createdUser2.Id);
-        await Service.CancelRequest(request.ReceiverId, request.SenderId);
+        await Service.CancelRequest(request.ReceiverId, request.Id);
         Assert.That(!(await friendService.FindFriendByNameSurname(createdUser1.Id, "Test")).Any());
         Assert.That(!(await friendService.FindFriendByNameSurname(createdUser2.Id, "Test")).Any());
         Assert.ThrowsAsync<FriendRequestException>(() => Service.GetByUsersId(createdUser1.Id, createdUser2.Id));
@@ -83,15 +88,15 @@ public class FriendRequestTest : DefaultServiceTest<IFriendRequestService, Frien
     {
         var userService = ServiceProvider.GetRequiredService<IUserService>();
 
-        var user1 = UserModelHelper.CreateTestData();
+        var user1 = await UserModelHelper.CreateTestData();
         await userService.CreateUserAsync(user1);
         var createdUser1 = await userService.GetUserByLogin(user1.Login);
         
-        var user2 = UserModelHelper.CreateTestData();
+        var user2 = await UserModelHelper.CreateTestData();
         await userService.CreateUserAsync(user2);
         var createdUser2 = await userService.GetUserByLogin(user2.Login);
         
-        var user3 = UserModelHelper.CreateTestData();
+        var user3 = await UserModelHelper.CreateTestData();
         await userService.CreateUserAsync(user3);
         var createdUser3 = await userService.GetUserByLogin(user3.Login);
         

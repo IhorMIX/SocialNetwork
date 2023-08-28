@@ -1,4 +1,6 @@
-﻿namespace SocialNetwork.DAL.Repository.Interfaces;
+﻿using SocialNetwork.DAL.Entity;
+
+namespace SocialNetwork.DAL.Repository.Interfaces;
 
 public interface IBasicRepository<TEntity> where TEntity : class
 {

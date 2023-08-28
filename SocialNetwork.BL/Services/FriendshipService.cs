@@ -32,7 +32,7 @@ public class FriendshipService : IFriendshipService
     public async Task<FriendshipModel?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
     {
         var friendDb = await _friendshipRepository.GetByIdAsync(id, cancellationToken);
-        IsExistsHelper.IsExists(friendDb, new FriendNotFoundException("Friend not found"), _logger);
+        _logger.IsExists(friendDb, new FriendNotFoundException("Friend not found"));
         var friendModel = _mapper.Map<FriendshipModel>(friendDb);
         return friendModel;
     }
@@ -41,8 +41,8 @@ public class FriendshipService : IFriendshipService
     {
         var userModel = await _userService.GetByIdAsync(userId, cancellationToken);
         var user2Model = await _userService.GetByIdAsync(firendId, cancellationToken);
-        IsExistsHelper.IsExists(userModel, new UserNotFoundException("User not found"), _logger);
-        IsExistsHelper.IsExists(user2Model, new UserNotFoundException("User not found"), _logger);
+        _logger.IsExists(userModel, new UserNotFoundException("User not found"));
+        _logger.IsExists(user2Model, new UserNotFoundException("User not found"));
         
         if (userModel!.Id != user2Model!.Id)
         {
@@ -64,8 +64,8 @@ public class FriendshipService : IFriendshipService
     {
         var userModel = await _userService.GetByIdAsync(userId, cancellationToken);
         var user2Model = await _userService.GetByIdAsync(firendId, cancellationToken);
-        IsExistsHelper.IsExists(userModel, new UserNotFoundException("User not found"), _logger);
-        IsExistsHelper.IsExists(user2Model, new UserNotFoundException("User not found"), _logger);
+        _logger.IsExists(userModel, new UserNotFoundException("User not found"));
+        _logger.IsExists(user2Model, new UserNotFoundException("User not found"));
         var friendship = new Friendship()
         {
             UserId = userModel!.Id,
@@ -77,7 +77,7 @@ public class FriendshipService : IFriendshipService
     public async Task<IEnumerable<UserModel>> GetAllFriends(int userId, CancellationToken cancellationToken = default)
     {
         var userDb = await _userRepository.GetByIdAsync(userId, cancellationToken);
-        IsExistsHelper.IsExists(userDb, new UserNotFoundException("User not found"), _logger);
+        _logger.IsExists(userDb, new UserNotFoundException("User not found"));
 
         var users = await _friendshipRepository
             .GetAllFriendsByUserId(userDb.Id)
@@ -92,7 +92,7 @@ public class FriendshipService : IFriendshipService
         CancellationToken cancellationToken = default)
     {
         var userDb = await _userRepository.GetByIdAsync(userId, cancellationToken);
-        IsExistsHelper.IsExists(userDb, new UserNotFoundException("User not found"), _logger);
+        _logger.IsExists(userDb, new UserNotFoundException("User not found"));
         
         string[] parts = nameSurname.Split();
 
@@ -137,8 +137,8 @@ public class FriendshipService : IFriendshipService
         var user2Model = await _userService.GetUserByEmail(friendEmail, cancellationToken);
         var userDb = await _userRepository.GetByIdAsync(userId, cancellationToken);
         
-        IsExistsHelper.IsExists(user2Model, new UserNotFoundException("User not found"), _logger);
-        IsExistsHelper.IsExists(userDb, new UserNotFoundException("User not found"), _logger);
+        _logger.IsExists(user2Model, new UserNotFoundException("User not found"));
+        _logger.IsExists(userDb, new UserNotFoundException("User not found"));
         var friend = await _friendshipRepository.GetAll()
             .Where(f => f.UserId == userDb.Id && f.FriendUser.Profile.Email == friendEmail)
             .Select(f => f.FriendUser)
@@ -148,9 +148,26 @@ public class FriendshipService : IFriendshipService
             .SingleOrDefaultAsync(cancellationToken);
 
         
-        IsExistsHelper.IsExists(friend, new FriendNotFoundException("Friend not found"), _logger);
+        _logger.IsExists(friend, new FriendNotFoundException("Friend not found"));
 
         var userModel = _mapper.Map<UserModel>(friend);
         return userModel;
+    }
+
+    public async Task<bool> IsFriends(int userId, int user2Id, CancellationToken cancellationToken = default)
+    {
+        var userDb = await _userRepository.GetByIdAsync(userId, cancellationToken);
+        var user2Db = await _userRepository.GetByIdAsync(user2Id, cancellationToken);
+        
+        _logger.IsExists(userDb, new UserNotFoundException("User not found"));
+        _logger.IsExists(user2Db, new UserNotFoundException("User not found"));
+
+        var friendship = await _friendshipRepository
+            .GetAllFriendsByUserId(userId)
+            .Where(u => u.UserId == user2Id || u.FriendId == user2Id)
+            .SingleOrDefaultAsync(cancellationToken);
+        if(friendship is null)
+            return false;
+        return true;
     }
 }

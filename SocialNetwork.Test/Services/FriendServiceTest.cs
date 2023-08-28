@@ -18,17 +18,24 @@ public class FriendServiceTest : DefaultServiceTest<IFriendshipService, Friendsh
     
     protected override void SetUpAdditionalDependencies(IServiceCollection services)
     {
-        services.AddScoped<IFriendshipRepository, FriendshipRepository>();
+        services.AddScoped<IFriendRequestRepository, FriendRequestRepository>();
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IUserService, UserService>();
+        services.AddScoped<IFriendshipService, FriendshipService>();
+        services.AddScoped<IFriendshipRepository, FriendshipRepository>();
+        
+        services.AddScoped<IChatService, ChatService>();
+        services.AddScoped<IRoleRepository, RoleRepository>();
+        services.AddScoped<IChatRepository, ChatRepository>();
+        services.AddScoped<IChatMemberRepository, ChatMemberRepository>();
         base.SetUpAdditionalDependencies(services);
     }
     
     [Test]
     public async Task CreateFriendship_UsersFound_createdFriendship()
     {
-        var user1 = UserModelHelper.CreateTestData();
-        var user2 = UserModelHelper.CreateTestData();
+        var user1 = await UserModelHelper.CreateTestData();
+        var user2 = await UserModelHelper.CreateTestData();
         
         var userService = ServiceProvider.GetRequiredService<IUserService>();
         await userService.CreateUserAsync(user1);
@@ -45,8 +52,8 @@ public class FriendServiceTest : DefaultServiceTest<IFriendshipService, Friendsh
     [Test]
     public async Task DeleteFriend_FriendFound_DeletedFriend()
     {
-        var user1 = UserModelHelper.CreateTestData();
-        var user2 = UserModelHelper.CreateTestData();
+        var user1 = await UserModelHelper.CreateTestData();
+        var user2 = await UserModelHelper.CreateTestData();
         
         var userService = ServiceProvider.GetRequiredService<IUserService>();
         await userService.CreateUserAsync(user1);
@@ -60,8 +67,8 @@ public class FriendServiceTest : DefaultServiceTest<IFriendshipService, Friendsh
     [Test]
     public async Task DeleteFriend_FriendNotFound_DeletedFriend()
     {
-        var user1 = UserModelHelper.CreateTestData();
-        var user2 = UserModelHelper.CreateTestData();
+        var user1 = await UserModelHelper.CreateTestData();
+        var user2 = await UserModelHelper.CreateTestData();
         
         var userService = ServiceProvider.GetRequiredService<IUserService>();
         await userService.CreateUserAsync(user1);
@@ -76,11 +83,11 @@ public class FriendServiceTest : DefaultServiceTest<IFriendshipService, Friendsh
     [Test]
     public async Task GetAllFriends_UserFound_ReturnFriends()
     {
-        var user = UserModelHelper.CreateTestData();
+        var user = await UserModelHelper.CreateTestData();
         var userService = ServiceProvider.GetRequiredService<IUserService>();
         await userService.CreateUserAsync(user);
         
-        var user1 = UserModelHelper.CreateTestData();
+        var user1 = await UserModelHelper.CreateTestData();
         user1.Login = "User231";
         user1.Profile.Email = "USER232@gmail.com";
         await userService.CreateUserAsync(user1);
@@ -108,9 +115,9 @@ public class FriendServiceTest : DefaultServiceTest<IFriendshipService, Friendsh
     [Test]
     public async Task GetFriendByEmail_UserFound_ReturnFriend()
     {
-        var user1 = UserModelHelper.CreateTestData();
-        var user2 = UserModelHelper.CreateTestData();
-        var user3 = UserModelHelper.CreateTestData();
+        var user1 = await UserModelHelper.CreateTestData();
+        var user2 = await UserModelHelper.CreateTestData();
+        var user3 = await UserModelHelper.CreateTestData();
         
         var userService = ServiceProvider.GetRequiredService<IUserService>();
         await userService.CreateUserAsync(user1);
@@ -141,8 +148,8 @@ public class FriendServiceTest : DefaultServiceTest<IFriendshipService, Friendsh
     [Test]
     public async Task GetAllFriendsByNameSurname_UserFound_ReturnFriends()
     {
-        var user = UserModelHelper.CreateTestData();
-        var user1 = UserModelHelper.CreateTestData();
+        var user = await UserModelHelper.CreateTestData();
+        var user1 = await UserModelHelper.CreateTestData();
         var userService = ServiceProvider.GetRequiredService<IUserService>();
         await userService.CreateUserAsync(user);
 
