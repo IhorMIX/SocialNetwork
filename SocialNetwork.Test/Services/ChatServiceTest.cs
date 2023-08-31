@@ -223,10 +223,10 @@ public class ChatServiceTest : DefaultServiceTest<IChatService, ChatService>
         });
         
         var chat = (await Service.FindChatByName(user1.Id, "Chat3")).First();
-        
         Assert.That(chat is not null);
         
         await Service.AddUsers(user1.Id, chat.Id, new List<int>{user2!.Id, user3!.Id});
+        
         chat = (await Service.FindChatByName(user1.Id, "Chat3")).First();
         Assert.That(chat.ChatMembers!.Count == 3);
         
@@ -240,19 +240,21 @@ public class ChatServiceTest : DefaultServiceTest<IChatService, ChatService>
         Assert.That(role is not null);
 
         await Service.SetRole(user1.Id, chat.Id, role.Id, new List<int>(){user2.Id, user3.Id});
+        
+        role = (await Service.GetAllChatRoles(user1.Id, chat.Id)).First();
         chat = (await Service.FindChatByName(user1.Id, "Chat3")).First();
         Assert.That(chat.ChatMembers.Any(m => m.Role.Any(r => r.RoleName == role.RoleName) && m.User.Login == user2.Login));
+
+        role.RoleName = "Role21";
+        role.RoleColor = "black1";
+        role.DelMessages = true;
+        role.EditNicknames = true;
+        await Service.EditRole(user1.Id, chat.Id, role.Id, role);
         
-        await Service.EditRole(user1.Id, chat.Id, role.Id, new RoleModel()
-        {
-            RoleName = "Role21",
-            RoleColor = "black1",
-            DelMessages = true,
-            EditNicknames = true
-        });
         role = (await Service.GetAllChatRoles(user1.Id, chat.Id)).First();
+        chat = (await Service.FindChatByName(user1.Id, "Chat3")).First();
         Assert.That(role.RoleName != "Role2" &&
-                    role.Chat.ChatMembers.Any(c => c.Role.Any(r => r.RoleName != role.RoleName)));
+                    chat.ChatMembers.Any(c => c.Role.Any(r => r.RoleName != "Role2")));
         Assert.That(role.DelMessages != false && role.EditNicknames == true);
     }
     

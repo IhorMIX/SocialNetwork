@@ -330,18 +330,16 @@ public class ChatService : IChatService
                 roleDbProperty.SetValue(roleDb, roleSourceValue);
             }
         }
-
         
-        var ids = roleDb.ChatMembers.Select(r => r.User.Id);
-        if (roleModel.UsersIds.Count() > ids.Count())
-        {
-            await SetRole(userId, chatId, roleDb.Id, new List<int>(roleModel.UsersIds.Except(ids)), cancellationToken);
-        }
+        var existingIds = new HashSet<int>(roleDb!.ChatMembers.Select(r => r.User.Id));
+        var newIds = new HashSet<int>(roleModel.UsersIds);
 
-        if (roleModel.UsersIds.Count() < ids.Count())
-        { 
-            await UnSetRole(userId, chatId, roleDb.Id, new List<int>(ids.Except(roleModel.UsersIds)), cancellationToken);
-        }
+        var idsToAdd = newIds.Except(existingIds);
+        var idsToRemove = existingIds.Except(newIds);
+
+        await SetRole(userId, chatId, roleDb.Id, idsToAdd.ToList(), cancellationToken);
+        await UnSetRole(userId, chatId, roleDb.Id, idsToRemove.ToList(), cancellationToken);
+        
         roleDb = await _roleRepository.GetByIdAsync(roleId, cancellationToken);
         _logger.IsExists(roleDb, new RoleNotFoundException($"Role with this Id {userId} not found"));
         
