@@ -58,7 +58,7 @@ namespace SocialNetwork.Web.MapperConfiguration
             
             CreateMap<ChatCreateViewModel, ChatModel>()
                 .ForMember(dest => dest.ChatMembers, opt=>opt.Ignore())
-                .ForMember(dest => dest.roles, opt=>opt.Ignore())
+                .ForMember(dest => dest.Roles, opt=>opt.Ignore())
                 .ReverseMap();
 
             CreateMap<CreateRoleModel, RoleModel>()
@@ -84,10 +84,16 @@ namespace SocialNetwork.Web.MapperConfiguration
             
             CreateMap<ChatViewModel, ChatModel>()
                 .ForMember(dest => dest.ChatMembers, opt => opt.Ignore())
-                .ForMember(dest => dest.roles, opt => opt.Ignore())
+                .ForMember(dest => dest.Roles, opt => opt.Ignore())
                 .ReverseMap();
 
-            
+            CreateMap<ChatEditModel, ChatModel>()
+                .ForMember(dest => dest.ChatMembers, opt => opt.Ignore())
+                .ForMember(dest => dest.Roles, opt => opt.Ignore())
+                .ReverseMap();
+            CreateMap<ChatModel, ChatEditModel>()
+                .ForMember(dest => dest.ChatId, opt => opt.Ignore())
+                .ReverseMap();
         }
     }
 }

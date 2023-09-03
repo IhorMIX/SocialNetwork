@@ -56,6 +56,15 @@ public class ChatController : ControllerBase
         return Ok();
     }
     
+    //EditChat
+    [HttpPost("edit-chat")]
+    public async Task<IActionResult> EditChat([FromBody] ChatEditModel chatEditModel ,CancellationToken cancellationToken)
+    {
+        var userId = User.GetUserId();
+        var chat = await _chatService.EditChat(userId, chatEditModel.ChatId, _mapper.Map<ChatModel>(chatEditModel), cancellationToken);
+        return Ok(_mapper.Map<ChatViewModel>(chat));
+    }
+    
     [HttpDelete("del-chat")]
     public async Task<IActionResult> DelChat([FromQuery] int chatId, CancellationToken cancellationToken)
     {
@@ -107,7 +116,7 @@ public class ChatController : ControllerBase
     {
         _logger.LogInformation("Start to set role");
         var userId = User.GetUserId();
-        await _chatService.SetRole(userId, idsForRoleModel.ChatId, idsForRoleModel.RoleId, idsForRoleModel.MemberIds, cancellationToken);
+        await _chatService.SetRole(userId, idsForRoleModel.ChatId, idsForRoleModel.RoleId, idsForRoleModel.MemberIds!, cancellationToken);
         _logger.LogInformation("Role was set");
         return Ok();
     }

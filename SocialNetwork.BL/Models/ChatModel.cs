@@ -9,6 +9,6 @@ public class ChatModel : BaseModel
     public bool isGroup { get; set; }
 
     public ICollection<ChatMemberModel>? ChatMembers { get; set; }
-    public ICollection<RoleModel>? roles { get; set; }
+    public ICollection<RoleModel>? Roles { get; set; }
     
 }

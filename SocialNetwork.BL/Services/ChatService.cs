@@ -120,18 +120,22 @@ public class ChatService : IChatService
         {
             _logger.IsExists(chatDb, new NoRightException($"Chat is not group"));
         }
-        
+
+        var alreadyIn = await _chatMemberRepository.GetAll().Select(c => c.User.Id).Where(c => userIds.Contains(c))
+            .ToListAsync(cancellationToken);
+        var idsToAdd = userIds.Except(alreadyIn);
+
         var userInChat = await _chatMemberRepository.GetAll()
             .Where(c => c.Chat == chatDb)
             .Where(c => c.User == userDb)
             .SingleOrDefaultAsync(c => c.Role.Any(r => r.AddMembers == true), cancellationToken);
         _logger.IsExists(userInChat, new NoRightException($"You have no rights for it"));
         
-        
+              
         var roleList = new List<Role> { _roleRepository.GetAll().FirstOrDefault(r => r.RoleName == "@everyone" && r.Chat == null)! };
   
         List<ChatMember> chatMembers = new List<ChatMember>();
-        foreach (var memberId in userIds)
+        foreach (var memberId in idsToAdd)
         {
             var memberDb = await _userRepository.GetByIdAsync(memberId, cancellationToken);
             _logger.IsExists(userDb, new UserNotFoundException($"User with this Id {memberId} not found"));

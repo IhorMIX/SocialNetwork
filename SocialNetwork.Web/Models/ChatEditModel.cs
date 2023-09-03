@@ -2,10 +2,8 @@
 
 public class ChatEditModel
 {
+    public int ChatId { get; set; }
     public string Name { get; set; }
     
     public string Logo { get; set; }
-    
-    public ICollection<int> ChatMembersToRemove { get; set; } 
-    public ICollection<int> RolesToRemove { get; set; } 
 }
