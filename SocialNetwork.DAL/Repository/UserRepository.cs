@@ -1,6 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Configuration;
 using SocialNetwork.DAL.Entity;
 using SocialNetwork.DAL.Repository.Interfaces;
+using System.Reflection.Metadata.Ecma335;
 
 namespace SocialNetwork.DAL.Repository;
 
@@ -9,12 +12,14 @@ public class UserRepository : IUserRepository
     private readonly SocialNetworkDbContext _socialNetworkDbContext;
     private readonly IFriendshipRepository _friendshipRepository;
     private readonly IFriendRequestRepository _friendRequestRepository;
-
-    public UserRepository(SocialNetworkDbContext socialNetworkDbContext, IFriendshipRepository friendshipRepository, IFriendRequestRepository friendRequestRepository)
+    private readonly CachingHelper<User> _cachingHelper;
+    public UserRepository(SocialNetworkDbContext socialNetworkDbContext, IFriendshipRepository friendshipRepository, IFriendRequestRepository friendRequestRepository, CachingHelper<User> cachingHelper)
     {
         _socialNetworkDbContext = socialNetworkDbContext;
         _friendshipRepository = friendshipRepository;
         _friendRequestRepository = friendRequestRepository;
+        _cachingHelper = cachingHelper;
+
     }
 
     public IQueryable<User> GetAll()
@@ -24,9 +29,15 @@ public class UserRepository : IUserRepository
 
     public async Task<User?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
     {
-        return await _socialNetworkDbContext.Users.Include(i => i.Profile).Include(i => i.AuthorizationInfo)
+        return await _cachingHelper.GetOrUpdate($"User-{id}", async (id, cancellationToken) =>
+        {
+
+            return await _socialNetworkDbContext.Users.Include(i => i.Profile).Include(i => i.AuthorizationInfo)
             .FirstOrDefaultAsync(i => i.Id == id, cancellationToken);
+        });
+        
     }
+
 
     public async Task CreateUser(User user, CancellationToken cancellationToken = default)
     {
@@ -36,8 +47,11 @@ public class UserRepository : IUserRepository
 
     public async Task<User?> FindUserAsync(string login, CancellationToken cancellationToken = default)
     {
-        return await _socialNetworkDbContext.Users.Include(i => i.Profile).Include(i => i.AuthorizationInfo)
-            .FirstOrDefaultAsync(i => i.Login == login, cancellationToken);
+        return await _socialNetworkDbContext.Users
+                .Include(i => i.Profile)
+                .Include(i => i.AuthorizationInfo)
+                .FirstOrDefaultAsync(i => i.Login == login, cancellationToken);
+
     }
 
     public async Task UpdateUserAsync(User user, CancellationToken cancellationToken = default)
