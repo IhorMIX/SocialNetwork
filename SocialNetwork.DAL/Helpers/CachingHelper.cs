@@ -16,20 +16,20 @@ public class CachingHelper<T>
         .SetSlidingExpiration(TimeSpan.FromSeconds(5))
         .SetAbsoluteExpiration(TimeSpan.FromMinutes(10));
 
-    private readonly SemaphoreSlim _cacheLock = new SemaphoreSlim(1);
+    private readonly SemaphoreSlim _cacheLock = new(1);
 
-    public async Task<T> GetOrUpdate(string key, Func<T, CancellationToken, Task<T>> getDataFunc, CancellationToken cancellationToken = default)
+    public async Task<T?> GetOrUpdate(string key, Func<CancellationToken, Task<T>> getDataFunc, CancellationToken cancellationToken = default)
     {
-        if (_cache.TryGetValue(key, out T result))
+        if (_cache.TryGetValue(key, out T? result))
             return result;
 
         await _cacheLock.WaitAsync(cancellationToken);
         try
         {
-            if (_cache.TryGetValue(key, out T cachedResult))
+            if (_cache.TryGetValue(key, out T? cachedResult))
                 return cachedResult;
 
-            T newValue = await getDataFunc(key, cancellationToken);
+            T? newValue = await getDataFunc(cancellationToken);
             _cache.Set(key, newValue, _entryOptions.SetSize(1));
             return newValue;
         }

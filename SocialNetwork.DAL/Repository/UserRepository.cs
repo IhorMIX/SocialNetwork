@@ -12,8 +12,8 @@ public class UserRepository : IUserRepository
     private readonly SocialNetworkDbContext _socialNetworkDbContext;
     private readonly IFriendshipRepository _friendshipRepository;
     private readonly IFriendRequestRepository _friendRequestRepository;
-    private readonly CachingHelper<User> _cachingHelper;
-    public UserRepository(SocialNetworkDbContext socialNetworkDbContext, IFriendshipRepository friendshipRepository, IFriendRequestRepository friendRequestRepository, CachingHelper<User> cachingHelper)
+    private readonly CachingHelper<User?> _cachingHelper;
+    public UserRepository(SocialNetworkDbContext socialNetworkDbContext, IFriendshipRepository friendshipRepository, IFriendRequestRepository friendRequestRepository, CachingHelper<User?> cachingHelper)
     {
         _socialNetworkDbContext = socialNetworkDbContext;
         _friendshipRepository = friendshipRepository;
@@ -29,12 +29,11 @@ public class UserRepository : IUserRepository
 
     public async Task<User?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
     {
-        return await _cachingHelper.GetOrUpdate($"User-{id}", async (id, cancellationToken) =>
+        return await _cachingHelper.GetOrUpdate($"User-{id}", async (token) =>
         {
-
             return await _socialNetworkDbContext.Users.Include(i => i.Profile).Include(i => i.AuthorizationInfo)
-            .FirstOrDefaultAsync(i => i.Id == id, cancellationToken);
-        });
+            .FirstOrDefaultAsync(i => i.Id == id, token);
+        }, cancellationToken);
         
     }
 

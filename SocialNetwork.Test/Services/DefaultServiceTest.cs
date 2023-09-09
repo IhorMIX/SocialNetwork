@@ -21,6 +21,7 @@ namespace SocialNetwork.Test.Services
             services.AddScoped<TService>();
             services.AddScoped<ILogger<TService>, NullLogger<TService>>();
             services.AddAutoMapper(typeof(Startup));
+            services.AddScoped(typeof(CachingHelper<>));
         }
 
         [SetUp]
