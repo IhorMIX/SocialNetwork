@@ -16,6 +16,8 @@ public class UserServiceTest : DefaultServiceTest<IUserService ,UserService>
     protected override void SetUpAdditionalDependencies(IServiceCollection services)
     {
         services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<IFriendshipRepository, FriendshipRepository>();
+        services.AddScoped<IFriendRequestRepository, FriendRequestRepository>();
 
         base.SetUpAdditionalDependencies(services);
     }

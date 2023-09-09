@@ -21,6 +21,7 @@ public class FriendServiceTest : DefaultServiceTest<IFriendshipService, Friendsh
         services.AddScoped<IFriendshipRepository, FriendshipRepository>();
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IUserService, UserService>();
+        services.AddScoped<IFriendRequestRepository, FriendRequestRepository>();
         base.SetUpAdditionalDependencies(services);
     }
     
