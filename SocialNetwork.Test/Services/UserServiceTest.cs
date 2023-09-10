@@ -94,7 +94,7 @@ public class UserServiceTest : DefaultServiceTest<IUserService, UserService>
 
         await Service.CreateUserAsync(user);
 
-        Assert.ThrowsAsync<UserNotFoundException>(async () => await Service.GetByIdAsync(10));
+        Assert.ThrowsAsync<UserNotFoundException>(async () => await Service.GetByIdAsync(1000000000));
     }
 
     [Test]

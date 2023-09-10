@@ -1,4 +1,5 @@
-﻿using SocialNetwork.BL.Models;
+﻿using System.Text;
+using SocialNetwork.BL.Models;
 using SocialNetwork.BL.Models.Enums;
 
 namespace SocialNetwork.Test.Helpers;
@@ -11,7 +12,7 @@ public static class UserModelHelper
         var num = random.Next(100, 1000);
         return new UserModel()
         {
-            Login = "User" + num.ToString(),
+            Login = GenerateRandomLogin(8, 60),
             Password = "Password",
             Profile = new ProfileModel()
             {
@@ -24,6 +25,23 @@ public static class UserModelHelper
                 AvatarImage = "Image"
             }
         };
+    }
+    
+    private static readonly Random random = new();
+
+    public static string GenerateRandomLogin(int minLength, int maxLength)
+    {
+        int loginLength = random.Next(minLength, maxLength + 1);
+        const string chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        StringBuilder loginBuilder = new StringBuilder();
+
+        for (int i = 0; i < loginLength; i++)
+        {
+            int randomIndex = random.Next(chars.Length);
+            loginBuilder.Append(chars[randomIndex]);
+        }
+
+        return loginBuilder.ToString();
     }
     
 }
