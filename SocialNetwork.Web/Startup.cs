@@ -6,8 +6,10 @@ using Microsoft.IdentityModel.Tokens;
 using SocialNetwork.BL.Services;
 using SocialNetwork.BL.Services.Interfaces;
 using SocialNetwork.DAL;
+using SocialNetwork.DAL.Options;
 using SocialNetwork.DAL.Repository;
 using SocialNetwork.DAL.Repository.Interfaces;
+using SocialNetwork.DAL.Services;
 using SocialNetwork.Web.Extensions;
 using SocialNetwork.Web.Helpers;
 using SocialNetwork.Web.Options;
@@ -38,6 +40,8 @@ public class Startup
         services.AddValidatorsFromAssemblyContaining<UserValidator>();
         services.AddValidatorsFromAssemblyContaining<UserUpdateValidator>(); //added update validator in controller
         services.AddValidatorsFromAssemblyContaining<AuthorizeValidator>();
+        services.AddSingleton(typeof(CacheService<>));
+        services.Configure<CacheOptions>(Configuration.GetSection("CacheOptions"));
 
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>
