@@ -462,10 +462,15 @@ public class ChatService : IChatService
             .SingleOrDefaultAsync(c => c.Role.Any(r => r.EditRoles), cancellationToken);
         _logger.IsExists(userInChat, new NoRightException($"You have no rights for it"));
 
-        var rolesDb = await GetAllChatRoles(userId, chatId, cancellationToken);
-        
-        
-        
-        return null;
+        var roleIds = roleModels.Select(rm => rm.Id).ToList();
+        var rolesDb = await _roleRepository.GetAll().Where(r => r.Chat.Id == chatDb.Id && roleIds.Contains(r.Id))
+                .ToListAsync(cancellationToken);
+
+        for (int i = 0; i < roleModels.Count; i++)
+        {
+            rolesDb[i].Rank = roleModels[i].Rank;
+        }
+        await _roleRepository.EditRole(rolesDb!, cancellationToken);
+        return _mapper.Map<List<RoleModel>>(rolesDb);
     }
 }

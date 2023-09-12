@@ -94,6 +94,22 @@ namespace SocialNetwork.Web.MapperConfiguration
             CreateMap<ChatModel, ChatEditModel>()
                 .ForMember(dest => dest.ChatId, opt => opt.Ignore())
                 .ReverseMap();
+            
+            CreateMap<RoleRankModel, RoleModel>()
+                .ForMember(dest => dest.RoleName, opt => opt.Ignore())
+                .ForMember(dest => dest.RoleColor, opt => opt.Ignore())
+                .ForMember(dest => dest.AddMembers, opt => opt.Ignore())
+                .ForMember(dest => dest.DelMessages, opt => opt.Ignore())
+                .ForMember(dest => dest.EditChat, opt => opt.Ignore())
+                .ForMember(dest => dest.EditNicknames, opt => opt.Ignore())
+                .ForMember(dest => dest.EditRoles, opt => opt.Ignore())
+                .ForMember(dest => dest.DelMembers, opt => opt.Ignore())
+                .ForMember(dest => dest.MuteMembers, opt => opt.Ignore())
+                .ForMember(dest => dest.SendFiles, opt => opt.Ignore())
+                .ForMember(dest => dest.SendMessages, opt => opt.Ignore())
+                .ForMember(dest => dest.SendAudioMess, opt => opt.Ignore())
+                .ForMember(dest => dest.Chat, opt => opt.Ignore())
+                .ReverseMap();
         }
     }
 }

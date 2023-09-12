@@ -157,4 +157,14 @@ public class ChatController : ControllerBase
         return Ok(_mapper.Map<List<ChatMemberViewModel>>
             (await _chatService.GetChatMembers(userId, chatId, cancellationToken)));
     }
+
+    [HttpPost("edit-roles-rank")]
+    public async Task<IActionResult> EditRolesRank([FromBody] RoleRankUpdateModel roleEditModel, CancellationToken cancellationToken)
+    {
+        var userId = User.GetUserId();
+        var roles = await _chatService.EditRolesRank(userId, roleEditModel.ChatId, _mapper.Map<List<RoleModel>>(roleEditModel.RoleRanksModel),
+            cancellationToken);
+        return Ok(_mapper.Map<List<RoleViewModel>>(roles));
+    }
+
 }

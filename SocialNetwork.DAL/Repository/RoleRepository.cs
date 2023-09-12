@@ -48,4 +48,9 @@ public class RoleRepository : IRoleRepository
         _socialNetworkDbContext.Roles.Update(role);
         await _socialNetworkDbContext.SaveChangesAsync(cancellationToken);
     }
+    public async Task EditRole(List<Role> role, CancellationToken cancellationToken = default)
+    {
+        _socialNetworkDbContext.Roles.UpdateRange(role);
+        await _socialNetworkDbContext.SaveChangesAsync(cancellationToken);
+    }
 }
