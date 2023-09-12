@@ -121,7 +121,7 @@ public class ChatService : IChatService
             _logger.IsExists(chatDb, new NoRightException($"Chat is not group"));
         }
 
-        var alreadyIn = await _chatMemberRepository.GetAll().Select(c => c.User.Id).Where(c => userIds.Contains(c))
+        var alreadyIn = await _chatMemberRepository.GetAll().Where(c => userIds.Contains(c.User.Id) && c.Chat.Id == chatId).Select(u => u.User.Id)
             .ToListAsync(cancellationToken);
         var idsToAdd = userIds.Except(alreadyIn);
 
@@ -400,7 +400,9 @@ public class ChatService : IChatService
         var chatMembers = new List<ChatMember>(){};
         foreach (var uId in userIds)
         {
-            var chatMemberDb = await _chatMemberRepository.GetAll().Where(m => m.Chat == chatDb && m.User.Id == uId).SingleOrDefaultAsync(cancellationToken);
+            var chatMemberDb = await _chatMemberRepository.GetAll()
+                .Where(m => m.Chat == chatDb && m.User.Id == uId)
+                .SingleOrDefaultAsync(cancellationToken);
             _logger.IsExists(chatMemberDb, new UserNotFoundException($"User with this Id {uId} not found"));
             chatMemberDb!.Role.Remove(roleDb!);
             chatMembers.Add(chatMemberDb!);
@@ -445,5 +447,25 @@ public class ChatService : IChatService
             .Where(c => c.Chat == chatDb)
             .ToListAsync(cancellationToken);
         return _mapper.Map<List<ChatMemberModel>>(chatMembers);
+    }
+
+    public async Task<List<RoleModel>> EditRolesRank(int userId, int chatId, List<RoleModel> roleModels, CancellationToken cancellationToken = default)
+    {
+        var userDb = await _userRepository.GetByIdAsync(userId, cancellationToken);
+        _logger.IsExists(userDb, new UserNotFoundException($"User with this Id {userId} not found"));
+        var chatDb = await _chatRepository.GetByIdAsync(chatId, cancellationToken);
+        _logger.IsExists(chatDb, new ChatNotFoundException($"Chat with this Id {chatId} not found"));
+        
+        var userInChat = await _chatMemberRepository.GetAll()
+            .Where(c => c.Chat.Id == chatDb!.Id)
+            .Where(c => c.User == userDb)
+            .SingleOrDefaultAsync(c => c.Role.Any(r => r.EditRoles), cancellationToken);
+        _logger.IsExists(userInChat, new NoRightException($"You have no rights for it"));
+
+        var rolesDb = await GetAllChatRoles(userId, chatId, cancellationToken);
+        
+        
+        
+        return null;
     }
 }

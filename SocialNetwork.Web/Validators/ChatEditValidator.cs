@@ -9,8 +9,7 @@ public class ChatEditValidator : AbstractValidator<ChatEditModel>
     {
         RuleFor(x => x.Name).NotEmpty().NotNull()
             .Length(1, 50)
-            .Matches(@"^[\p{L}\p{Mn}\p{Pd}'\s]+$")
-            .WithMessage("Not a valid name format. Only Latin letters, digits, underscore and hyphen are allowed.");
+            .WithMessage("Length has to be from 1 to 50");
         
     }
 }
