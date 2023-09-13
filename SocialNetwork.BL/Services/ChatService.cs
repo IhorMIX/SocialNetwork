@@ -166,7 +166,7 @@ public class ChatService : IChatService
         var membersToDel = await _chatMemberRepository.GetAll().Where(i => userIds.Contains(i.Id)).ToListAsync(cancellationToken);
         _logger.IsExists(membersToDel, new ChatNotFoundException($"Chat with this Id {chatId} not found"));
         
-        await _chatRepository.DelMemberChatAsync(membersToDel, chatDb!, cancellationToken);
+        await _chatRepository.DelChatMemberAsync(membersToDel, chatDb!, cancellationToken);
     }
     
     public async Task DeleteChat(int userId, int chatId, CancellationToken cancellationToken = default)
