@@ -40,8 +40,10 @@ public class Startup
         services.AddValidatorsFromAssemblyContaining<UserValidator>();
         services.AddValidatorsFromAssemblyContaining<UserUpdateValidator>(); //added update validator in controller
         services.AddValidatorsFromAssemblyContaining<AuthorizeValidator>();
+        services.AddValidatorsFromAssemblyContaining<ChatValidator>();
         services.AddSingleton(typeof(CacheService<>));
         services.Configure<CacheOptions>(Configuration.GetSection("CacheOptions"));
+        services.Configure<RoleOption>(Configuration.GetSection("Roles"));
 
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>
@@ -68,11 +70,18 @@ public class Startup
         services.AddSingleton<TokenHelper>();
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IUserService, UserService>();
+        
         services.AddScoped<IFriendshipRepository, FriendshipRepository>();
         services.AddScoped<IFriendshipService, FriendshipService>();
+        
         services.AddScoped<IFriendRequestRepository, FriendRequestRepository>();
         services.AddScoped<IFriendRequestService, FriendRequestService>();
-
+        
+        services.AddScoped<IChatService,ChatService>();
+        services.AddScoped<IChatRepository,ChatRepository>();
+        services.AddScoped<IRoleRepository,RoleRepository>();
+        services.AddScoped<IChatMemberRepository,ChatMemberRepository>();
+        
         var connectionString = Environment.GetEnvironmentVariable("SQLSERVER_CONNECTION_STRING") ?? Configuration.GetConnectionString("ConnectionString");
 
         services.AddDbContext<SocialNetworkDbContext>(options =>

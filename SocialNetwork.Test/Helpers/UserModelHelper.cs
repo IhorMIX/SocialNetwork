@@ -6,19 +6,19 @@ namespace SocialNetwork.Test.Helpers;
 
 public static class UserModelHelper
 {
-    public static UserModel CreateTestData()
+    public static async Task<UserModel> CreateTestData()
     {
         Random random = new Random();
-        var num = random.Next(100, 1000);
         return new UserModel()
         {
+
             Login = GenerateRandomLogin(8, 60),
             Password = "Password",
             Profile = new ProfileModel()
             {
                 Birthday = DateTime.Now,
                 Description = "sdsdds",
-                Email = "User" + num.ToString() + "@gmail.com",
+                Email = GenerateRandomLogin(8, 60) + "@gmail.com",
                 Name = "Test",
                 Sex = Sex.Male,
                 Surname = "Test",

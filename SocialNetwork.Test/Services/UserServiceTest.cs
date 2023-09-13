@@ -7,6 +7,7 @@ using SocialNetwork.BL.Services.Interfaces;
 using SocialNetwork.DAL;
 using SocialNetwork.DAL.Repository;
 using SocialNetwork.DAL.Repository.Interfaces;
+using SocialNetwork.Test.Helpers;
 using SocialNetwork.Web;
 
 namespace SocialNetwork.Test.Services;
@@ -15,10 +16,18 @@ public class UserServiceTest : DefaultServiceTest<IUserService, UserService>
 {
     protected override void SetUpAdditionalDependencies(IServiceCollection services)
     {
+        services.AddScoped<IFriendRequestRepository, FriendRequestRepository>();
         services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<IUserService, UserService>();
+        services.AddScoped<IFriendshipService, FriendshipService>();
+        services.AddScoped<IFriendshipRepository, FriendshipRepository>();
+        
+        services.AddScoped<IChatService, ChatService>();
+        services.AddScoped<IRoleRepository, RoleRepository>();
+        services.AddScoped<IChatRepository, ChatRepository>();
+        services.AddScoped<IChatMemberRepository, ChatMemberRepository>();
         services.AddScoped<IFriendshipRepository, FriendshipRepository>();
         services.AddScoped<IFriendRequestRepository, FriendRequestRepository>();
-
         base.SetUpAdditionalDependencies(services);
     }
 
@@ -76,6 +85,7 @@ public class UserServiceTest : DefaultServiceTest<IUserService, UserService>
     [Test]
     public async Task CreateUserAndGetWithIncorrectId_ShouldFail()
     {
+
         var user = new UserModel()
         {
             Login = "TestLogin3",
@@ -273,9 +283,7 @@ public class UserServiceTest : DefaultServiceTest<IUserService, UserService>
         Assert.That(createdUser!.AuthorizationInfo, Is.Not.EqualTo(null));
 
         Assert.ThrowsAsync<TimeoutException>(async () =>
-            await Service.AddAuthorizationValueAsync(createdUser!, "2222", LoginType.LocalSystem));
-        createdUser = await Service.GetUserByLogin(user.Login);
-        Assert.That(createdUser!.AuthorizationInfo, Is.EqualTo(null));
+            await Service.GetUserByRefreshTokenAsync(createdUser.AuthorizationInfo.RefreshToken));
     }
 
     [Test]

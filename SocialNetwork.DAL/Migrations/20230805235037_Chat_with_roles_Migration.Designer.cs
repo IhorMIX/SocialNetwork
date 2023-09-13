@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SocialNetwork.DAL;
 
@@ -11,9 +12,11 @@ using SocialNetwork.DAL;
 namespace SocialNetwork.DAL.Migrations
 {
     [DbContext(typeof(SocialNetworkDbContext))]
-    partial class SocialNetworkDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230805235037_Chat_with_roles_Migration")]
+    partial class Chat_with_roles_Migration
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -34,7 +37,7 @@ namespace SocialNetwork.DAL.Migrations
 
                     b.HasIndex("RoleId");
 
-                    b.ToTable("ChatMemberRole", (string)null);
+                    b.ToTable("ChatMemberRole");
                 });
 
             modelBuilder.Entity("SocialNetwork.DAL.Entity.AuthorizationInfo", b =>
@@ -63,7 +66,7 @@ namespace SocialNetwork.DAL.Migrations
                     b.HasIndex("UserId")
                         .IsUnique();
 
-                    b.ToTable("AuthorizationInfo", (string)null);
+                    b.ToTable("AuthorizationInfo");
                 });
 
             modelBuilder.Entity("SocialNetwork.DAL.Entity.Chat", b =>
@@ -87,7 +90,7 @@ namespace SocialNetwork.DAL.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Chats", (string)null);
+                    b.ToTable("Chats");
                 });
 
             modelBuilder.Entity("SocialNetwork.DAL.Entity.ChatMember", b =>
@@ -110,7 +113,7 @@ namespace SocialNetwork.DAL.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("ChatMembers", (string)null);
+                    b.ToTable("ChatMembers");
                 });
 
             modelBuilder.Entity("SocialNetwork.DAL.Entity.FriendRequest", b =>
@@ -133,7 +136,7 @@ namespace SocialNetwork.DAL.Migrations
 
                     b.HasIndex("SenderId");
 
-                    b.ToTable("FriendRequests", (string)null);
+                    b.ToTable("FriendRequests");
                 });
 
             modelBuilder.Entity("SocialNetwork.DAL.Entity.Friendship", b =>
@@ -151,7 +154,7 @@ namespace SocialNetwork.DAL.Migrations
 
                     b.HasIndex("FriendId");
 
-                    b.ToTable("Friends", (string)null);
+                    b.ToTable("Friends");
                 });
 
             modelBuilder.Entity("SocialNetwork.DAL.Entity.Profile", b =>
@@ -196,7 +199,7 @@ namespace SocialNetwork.DAL.Migrations
                     b.HasIndex("UserId")
                         .IsUnique();
 
-                    b.ToTable("Profiles", (string)null);
+                    b.ToTable("Profiles");
                 });
 
             modelBuilder.Entity("SocialNetwork.DAL.Entity.Role", b =>
@@ -255,7 +258,7 @@ namespace SocialNetwork.DAL.Migrations
 
                     b.HasIndex("ChatId");
 
-                    b.ToTable("Roles", (string)null);
+                    b.ToTable("Roles");
                 });
 
             modelBuilder.Entity("SocialNetwork.DAL.Entity.User", b =>
@@ -288,7 +291,7 @@ namespace SocialNetwork.DAL.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Users", (string)null);
+                    b.ToTable("Users");
                 });
 
             modelBuilder.Entity("ChatMemberRole", b =>

@@ -1,4 +1,5 @@
-﻿using SocialNetwork.BL.Models;
+﻿using Microsoft.EntityFrameworkCore.SqlServer.Design.Internal;
+using SocialNetwork.BL.Models;
 using SocialNetwork.DAL.Entity;
 using SocialNetwork.Web.Models;
 using Profile = AutoMapper.Profile;
@@ -47,6 +48,68 @@ namespace SocialNetwork.Web.MapperConfiguration
             
             CreateMap<AuthorizationInfoModel, AuthorizationInfo>().ReverseMap();
             CreateMap<ProfileModel, SocialNetwork.DAL.Entity.Profile>().ReverseMap();
+            CreateMap<ChatModel, Chat>().ReverseMap();
+            CreateMap<ChatMemberModel, ChatMember>().ReverseMap();
+            
+            CreateMap<Role, RoleModel>()
+                .ForMember(dest => dest.Chat, opt => opt.Ignore())
+                .ForMember(dest => dest.UsersIds, opt => opt.MapFrom(src => src.ChatMembers.Select(cm => cm.User.Id)))
+                .ReverseMap();
+            
+            CreateMap<ChatCreateViewModel, ChatModel>()
+                .ForMember(dest => dest.ChatMembers, opt=>opt.Ignore())
+                .ForMember(dest => dest.Roles, opt=>opt.Ignore())
+                .ReverseMap();
+
+            CreateMap<CreateRoleModel, RoleModel>()
+                .ForMember(dest => dest.Chat, opt => opt.Ignore())
+                .ForMember(dest => dest.UsersIds, opt => opt.Ignore())
+                .ReverseMap();
+            
+            CreateMap<RoleEditModel, RoleModel>()
+                .ForMember(dest => dest.Chat, opt => opt.Ignore())
+                .ReverseMap();
+            CreateMap<RoleViewModel, RoleModel>()
+                .ForMember(dest => dest.Chat, opt => opt.Ignore())
+                .ReverseMap();
+            CreateMap<ChatMemberRoleViewModel, RoleModel>()
+                .ForMember(dest => dest.Chat, opt => opt.Ignore())
+                .ForMember(dest => dest.UsersIds, opt => opt.Ignore())
+                .ReverseMap();
+            
+            CreateMap<ChatMemberViewModel, ChatMemberModel>()
+                .ForMember(dest => dest.Chat, opt => opt.Ignore())
+                .ForMember(dest => dest.Role, opt => opt.Ignore())
+                .ReverseMap();
+            
+            CreateMap<ChatViewModel, ChatModel>()
+                .ForMember(dest => dest.ChatMembers, opt => opt.Ignore())
+                .ForMember(dest => dest.Roles, opt => opt.Ignore())
+                .ReverseMap();
+
+            CreateMap<ChatEditModel, ChatModel>()
+                .ForMember(dest => dest.ChatMembers, opt => opt.Ignore())
+                .ForMember(dest => dest.Roles, opt => opt.Ignore())
+                .ReverseMap();
+            CreateMap<ChatModel, ChatEditModel>()
+                .ForMember(dest => dest.ChatId, opt => opt.Ignore())
+                .ReverseMap();
+            
+            CreateMap<RoleRankModel, RoleModel>()
+                .ForMember(dest => dest.RoleName, opt => opt.Ignore())
+                .ForMember(dest => dest.RoleColor, opt => opt.Ignore())
+                .ForMember(dest => dest.AddMembers, opt => opt.Ignore())
+                .ForMember(dest => dest.DelMessages, opt => opt.Ignore())
+                .ForMember(dest => dest.EditChat, opt => opt.Ignore())
+                .ForMember(dest => dest.EditNicknames, opt => opt.Ignore())
+                .ForMember(dest => dest.EditRoles, opt => opt.Ignore())
+                .ForMember(dest => dest.DelMembers, opt => opt.Ignore())
+                .ForMember(dest => dest.MuteMembers, opt => opt.Ignore())
+                .ForMember(dest => dest.SendFiles, opt => opt.Ignore())
+                .ForMember(dest => dest.SendMessages, opt => opt.Ignore())
+                .ForMember(dest => dest.SendAudioMess, opt => opt.Ignore())
+                .ForMember(dest => dest.Chat, opt => opt.Ignore())
+                .ReverseMap();
         }
     }
 }

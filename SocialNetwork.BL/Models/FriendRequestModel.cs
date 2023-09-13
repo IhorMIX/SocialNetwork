@@ -1,6 +1,6 @@
 ﻿namespace SocialNetwork.BL.Models;
 
-public class FriendRequestModel
+public class FriendRequestModel : BaseModel
 {
         
         public int SenderId { get; set; }

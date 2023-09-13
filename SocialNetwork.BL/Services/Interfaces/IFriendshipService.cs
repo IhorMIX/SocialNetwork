@@ -14,4 +14,5 @@ public interface IFriendshipService : IBaseService<FriendshipModel>
     Task<IEnumerable<UserModel>> FindFriendByNameSurname(int userId, string nameSurname, CancellationToken cancellationToken = default);
     
     Task<UserModel> FindFriendByEmail(int userId, string friendEmail, CancellationToken cancellationToken = default);
+    Task<bool> IsFriends(int userId, int user2Id, CancellationToken cancellationToken = default);
 }
