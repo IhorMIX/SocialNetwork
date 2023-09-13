@@ -2,11 +2,13 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using SocialNetwork.BL.Exceptions;
 using SocialNetwork.BL.Helpers;
 using SocialNetwork.BL.Models;
 using SocialNetwork.BL.Services.Interfaces;
 using SocialNetwork.DAL.Entity;
+using SocialNetwork.DAL.Options;
 using SocialNetwork.DAL.Repository.Interfaces;
 
 namespace SocialNetwork.BL.Services;
@@ -20,7 +22,7 @@ public class ChatService : IChatService
     private readonly ILogger<ChatService> _logger;
     private readonly IChatMemberRepository _chatMemberRepository;
     private readonly IMapper _mapper;
-    private readonly IConfiguration _configuration;
+    private readonly RoleOption _roleOptions;
     
     public ChatService(
         IChatRepository chatRepository, 
@@ -30,7 +32,7 @@ public class ChatService : IChatService
         IFriendshipService friendshipService, 
         IRoleRepository roleRepository, 
         IChatMemberRepository chatMemberRepository,
-        IConfiguration configuration)
+        IOptions<RoleOption> roleOptions)
     {
         _chatRepository = chatRepository;
         _logger = logger;
@@ -39,7 +41,7 @@ public class ChatService : IChatService
         _friendshipService = friendshipService;
         _roleRepository = roleRepository;
         _chatMemberRepository = chatMemberRepository;
-        _configuration = configuration;
+        _roleOptions = roleOptions.Value;
     }
 
     public async Task<ChatModel?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
@@ -70,7 +72,8 @@ public class ChatService : IChatService
         _logger.IsExists(chatDb, new ChatNotFoundException($"Chat with this Id {chatId} not found"));
         
         //p2pAdmin role
-        var roleList = new List<Role>(){(await _roleRepository.GetByIdAsync(_configuration.GetValue<int>("RoleP2PAdminId"), cancellationToken))!};
+        var roleList = new List<Role>(){(await _roleRepository.GetByIdAsync(_roleOptions.RoleP2PAdminId, cancellationToken))!};
+        
         await _chatRepository.AddChatMemberAsync(new ChatMember
         {
             Chat = chatDb!,
@@ -96,9 +99,12 @@ public class ChatService : IChatService
         _logger.IsExists(chatDb, new ChatNotFoundException($"Chat with this Id {chatId} not found"));
         
         //admin role
-        var roleList = new List<Role>(){(await _roleRepository.GetByIdAsync(_configuration.GetValue<int>("RoleAdminId"), cancellationToken))!};
-        roleList.Add((await _roleRepository.GetByIdAsync(1, cancellationToken))!);
-        
+        var roleList = new List<Role>
+        {
+            (await _roleRepository.GetByIdAsync(_roleOptions.RoleAdminId, cancellationToken))!,
+            (await _roleRepository.GetByIdAsync(_roleOptions.RoleEveryone, cancellationToken))!
+        };
+
         var member = new ChatMember
         {
             Chat = chatDb!,
@@ -131,7 +137,7 @@ public class ChatService : IChatService
             .SingleOrDefaultAsync(c => c.Role.Any(r => r.AddMembers == true), cancellationToken);
         _logger.IsExists(userInChat, new NoRightException($"You have no rights for it"));
         
-        var roleList = new List<Role>(){(await _roleRepository.GetByIdAsync(_configuration.GetValue<int>("RoleEveryone"), cancellationToken))!};
+        var roleList = new List<Role>(){(await _roleRepository.GetByIdAsync(_roleOptions.RoleEveryone, cancellationToken))!};
         var usersToAdd = await _userRepository.GetAll().Where(i => idsToAdd.Contains(i.Id)).ToListAsync(cancellationToken);
         _logger.IsExists(usersToAdd, new ChatNotFoundException($"Chat with this Id {chatId} not found"));
         

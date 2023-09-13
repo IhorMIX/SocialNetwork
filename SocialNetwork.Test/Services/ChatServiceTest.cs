@@ -26,10 +26,10 @@ public class ChatServiceTest : DefaultServiceTest<IChatService, ChatService>
         services.AddScoped<IRoleRepository, RoleRepository>();
         services.AddScoped<IChatRepository, ChatRepository>();
         services.AddScoped<IChatMemberRepository, ChatMemberRepository>();
-        
-        
+    
         base.SetUpAdditionalDependencies(services);
     }
+    
     private async Task CreateRole()
     {
         var _roleRepository =  ServiceProvider.GetRequiredService<IRoleRepository>();
@@ -276,7 +276,7 @@ public class ChatServiceTest : DefaultServiceTest<IChatService, ChatService>
         Assert.That(user1, Is.Not.EqualTo(null));
         Assert.That(user2, Is.Not.EqualTo(null));
         Assert.That(user3, Is.Not.EqualTo(null));
-        await CreateRole();
+        //await CreateRole();
         
         await Service.CreateGroupChat(user1.Id, new ChatModel
         {

@@ -18,7 +18,7 @@ public static class UserModelHelper
             {
                 Birthday = DateTime.Now,
                 Description = "sdsdds",
-                Email = "User" + random.Next(100, 10000) + "@gmail.com",
+                Email = GenerateRandomLogin(8, 60) + "@gmail.com",
                 Name = "Test",
                 Sex = Sex.Male,
                 Surname = "Test",

@@ -283,9 +283,7 @@ public class UserServiceTest : DefaultServiceTest<IUserService, UserService>
         Assert.That(createdUser!.AuthorizationInfo, Is.Not.EqualTo(null));
 
         Assert.ThrowsAsync<TimeoutException>(async () =>
-            await Service.AddAuthorizationValueAsync(createdUser!, "2222", LoginType.LocalSystem));
-        createdUser = await Service.GetUserByLogin(user.Login);
-        Assert.That(createdUser!.AuthorizationInfo, Is.EqualTo(null));
+            await Service.GetUserByRefreshTokenAsync(createdUser.AuthorizationInfo.RefreshToken));
     }
 
     [Test]

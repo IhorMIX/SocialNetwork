@@ -173,7 +173,7 @@ public class UserService : IUserService
         var userModel = _mapper.Map<UserModel>(userDb);
         return userModel;
     }
-
+    //if expired throw exp
     public async Task<UserModel> GetUserByRefreshTokenAsync(string refreshToken,
         CancellationToken cancellationToken = default)
     {
@@ -182,13 +182,16 @@ public class UserService : IUserService
                 i.AuthorizationInfo != null && 
                 i.AuthorizationInfo.RefreshToken == refreshToken, 
                 cancellationToken);
-
+        
         if (userDb is null)
         {
             _logger.LogError("refresh token not found");
             throw new UserNotFoundException($"User not found");
         }
-
+        
+        if (userDb.AuthorizationInfo is not null && userDb.AuthorizationInfo.ExpiredDate <= DateTime.Now.AddDays(-1))
+            throw new TimeoutException();
+        
         var userModel = _mapper.Map<UserModel>(userDb);
         return userModel;
     }
