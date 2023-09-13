@@ -11,4 +11,16 @@ public static class IsExistsHelper
         logger.LogError(exceptionType.Message);
         throw exceptionType;
     }
+    public static void IsExists(this ILogger logger, List<Object>? model, CustomException exceptionType)
+    {
+
+        foreach (var m in model)
+        {
+            if (m is null)
+            {
+                logger.LogError(exceptionType.Message);
+                throw exceptionType;
+            }
+        }
+    }
 }

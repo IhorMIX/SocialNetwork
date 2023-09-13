@@ -8,10 +8,10 @@ public interface IChatService : IBaseService<ChatModel>
     Task CreateP2PChat(int userId, int user2Id, ChatModel chatModel, CancellationToken cancellationToken = default);
     Task<ChatModel> CreateGroupChat(int userId, ChatModel chatModel, CancellationToken cancellationToken = default);
     Task AddUsers(int userId, int chatId, List<int> userIds, CancellationToken cancellationToken = default);
-    Task DelMember(int userId, int chatId, int memberId, CancellationToken cancellationToken = default);
+    Task DelMember(int userId, int chatId, List<int> userIds, CancellationToken cancellationToken = default);
     
     Task<ChatModel> EditChat(int userId, int chatId, ChatModel chatModel, CancellationToken cancellationToken = default);
-    Task Delete(int userId, int chatId, CancellationToken cancellationToken = default);
+    Task DeleteChat(int userId, int chatId, CancellationToken cancellationToken = default);
     Task<List<ChatModel>> FindChatByName(int userId, string chatName, CancellationToken cancellationToken = default);
     Task<List<ChatModel>> GetAllChats(int userId, CancellationToken cancellationToken = default);
 

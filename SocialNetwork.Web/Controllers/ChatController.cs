@@ -41,17 +41,17 @@ public class ChatController : ControllerBase
     {
         _logger.LogInformation("Start to add user in chat");
         var userId = User.GetUserId();
-        await _chatService.AddUsers(userId, addUserInChatModel.chatId, addUserInChatModel.newMeberIds, cancellationToken);
+        await _chatService.AddUsers(userId, addUserInChatModel.ChatId, addUserInChatModel.NewMeberIds, cancellationToken);
         _logger.LogInformation("User was added in chat");
         return Ok();
     }
 
-    [HttpDelete("del-chat-member")]
-    public async Task<IActionResult> DelChatMember([FromQuery] int chatId, [FromQuery] int memberId, CancellationToken cancellationToken)
+    [HttpDelete("chat-member")]
+    public async Task<IActionResult> DelChatMember([FromBody] DelChatMembersModel delChatMembersModel, CancellationToken cancellationToken)
     {
         _logger.LogInformation("Start to delete user in chat");
         var userId = User.GetUserId();
-        await _chatService.DelMember(userId, chatId, memberId, cancellationToken);
+        await _chatService.DelMember(userId, delChatMembersModel.ChatId, delChatMembersModel.MeberIds , cancellationToken);
         _logger.LogInformation("User was deleted in chat");
         return Ok();
     }
@@ -70,7 +70,7 @@ public class ChatController : ControllerBase
     {
         _logger.LogInformation("Start to delete chat");
         var userId = User.GetUserId();
-        await _chatService.Delete(userId, chatId, cancellationToken);
+        await _chatService.DeleteChat(userId, chatId, cancellationToken);
         _logger.LogInformation("Chat was deleted");
         return Ok();
     }

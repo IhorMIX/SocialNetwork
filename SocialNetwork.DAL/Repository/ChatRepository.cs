@@ -72,6 +72,16 @@ public class ChatRepository : IChatRepository
         await _socialNetworkDbContext.SaveChangesAsync(cancellationToken);
     }
     
+    public async Task DelMemberChatAsync(List<ChatMember> chatMembers, Chat chat, CancellationToken cancellationToken = default)
+    {
+        foreach (var c in chatMembers)
+        {
+            chat.ChatMembers?.Remove(c);
+        }
+        _socialNetworkDbContext.Chats.Update(chat);
+        await _socialNetworkDbContext.SaveChangesAsync(cancellationToken);
+    }
+    
     public async Task EditChat(Chat chat, CancellationToken cancellationToken = default)
     {
         _socialNetworkDbContext.Chats.Update(chat);

@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using SocialNetwork.BL.Exceptions;
 using SocialNetwork.BL.Helpers;
@@ -19,7 +20,7 @@ public class ChatService : IChatService
     private readonly ILogger<ChatService> _logger;
     private readonly IChatMemberRepository _chatMemberRepository;
     private readonly IMapper _mapper;
-    //private readonly IConfiguration _configuration;
+    private readonly IConfiguration _configuration;
     
     public ChatService(
         IChatRepository chatRepository, 
@@ -28,7 +29,8 @@ public class ChatService : IChatService
         IUserRepository userRepository, 
         IFriendshipService friendshipService, 
         IRoleRepository roleRepository, 
-        IChatMemberRepository chatMemberRepository)
+        IChatMemberRepository chatMemberRepository,
+        IConfiguration configuration)
     {
         _chatRepository = chatRepository;
         _logger = logger;
@@ -37,7 +39,7 @@ public class ChatService : IChatService
         _friendshipService = friendshipService;
         _roleRepository = roleRepository;
         _chatMemberRepository = chatMemberRepository;
-        //_configuration = configuration;
+        _configuration = configuration;
     }
 
     public async Task<ChatModel?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
@@ -68,8 +70,7 @@ public class ChatService : IChatService
         _logger.IsExists(chatDb, new ChatNotFoundException($"Chat with this Id {chatId} not found"));
         
         //p2pAdmin role
-        var roleList = new List<Role>() { (await _roleRepository.GetByIdAsync(3, cancellationToken))! };
-        //roleList.Add((await _roleRepository.GetByIdAsync(_configuration.GetValue<int>("RoleP2PAdminId"), cancellationToken))!);
+        var roleList = new List<Role>(){(await _roleRepository.GetByIdAsync(_configuration.GetValue<int>("RoleP2PAdminId"), cancellationToken))!};
         await _chatRepository.AddChatMemberAsync(new ChatMember
         {
             Chat = chatDb!,
@@ -95,8 +96,7 @@ public class ChatService : IChatService
         _logger.IsExists(chatDb, new ChatNotFoundException($"Chat with this Id {chatId} not found"));
         
         //admin role
-        var roleList = new List<Role>() { (await _roleRepository.GetByIdAsync(2, cancellationToken))! };
-        //roleList.Add((await _roleRepository.GetByIdAsync(_configuration.GetValue<int>("RoleAdminId"), cancellationToken))!);
+        var roleList = new List<Role>(){(await _roleRepository.GetByIdAsync(_configuration.GetValue<int>("RoleAdminId"), cancellationToken))!};
         roleList.Add((await _roleRepository.GetByIdAsync(1, cancellationToken))!);
         
         var member = new ChatMember
@@ -131,25 +131,24 @@ public class ChatService : IChatService
             .SingleOrDefaultAsync(c => c.Role.Any(r => r.AddMembers == true), cancellationToken);
         _logger.IsExists(userInChat, new NoRightException($"You have no rights for it"));
         
-              
-        var roleList = new List<Role> { _roleRepository.GetAll().FirstOrDefault(r => r.RoleName == "@everyone" && r.Chat == null)! };
-  
+        var roleList = new List<Role>(){(await _roleRepository.GetByIdAsync(_configuration.GetValue<int>("RoleEveryone"), cancellationToken))!};
+        var usersToAdd = await _userRepository.GetAll().Where(i => idsToAdd.Contains(i.Id)).ToListAsync(cancellationToken);
+        _logger.IsExists(usersToAdd, new ChatNotFoundException($"Chat with this Id {chatId} not found"));
+        
         List<ChatMember> chatMembers = new List<ChatMember>();
-        foreach (var memberId in idsToAdd)
+        foreach (var userToAdd in usersToAdd)
         {
-            var memberDb = await _userRepository.GetByIdAsync(memberId, cancellationToken);
-            _logger.IsExists(userDb, new UserNotFoundException($"User with this Id {memberId} not found"));
             chatMembers.Add(new ChatMember
             {
                 Chat = chatDb,
-                User = memberDb!,
+                User = userToAdd!,
                 Role = new List<Role>(roleList)
             });
         }
         await _chatRepository.AddChatMemberAsync(chatMembers, chatDb, cancellationToken);
     }
 
-    public async Task DelMember(int userId, int chatId, int memberId, CancellationToken cancellationToken = default)
+    public async Task DelMember(int userId, int chatId, List<int> userIds, CancellationToken cancellationToken = default)
     {
         var userDb = await _userRepository.GetByIdAsync(userId, cancellationToken);
         _logger.IsExists(userDb, new UserNotFoundException($"User with this Id {userId} not found"));
@@ -162,13 +161,14 @@ public class ChatService : IChatService
             .SingleOrDefaultAsync(c => c.Role.Any(r => r.DelMembers == true), cancellationToken);
         _logger.IsExists(userInChat, new NoRightException($"You have no rights for it"));
 
-        var memberDb = await _userRepository.GetByIdAsync(memberId, cancellationToken);
-        _logger.IsExists(userDb, new UserNotFoundException($"User with this Id {memberId} not found"));
-        await _chatRepository.DelMemberChatAsync(memberDb!.Id, chatDb!, cancellationToken);
-
+        
+        var membersToDel = await _chatMemberRepository.GetAll().Where(i => userIds.Contains(i.Id)).ToListAsync(cancellationToken);
+        _logger.IsExists(membersToDel, new ChatNotFoundException($"Chat with this Id {chatId} not found"));
+        
+        await _chatRepository.DelMemberChatAsync(membersToDel, chatDb!, cancellationToken);
     }
     
-    public async Task Delete(int userId, int chatId, CancellationToken cancellationToken = default)
+    public async Task DeleteChat(int userId, int chatId, CancellationToken cancellationToken = default)
     {
         var userDb = await _userRepository.GetByIdAsync(userId, cancellationToken);
         _logger.IsExists(userDb, new UserNotFoundException($"User with this Id {userId} not found"));
