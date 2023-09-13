@@ -102,7 +102,6 @@ public class UserService : IUserService
 
     public async Task DeleteUserAsync(int id, CancellationToken cancellationToken = default)
     {
-
         var userDb = await _userRepository.GetByIdAsync(id, cancellationToken);
 
         if (userDb is null)

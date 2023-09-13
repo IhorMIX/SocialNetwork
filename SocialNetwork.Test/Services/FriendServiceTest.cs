@@ -28,6 +28,7 @@ public class FriendServiceTest : DefaultServiceTest<IFriendshipService, Friendsh
         services.AddScoped<IRoleRepository, RoleRepository>();
         services.AddScoped<IChatRepository, ChatRepository>();
         services.AddScoped<IChatMemberRepository, ChatMemberRepository>();
+        services.AddScoped<IFriendRequestRepository, FriendRequestRepository>();
         base.SetUpAdditionalDependencies(services);
     }
     
