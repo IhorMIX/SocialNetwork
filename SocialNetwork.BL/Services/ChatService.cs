@@ -47,12 +47,7 @@ public class ChatService : IChatService
     public async Task<ChatModel?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
     {
         var chat = await _chatRepository.GetByIdAsync(id, cancellationToken);
-        if (chat is null)
-        {
-            _logger.LogError("Chat with this Id {Id} not found", id);
-            throw new Exception($"Chat with Id '{id}' not found");
-        }
-        
+        _logger.IsExists(chat, new ChatNotFoundException($"Chat with this Id {id} not found"));
         return _mapper.Map<ChatModel>(chat);
     }
 

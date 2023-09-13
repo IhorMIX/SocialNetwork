@@ -30,33 +30,23 @@ public class UserService : IUserService
 
     public async Task<UserModel?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
     {
-        var user = await _userRepository.GetByIdAsync(id, cancellationToken);
-
-        if (user is null)
-        {
-            _logger.LogError("User with this Id {Id} not found", id);
-            throw new UserNotFoundException($"User with Id '{id}' not found");
-        }
-
-        var userModel = _mapper.Map<UserModel>(user);
+        var userDb = await _userRepository.GetByIdAsync(id, cancellationToken);
+        _logger.IsExists(userDb, new UserNotFoundException($"User with this Id {id} not found"));
+        var userModel = _mapper.Map<UserModel>(userDb);
         return userModel;
     }
 
     public async Task CreateUserAsync(UserModel user, CancellationToken cancellationToken = default)
     {
         var userDb = await _userRepository.GetAll().FirstOrDefaultAsync(i => i.Login == user.Login || i.Profile.Email == user.Profile.Email, cancellationToken);
-
+        
         if (userDb != null)
         {
             if (userDb.Login == user.Login)
-            {
                 throw new AlreadyLoginAndEmailException("Login is already used by another user");
-            }
 
             if (userDb.Profile.Email == user.Profile.Email)
-            {
                 throw new AlreadyLoginAndEmailException("Email is already used by another user");
-            }
         }
 
         var userDbModel = _mapper.Map<User>(user);
@@ -71,13 +61,9 @@ public class UserService : IUserService
 
         var userDb = await _userRepository.GetByIdAsync(id, cancellationToken);
 
-        if (userDb is null)
-        {
-            _logger.LogError("User with this {Id} not found", id);
-            throw new UserNotFoundException($"User with Id '{id}' not found");
-        }
+        _logger.IsExists(userDb, new UserNotFoundException($"User with this Id {id} not found"));
 
-        userDb.Password = string.IsNullOrEmpty(user.Password)
+        userDb!.Password = string.IsNullOrEmpty(user.Password)
             ? userDb.Password
             : PasswordHelper.HashPassword(user.Password);
 
@@ -104,25 +90,16 @@ public class UserService : IUserService
     {
         var userDb = await _userRepository.GetByIdAsync(id, cancellationToken);
 
-        if (userDb is null)
-        {
-            _logger.LogError("User with this {Id} not found", id);
-            throw new UserNotFoundException($"User with Id '{id}' not found");
-        }
+        _logger.IsExists(userDb, new UserNotFoundException($"User with this Id {id} not found"));
 
-        await _userRepository.DeleteUserAsync(userDb, cancellationToken);
+        await _userRepository.DeleteUserAsync(userDb!, cancellationToken);
     }
 
     public async Task AddAuthorizationValueAsync(UserModel user, string refreshToken, LoginType loginType, DateTime? expiredDate = null,
         CancellationToken cancellationToken = default)
     {
         var userDb = await _userRepository.GetByIdAsync(user.Id, cancellationToken);
-
-        if (userDb is null)
-        {
-            _logger.LogError("User with this {Id} not found", user.Id);
-            throw new UserNotFoundException($"User with Id '{user.Id}' not found");
-        }
+        _logger.IsExists(userDb, new UserNotFoundException($"User with this Id {user.Id} not found"));
             
         if (userDb.AuthorizationInfo is not null && userDb.AuthorizationInfo.ExpiredDate <= DateTime.Now.AddDays(-1))
             await LogOutAsync(user.Id, cancellationToken);
@@ -140,11 +117,7 @@ public class UserService : IUserService
     {
         var userDb = await _userRepository.GetByIdAsync(userId, cancellationToken);
 
-        if (userDb is null)
-        {
-            _logger.LogError("User with this token not found");
-            throw new UserNotFoundException($"User with this token not found");
-        }
+        _logger.IsExists(userDb, new UserNotFoundException($"User with this Id {userId} not found"));
             
         if (userDb.AuthorizationInfo is not null)
         {
@@ -159,11 +132,7 @@ public class UserService : IUserService
     {
         var userDb = await _userRepository.GetAll().FirstOrDefaultAsync(i => i.Login == login, cancellationToken);
 
-        if (userDb is null)
-        {
-            _logger.LogError("User with this Login {Login} not found", login);
-            throw new UserNotFoundException($"User not found");
-        }
+        _logger.IsExists(userDb, new UserNotFoundException($"User with this login {login} not found"));
 
         if (!PasswordHelper.VerifyHashedPassword(userDb.Password, password))
         {
@@ -173,7 +142,7 @@ public class UserService : IUserService
         var userModel = _mapper.Map<UserModel>(userDb);
         return userModel;
     }
-    //if expired throw exp
+    
     public async Task<UserModel> GetUserByRefreshTokenAsync(string refreshToken,
         CancellationToken cancellationToken = default)
     {
@@ -183,11 +152,7 @@ public class UserService : IUserService
                 i.AuthorizationInfo.RefreshToken == refreshToken, 
                 cancellationToken);
         
-        if (userDb is null)
-        {
-            _logger.LogError("refresh token not found");
-            throw new UserNotFoundException($"User not found");
-        }
+        _logger.IsExists(userDb, new UserNotFoundException($"User with this refresh token {refreshToken} not found"));
         
         if (userDb.AuthorizationInfo is not null && userDb.AuthorizationInfo.ExpiredDate <= DateTime.Now.AddDays(-1))
             throw new TimeoutException();
@@ -200,14 +165,9 @@ public class UserService : IUserService
     {
         var userDb = await _userRepository.GetAll()
             .FirstOrDefaultAsync(i => i.Profile.Email == email, cancellationToken);
-
-        if (userDb is null)
-        {
-            _logger.LogError("User with this Login {Email} not found", email);
-            throw new UserNotFoundException($"User not found");
-        }
-
-
+        
+        _logger.IsExists(userDb, new UserNotFoundException($"User with this email {email} not found"));
+        
         var userModel = _mapper.Map<UserModel>(userDb);
         return userModel;
     }
@@ -215,12 +175,8 @@ public class UserService : IUserService
     public async Task<UserModel?> GetUserByLogin(string login, CancellationToken cancellationToken = default)
     {
         var userDb = await _userRepository.GetAll().FirstOrDefaultAsync(i => i.Login == login, cancellationToken);
-
-        if (userDb is null)
-        {
-            _logger.LogError("User with this Login {Login} not found", login);
-            throw new UserNotFoundException($"User not found");
-        }
+        
+        _logger.IsExists(userDb, new UserNotFoundException($"User with this login {login} not found"));
         
         var userModel = _mapper.Map<UserModel>(userDb);
         return userModel;
