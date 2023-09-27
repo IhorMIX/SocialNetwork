@@ -11,4 +11,6 @@ public class Chat : BaseEntity
     
     public ICollection<ChatMember>? ChatMembers { get; set; }
     public ICollection<Role>? Roles { get; set; }
+    
+    public ICollection<Message>? Messages { get; set; }
 }

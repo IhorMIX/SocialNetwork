@@ -16,5 +16,10 @@ public class ChatConfiguration : IEntityTypeConfiguration<Chat>
 
         builder.HasMany(c => c.Roles)
             .WithOne(r => r.Chat);
+        
+        builder.HasMany(r => r.Messages)
+            .WithOne(m => m.Chat)
+            .HasForeignKey(m => m.ChatId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

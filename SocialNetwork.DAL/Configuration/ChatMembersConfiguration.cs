@@ -11,7 +11,7 @@ public class ChatMembersConfiguration : IEntityTypeConfiguration<ChatMember>
         builder.HasKey(i => i.Id);
 
         builder.HasOne(i => i.User)
-            .WithMany(i => i.Chats);
+            .WithMany(i => i.ChatMembers);
         
         builder.HasMany(i => i.Role)
             .WithMany(r => r.ChatMembers);
