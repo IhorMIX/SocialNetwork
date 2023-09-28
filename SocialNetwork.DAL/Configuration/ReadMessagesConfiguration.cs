@@ -12,7 +12,7 @@ public class ReadMessagesConfiguration : IEntityTypeConfiguration<ReadMessage>
         
         builder.HasOne(mr => mr.ChatMember)
             .WithMany(u => u.MessagesRead)
-            .HasForeignKey(mr => mr.UserId)
+            .HasForeignKey(mr => mr.ChatMemberId)
             .OnDelete(DeleteBehavior.Restrict);
 
        

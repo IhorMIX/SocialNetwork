@@ -23,6 +23,8 @@ public class SocialNetworkDbContext : DbContext
     public DbSet<Role> Roles { get; set; }
     
     public DbSet<Message> Messages { get; set; }
+    
+    public DbSet<ReadMessage> ReadMessages { get; set; }
     public DbSet<Reaction> Reactions { get; set; }
 
 

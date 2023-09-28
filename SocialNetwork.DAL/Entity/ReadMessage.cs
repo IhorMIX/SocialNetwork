@@ -4,7 +4,7 @@ public class ReadMessage : BaseEntity
 {
     public DateTime ReadAt { get; set; }
     
-    public int UserId { get; set; }
+    public int ChatMemberId { get; set; }
 
     public int MessageId { get; set; }
     

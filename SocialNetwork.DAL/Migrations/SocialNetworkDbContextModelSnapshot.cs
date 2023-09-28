@@ -282,22 +282,22 @@ namespace SocialNetwork.DAL.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<int>("ChatMemberId")
+                        .HasColumnType("int");
+
                     b.Property<int>("MessageId")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("ReadAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
+
+                    b.HasIndex("ChatMemberId");
 
                     b.HasIndex("MessageId");
 
-                    b.HasIndex("UserId");
-
-                    b.ToTable("ReadMessage");
+                    b.ToTable("ReadMessages");
                 });
 
             modelBuilder.Entity("SocialNetwork.DAL.Entity.Role", b =>
@@ -532,15 +532,15 @@ namespace SocialNetwork.DAL.Migrations
 
             modelBuilder.Entity("SocialNetwork.DAL.Entity.ReadMessage", b =>
                 {
-                    b.HasOne("SocialNetwork.DAL.Entity.Message", "Message")
-                        .WithMany("MessageReads")
-                        .HasForeignKey("MessageId")
+                    b.HasOne("SocialNetwork.DAL.Entity.ChatMember", "ChatMember")
+                        .WithMany("MessagesRead")
+                        .HasForeignKey("ChatMemberId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("SocialNetwork.DAL.Entity.ChatMember", "ChatMember")
-                        .WithMany("MessagesRead")
-                        .HasForeignKey("UserId")
+                    b.HasOne("SocialNetwork.DAL.Entity.Message", "Message")
+                        .WithMany("MessageReads")
+                        .HasForeignKey("MessageId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 

@@ -41,4 +41,10 @@ public class MessageRepository : IMessageRepository
         _socialNetworkDbContext.Messages.Update(message);
         await _socialNetworkDbContext.SaveChangesAsync(cancellationToken);
     }
+
+    public async Task Delete(Message message, CancellationToken cancellationToken = default)
+    {
+        _socialNetworkDbContext.Messages.Remove(message);
+        await _socialNetworkDbContext.SaveChangesAsync(cancellationToken);
+    }
 }
