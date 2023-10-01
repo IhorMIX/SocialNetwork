@@ -30,19 +30,19 @@ public class MessageRepository : IMessageRepository
             .FirstOrDefaultAsync(cancellationToken);
     }
 
-    public async Task CreateMessage(Message message, CancellationToken cancellationToken = default)
+    public async Task CreateMessageAsync(Message message, CancellationToken cancellationToken = default)
     {
         await _socialNetworkDbContext.Messages.AddAsync(message, cancellationToken);
         await _socialNetworkDbContext.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task EditMessage(Message message, CancellationToken cancellationToken = default)
+    public async Task EditMessageAsync(Message message, CancellationToken cancellationToken = default)
     {
         _socialNetworkDbContext.Messages.Update(message);
         await _socialNetworkDbContext.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task Delete(Message message, CancellationToken cancellationToken = default)
+    public async Task DeleteAsync(Message message, CancellationToken cancellationToken = default)
     {
         _socialNetworkDbContext.Messages.Remove(message);
         await _socialNetworkDbContext.SaveChangesAsync(cancellationToken);

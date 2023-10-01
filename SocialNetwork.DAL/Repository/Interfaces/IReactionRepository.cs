@@ -4,7 +4,7 @@ namespace SocialNetwork.DAL.Repository.Interfaces;
 
 public interface IReactionRepository : IBasicRepository<Reaction>
 {
-    public Task CreateReaction(Reaction reaction, CancellationToken cancellationToken = default);
-    public Task EditReaction(Reaction reaction, CancellationToken cancellationToken = default);
-    public Task DeleteReaction(Reaction reaction, CancellationToken cancellationToken = default);
+    public Task CreateReactionAsync(Reaction reaction, CancellationToken cancellationToken = default);
+    public Task EditReactionAsync(Reaction reaction, CancellationToken cancellationToken = default);
+    public Task DeleteReactionAsync(Reaction reaction, CancellationToken cancellationToken = default);
 }

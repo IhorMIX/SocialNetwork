@@ -4,7 +4,7 @@ namespace SocialNetwork.DAL.Repository.Interfaces;
 
 public interface IMessageRepository : IBasicRepository<Message>
 {
-    public Task CreateMessage(Message message, CancellationToken cancellationToken = default);
-    public Task EditMessage(Message message, CancellationToken cancellationToken = default);
-    public Task Delete(Message message, CancellationToken cancellationToken = default);
+    public Task CreateMessageAsync(Message message, CancellationToken cancellationToken = default);
+    public Task EditMessageAsync(Message message, CancellationToken cancellationToken = default);
+    public Task DeleteAsync(Message message, CancellationToken cancellationToken = default);
 }

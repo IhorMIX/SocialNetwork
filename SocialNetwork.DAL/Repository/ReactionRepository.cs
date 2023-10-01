@@ -28,19 +28,19 @@ public class ReactionRepository : IReactionRepository
             .FirstOrDefaultAsync(cancellationToken);
     }
 
-    public async Task CreateReaction(Reaction reaction, CancellationToken cancellationToken = default)
+    public async Task CreateReactionAsync(Reaction reaction, CancellationToken cancellationToken = default)
     {
         await _socialNetworkDbContext.Reactions.AddAsync(reaction, cancellationToken);
         await _socialNetworkDbContext.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task EditReaction(Reaction reaction, CancellationToken cancellationToken = default)
+    public async Task EditReactionAsync(Reaction reaction, CancellationToken cancellationToken = default)
     {
         _socialNetworkDbContext.Reactions.Update(reaction);
         await _socialNetworkDbContext.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task DeleteReaction(Reaction reaction, CancellationToken cancellationToken = default)
+    public async Task DeleteReactionAsync(Reaction reaction, CancellationToken cancellationToken = default)
     {
         _socialNetworkDbContext.Reactions.Remove(reaction);
         await _socialNetworkDbContext.SaveChangesAsync(cancellationToken);
