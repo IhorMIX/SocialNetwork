@@ -33,7 +33,7 @@ public class RoleRepository : IRoleRepository
                 .Include(r => r.ChatMembers)
                 .ThenInclude(cm => cm.User)
                 .FirstOrDefaultAsync(r => r.Id == id, token);
-        }, cancellationToken);
+        }, cancellationToken, _socialNetworkDbContext);
         
        
     }
@@ -42,7 +42,7 @@ public class RoleRepository : IRoleRepository
     {
        await _socialNetworkDbContext.Roles.AddAsync(role, cancellationToken);
        await _socialNetworkDbContext.SaveChangesAsync(cancellationToken);
-       await _cacheService.GetOrSetAsync($"Role-{role.Id}", (_) => Task.FromResult(role)!, cancellationToken);
+       await _cacheService.GetOrSetAsync($"Role-{role.Id}", (_) => Task.FromResult(role)!, cancellationToken, _socialNetworkDbContext);
        return role;
     }
 

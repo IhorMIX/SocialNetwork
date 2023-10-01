@@ -30,7 +30,7 @@ public class FriendshipRepository : IFriendshipRepository
             await _socialNetworkDbContext.Friends
                 .Include(i => i.FriendUser)
                 .Include(i => i.User)
-                .FirstOrDefaultAsync(i => i.Id == id, token), cancellationToken);
+                .FirstOrDefaultAsync(i => i.Id == id, token), cancellationToken, _socialNetworkDbContext);
     }
 
     public async Task CreateFriendshipAsync(Friendship friendship, CancellationToken cancellationToken = default)
@@ -38,7 +38,7 @@ public class FriendshipRepository : IFriendshipRepository
         await _socialNetworkDbContext.Friends.AddAsync(friendship, cancellationToken);
         await _socialNetworkDbContext.SaveChangesAsync(cancellationToken);
 
-        await _cacheService.GetOrSetAsync($"Friend-{friendship.Id}", (_) => Task.FromResult(friendship)!, cancellationToken);
+        await _cacheService.GetOrSetAsync($"Friend-{friendship.Id}", (_) => Task.FromResult(friendship)!, cancellationToken, _socialNetworkDbContext);
     }
 
     public async Task<bool> DeleteFriendsAsync(Friendship friendship, CancellationToken cancellationToken = default)

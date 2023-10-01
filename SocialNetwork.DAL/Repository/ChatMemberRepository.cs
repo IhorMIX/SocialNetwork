@@ -33,7 +33,7 @@ public class ChatMemberRepository : IChatMemberRepository
                 .Include(c => c.Role)
                 .Include(c => c.User)
                 .FirstOrDefaultAsync( i => i.Id == id, token);
-        }, cancellationToken);
+        }, cancellationToken, _socialNetworkDbContext);
     }
 
     public async Task SetRole(List<ChatMember> chatMembers, CancellationToken cancellationToken = default)

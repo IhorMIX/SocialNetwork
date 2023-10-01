@@ -35,7 +35,7 @@ public class UserRepository : IUserRepository
         {
             return await _socialNetworkDbContext.Users.Include(i => i.Profile).Include(i => i.AuthorizationInfo)
                 .FirstOrDefaultAsync(i => i.Id == id, token);
-        }, cancellationToken);
+        }, cancellationToken, _socialNetworkDbContext);
     }
 
 
@@ -44,7 +44,7 @@ public class UserRepository : IUserRepository
         await _socialNetworkDbContext.Users.AddAsync(user, cancellationToken);
         await _socialNetworkDbContext.SaveChangesAsync(cancellationToken);
 
-        await _cacheService.GetOrSetAsync($"User-{user.Id}", (_) => Task.FromResult(user)!, cancellationToken);
+        await _cacheService.GetOrSetAsync($"User-{user.Id}", (_) => Task.FromResult(user)!, cancellationToken, _socialNetworkDbContext);
     }
 
     public async Task<User?> FindUserAsync(string login, CancellationToken cancellationToken = default)

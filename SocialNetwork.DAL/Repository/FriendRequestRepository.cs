@@ -32,7 +32,7 @@ public class FriendRequestRepository : IFriendRequestRepository
             .FriendRequests
             .Include(i => i.Sender)
             .Include(i => i.Receiver)
-            .FirstOrDefaultAsync(i => i.Id == id, token), cancellationToken);
+            .FirstOrDefaultAsync(i => i.Id == id, token), cancellationToken, _socialNetworkDbContext);
     }
 
     public async Task<bool> DeleteFriendRequestAsync(FriendRequest friendRequest,
@@ -83,7 +83,7 @@ public class FriendRequestRepository : IFriendRequestRepository
         await _socialNetworkDbContext.SaveChangesAsync(cancellationToken);
 
         await _cacheService.GetOrSetAsync($"FriendRequest-{friendRequest.Id}", (_) => Task.FromResult(friendRequest)!,
-            cancellationToken);
+            cancellationToken, _socialNetworkDbContext);
     }
 
     public IQueryable<FriendRequest> GetAllFriendRequests(int id)

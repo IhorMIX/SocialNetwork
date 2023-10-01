@@ -33,14 +33,14 @@ public class ChatRepository : IChatRepository
                 .Include(i => i.ChatMembers)
                 .Include(c => c.Roles)
                 .FirstOrDefaultAsync(i => i.Id == id, token);
-        }, cancellationToken);
+        }, cancellationToken, _socialNetworkDbContext);
     }
 
     public async Task<int> CreateChat(Chat chat, CancellationToken cancellationToken = default)
     {
         var chatEntity = await _socialNetworkDbContext.Chats.AddAsync(chat, cancellationToken); 
         await _socialNetworkDbContext.SaveChangesAsync(cancellationToken);
-        await _cacheService.GetOrSetAsync($"Chat-{chatEntity.Entity.Id}", (_) => Task.FromResult(chat)!, cancellationToken);
+        await _cacheService.GetOrSetAsync($"Chat-{chatEntity.Entity.Id}", (_) => Task.FromResult(chat)!, cancellationToken, _socialNetworkDbContext);
         return chatEntity.Entity.Id;
         
     }

@@ -16,6 +16,7 @@ public class CacheService<T>
 
     private readonly SemaphoreSlim _cacheLock = new(1);
 
+
     public CacheService(IOptions<CacheOptions> options)
     {
         _entryOptions = new MemoryCacheEntryOptions()
@@ -23,10 +24,13 @@ public class CacheService<T>
     }
 
     public async Task<T?> GetOrSetAsync(string key, Func<CancellationToken, Task<T>> getDataFunc,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken, SocialNetworkDbContext? socialNetworkDbContext = null)
     {
         if (_cache.TryGetValue(key, out T? result))
+        {
+            socialNetworkDbContext.Attach(result!);
             return result;
+        }
 
         await _cacheLock.WaitAsync(cancellationToken);
         try
