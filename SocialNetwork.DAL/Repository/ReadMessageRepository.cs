@@ -28,7 +28,7 @@ public class ReadMessageRepository : IReadMessageRepository
             .FirstOrDefaultAsync(cancellationToken);
     }
 
-    public async Task CreateReactionAsync(ReadMessage readMessage, CancellationToken cancellationToken = default)
+    public async Task AddReadAsync(ReadMessage readMessage, CancellationToken cancellationToken = default)
     {
         await _socialNetworkDbContext.ReadMessages.AddAsync(readMessage, cancellationToken);
         await _socialNetworkDbContext.SaveChangesAsync(cancellationToken);
