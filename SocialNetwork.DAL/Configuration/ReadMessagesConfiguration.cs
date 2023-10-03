@@ -17,7 +17,7 @@ public class ReadMessagesConfiguration : IEntityTypeConfiguration<ReadMessage>
 
        
         builder.HasOne(mr => mr.Message)
-            .WithMany(m => m.MessageReads)
+            .WithMany(m => m.ReadMessages)
             .HasForeignKey(mr => mr.MessageId)
             .OnDelete(DeleteBehavior.Restrict);
     }

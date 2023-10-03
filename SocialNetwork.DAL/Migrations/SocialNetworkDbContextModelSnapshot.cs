@@ -255,9 +255,6 @@ namespace SocialNetwork.DAL.Migrations
                     b.Property<int>("AuthorId")
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
                     b.Property<int>("MessageId")
                         .HasColumnType("int");
 
@@ -539,7 +536,7 @@ namespace SocialNetwork.DAL.Migrations
                         .IsRequired();
 
                     b.HasOne("SocialNetwork.DAL.Entity.Message", "Message")
-                        .WithMany("MessageReads")
+                        .WithMany("ReadMessages")
                         .HasForeignKey("MessageId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
@@ -578,9 +575,9 @@ namespace SocialNetwork.DAL.Migrations
 
             modelBuilder.Entity("SocialNetwork.DAL.Entity.Message", b =>
                 {
-                    b.Navigation("MessageReads");
-
                     b.Navigation("Reactions");
+
+                    b.Navigation("ReadMessages");
                 });
 
             modelBuilder.Entity("SocialNetwork.DAL.Entity.User", b =>
