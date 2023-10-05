@@ -18,7 +18,5 @@ public class Message : BaseEntity
     public Chat Chat { get; set; }
     public Message? ToReplyMessage { get; set; }
     
-    public ICollection<ReadMessage>? MessageReads { get; set; }
     public ICollection<Reaction>? Reactions { get; set; }
-    
 }

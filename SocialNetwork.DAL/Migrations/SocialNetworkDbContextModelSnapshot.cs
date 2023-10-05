@@ -271,32 +271,6 @@ namespace SocialNetwork.DAL.Migrations
                     b.ToTable("Reactions");
                 });
 
-            modelBuilder.Entity("SocialNetwork.DAL.Entity.ReadMessage", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("ChatMemberId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("MessageId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("ReadAt")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ChatMemberId");
-
-                    b.HasIndex("MessageId");
-
-                    b.ToTable("ReadMessages");
-                });
-
             modelBuilder.Entity("SocialNetwork.DAL.Entity.Role", b =>
                 {
                     b.Property<int>("Id")
@@ -527,25 +501,6 @@ namespace SocialNetwork.DAL.Migrations
                     b.Navigation("Message");
                 });
 
-            modelBuilder.Entity("SocialNetwork.DAL.Entity.ReadMessage", b =>
-                {
-                    b.HasOne("SocialNetwork.DAL.Entity.ChatMember", "ChatMember")
-                        .WithMany("MessagesRead")
-                        .HasForeignKey("ChatMemberId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("SocialNetwork.DAL.Entity.Message", "Message")
-                        .WithMany("ReadMessages")
-                        .HasForeignKey("MessageId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("ChatMember");
-
-                    b.Navigation("Message");
-                });
-
             modelBuilder.Entity("SocialNetwork.DAL.Entity.Role", b =>
                 {
                     b.HasOne("SocialNetwork.DAL.Entity.Chat", "Chat")
@@ -566,8 +521,6 @@ namespace SocialNetwork.DAL.Migrations
 
             modelBuilder.Entity("SocialNetwork.DAL.Entity.ChatMember", b =>
                 {
-                    b.Navigation("MessagesRead");
-
                     b.Navigation("MessagesSent");
 
                     b.Navigation("Reactions");
@@ -576,8 +529,6 @@ namespace SocialNetwork.DAL.Migrations
             modelBuilder.Entity("SocialNetwork.DAL.Entity.Message", b =>
                 {
                     b.Navigation("Reactions");
-
-                    b.Navigation("ReadMessages");
                 });
 
             modelBuilder.Entity("SocialNetwork.DAL.Entity.User", b =>

@@ -13,23 +13,19 @@ namespace SocialNetwork.BL.Services;
 
 public class MessageService : IMessageService
 {
-    private readonly IUserRepository _userRepository;
-    private readonly MessageRepository _messageRepository;
+    private readonly IMessageRepository _messageRepository;
     private readonly ILogger<FriendshipService> _logger;
     private readonly IMapper _mapper;
     private readonly IChatRepository _chatRepository;
     private readonly IChatMemberRepository _chatMemberRepository;
-    private readonly IReadMessageRepository _readMessageRepository;
 
-    public MessageService(IUserRepository userRepository, ILogger<FriendshipService> logger, IMapper mapper, MessageRepository messageRepository, IChatRepository chatRepository, IChatMemberRepository chatMemberRepository, IReadMessageRepository readMessageRepository)
+    public MessageService(ILogger<FriendshipService> logger, IMapper mapper, IMessageRepository messageRepository, IChatRepository chatRepository, IChatMemberRepository chatMemberRepository)
     {
-        _userRepository = userRepository;
         _logger = logger;
         _mapper = mapper;
         _messageRepository = messageRepository;
         _chatRepository = chatRepository;
         _chatMemberRepository = chatMemberRepository;
-        _readMessageRepository = readMessageRepository;
     }
 
     public async Task<MessageModel?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
@@ -62,7 +58,6 @@ public class MessageService : IMessageService
             Author = chatMemberDb,
             Chat = chatDb!,
             ToReplyMessage = null,
-            ReadMessages = new List<ReadMessage>(),
             Reactions = new List<Reaction>()
         }, cancellationToken);
         
@@ -87,7 +82,7 @@ public class MessageService : IMessageService
         await _messageRepository.DeleteAsync(messageDb!, cancellationToken);
     }
 
-    public async Task<MessageModel> EditModel(int userId, int chatId, int messageId, MessageModel messageModel,
+    public async Task<MessageModel> EditMessage(int userId, int chatId, int messageId, MessageModel messageModel,
         CancellationToken cancellationToken = default)
     {
         var chatMemberDb = await _chatMemberRepository.GetByUserIdAndChatId(userId, chatId, cancellationToken);
@@ -102,13 +97,12 @@ public class MessageService : IMessageService
 
         var messageDb = await _messageRepository.GetByIdAsync(messageId, cancellationToken);
         _logger.IsExists(messageDb, new UserNotFoundException($"Message with id-{messageId} not found"));
+
+        messageDb!.IsEdited = true;
+        messageDb.Text = messageModel.Text;
+        messageDb.Files = messageModel.Files;
         
-        messageDb = await _messageRepository.EditMessageAsync(new Message
-        {
-            Text = messageModel.Text,
-            Files = messageModel.Files,
-            IsEdited = true,
-        }, cancellationToken);
+        messageDb = await _messageRepository.EditMessageAsync(messageDb, cancellationToken);
         
         return _mapper.Map<MessageModel>(messageDb);
     }
@@ -142,7 +136,6 @@ public class MessageService : IMessageService
             Author = chatMemberDb,
             Chat = chatDb!,
             ToReplyMessage = messageToReply,
-            ReadMessages = new List<ReadMessage>(),
             Reactions = new List<Reaction>()
         }, cancellationToken);
         
@@ -156,17 +149,6 @@ public class MessageService : IMessageService
         
         var chatDb = await _chatRepository.GetByIdAsync(chatId, cancellationToken);
         _logger.IsExists(chatDb, new UserNotFoundException($"Chat with id-{chatId} not found"));
-
-        // await _readMessageRepository.AddReadAsync(new ReadMessage
-        // {
-        //     Id = 0,
-        //     ReadAt = DateTime.Now,
-        //     ChatMemberId = chatMemberDb!.Id,
-        //     MessageId = 0,
-        //     Message = null,
-        //     ChatMember = chatMemberDb
-        // }, cancellationToken);
-        
         
         return _mapper.Map<List<MessageModel>>(await _messageRepository.GetAll().Where(m => m.ChatId == chatId).ToListAsync(cancellationToken));
     }

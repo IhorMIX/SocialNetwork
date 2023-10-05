@@ -19,10 +19,6 @@ public class MessageConfiguration : IEntityTypeConfiguration<Message>
             .WithMany(c => c.Messages)
             .HasForeignKey(m => m.ChatId)
             .OnDelete(DeleteBehavior.Restrict);
-        
-        builder.HasMany(m => m.ReadMessages)
-            .WithOne(mr => mr.Message)
-            .HasForeignKey(mr => mr.MessageId)
-            .OnDelete(DeleteBehavior.Cascade); 
+ 
     }
 }

@@ -9,7 +9,7 @@ public interface IMessageService : IBaseService<MessageModel>
 
     public Task DeleteMessage(int userId, int chatId, int messageId, CancellationToken cancellationToken = default);
 
-    public Task<MessageModel> EditModel(int userId, int chatId, int messageId, MessageModel messageModel, 
+    public Task<MessageModel> EditMessage(int userId, int chatId, int messageId, MessageModel messageModel, 
         CancellationToken cancellationToken = default);
     
     public Task<MessageModel> ReplyMessage(int userId, int chatId, int messageId, MessageModel messageModel,

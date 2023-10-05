@@ -8,8 +8,6 @@ public class ChatMember : BaseEntity
     
     public ICollection<Message>? MessagesSent { get; set; }
     
-    public ICollection<ReadMessage>? MessagesRead { get; set; }
-    
     public ICollection<Reaction>? Reactions { get; set; }
 
 }

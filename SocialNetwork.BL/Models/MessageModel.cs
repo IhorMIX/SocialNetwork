@@ -18,6 +18,5 @@ public class MessageModel : BaseModel
     public ChatModel Chat { get; set; }
     public MessageModel? ToReplyMessage { get; set; }
     
-    public ICollection<ReadMessageModel>? MessageReads { get; set; }
     public ICollection<ReactionModel>? Reactions { get; set; }
 }

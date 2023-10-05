@@ -26,7 +26,6 @@ public class ChatServiceTest : DefaultServiceTest<IChatService, ChatService>
         services.AddScoped<IRoleRepository, RoleRepository>();
         services.AddScoped<IChatRepository, ChatRepository>();
         services.AddScoped<IChatMemberRepository, ChatMemberRepository>();
-    
         base.SetUpAdditionalDependencies(services);
     }
     

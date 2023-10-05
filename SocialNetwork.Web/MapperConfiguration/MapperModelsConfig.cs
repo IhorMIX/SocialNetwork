@@ -110,6 +110,10 @@ namespace SocialNetwork.Web.MapperConfiguration
                 .ForMember(dest => dest.SendAudioMess, opt => opt.Ignore())
                 .ForMember(dest => dest.Chat, opt => opt.Ignore())
                 .ReverseMap();
+            
+            CreateMap<Message, MessageModel>()
+                .ReverseMap();
+            
         }
     }
 }
