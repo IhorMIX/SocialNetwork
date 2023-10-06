@@ -28,10 +28,11 @@ public class ReactionRepository : IReactionRepository
             .FirstOrDefaultAsync(cancellationToken);
     }
 
-    public async Task CreateReactionAsync(Reaction reaction, CancellationToken cancellationToken = default)
+    public async Task<Reaction> CreateReactionAsync(Reaction reaction, CancellationToken cancellationToken = default)
     {
-        await _socialNetworkDbContext.Reactions.AddAsync(reaction, cancellationToken);
+        var reactionDb = (await _socialNetworkDbContext.Reactions.AddAsync(reaction, cancellationToken)).Entity;
         await _socialNetworkDbContext.SaveChangesAsync(cancellationToken);
+        return reactionDb;
     }
 
     public async Task EditReactionAsync(Reaction reaction, CancellationToken cancellationToken = default)

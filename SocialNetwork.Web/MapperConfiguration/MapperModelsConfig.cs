@@ -114,6 +114,9 @@ namespace SocialNetwork.Web.MapperConfiguration
             CreateMap<Message, MessageModel>()
                 .ReverseMap();
             
+            CreateMap<Reaction, ReactionModel>()
+                .ReverseMap();
+            
         }
     }
 }

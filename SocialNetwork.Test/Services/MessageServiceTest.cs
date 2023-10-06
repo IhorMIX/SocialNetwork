@@ -23,8 +23,7 @@ public class MessageServiceTest : DefaultServiceTest<IMessageService, MessageSer
         services.AddScoped<IRoleRepository, RoleRepository>();
         services.AddScoped<IChatRepository, ChatRepository>();
         services.AddScoped<IChatMemberRepository, ChatMemberRepository>();
-
-
+        
         services.AddScoped<IMessageService, MessageService>();
         services.AddScoped<IMessageRepository, MessageRepository>();
 
@@ -226,19 +225,18 @@ public class MessageServiceTest : DefaultServiceTest<IMessageService, MessageSer
             user2.Id,
             user3.Id
         });
-
-        var messageService = ServiceProvider.GetRequiredService<IMessageService>();
-        await messageService.CreateMessage(user1.Id, chat.Id, new MessageModel()
+        
+        await Service.CreateMessage(user1.Id, chat.Id, new MessageModel()
         {
             Text = "Test message 1",
             Files = "test1.png"
         });
-        var messageToReply = await messageService.CreateMessage(user2.Id, chat.Id, new MessageModel()
+        var messageToReply = await Service.CreateMessage(user2.Id, chat.Id, new MessageModel()
         {
             Text = "Test message 2",
             Files = "test2.png"
         });
-        var replyMessage = await messageService.ReplyMessage(user3.Id, chat.Id, messageToReply.Id, new MessageModel()
+        var replyMessage = await Service.ReplyMessage(user3.Id, chat.Id, messageToReply.Id, new MessageModel()
         {
             Text = "Test message 3",
             Files = "test3.png"
