@@ -108,12 +108,22 @@ public class MessageService : IMessageService
         var messageDb = await _messageRepository.GetByIdAsync(messageId, cancellationToken);
         _logger.IsExists(messageDb, new UserNotFoundException($"Message with id-{messageId} not found"));
 
-        messageDb!.IsEdited = true;
-        messageDb.Text = messageModel.Text;
-        messageDb.Files = messageModel.Files;
         
-        messageDb = await _messageRepository.EditMessageAsync(messageDb, cancellationToken);
+        foreach (var propertyMap in ReflectionHelper.WidgetUtil<MessageModel, Message>.PropertyMap)
+        {
+            var messageProperty = propertyMap.Item1;
+            var messageDbProperty = propertyMap.Item2;
+
+            var messageSourceValue = messageProperty.GetValue(messageModel);
+            var messageTargetValue = messageDbProperty.GetValue(messageDb);
+
+            if (messageSourceValue != null && !messageSourceValue.Equals(0) && messageSourceValue != "" && !messageSourceValue.Equals(messageTargetValue))
+            {
+                messageDbProperty.SetValue(messageDb, messageSourceValue);
+            }
+        }
         
+        messageDb = await _messageRepository.EditMessageAsync(messageDb!, cancellationToken);
         return _mapper.Map<MessageModel>(messageDb);
     }
 

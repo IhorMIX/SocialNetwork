@@ -253,16 +253,15 @@ public class MessageServiceTest : DefaultServiceTest<IMessageService, MessageSer
         await Service.EditMessage(user3.Id, chat.Id, replyMessage.Id, new MessageModel
         {
             Text = "editedMessage",
-            Files = "editedFile.png",
         });
         
         messages = await Service.GetMessages(user2.Id, chat.Id);
         replyMessage = messages.FirstOrDefault(c => c.Id == replyMessage.Id);
 
-        Assert.That(messages.Any(c => c.Text == "editedMessage"));
+        Assert.That(messages.Any(c => c.Text == "editedMessage" && c.Files == "test3.png"));
         Assert.That(replyMessage.ChatId == chat.Id && replyMessage.Text == "editedMessage" && replyMessage.ToReplyMessageId == messageToReply.Id);
         
-        await Service.DeleteMessage(user1.Id, chat.Id, messageToReply.Id);
+        await Service.DeleteMessage(user1.Id, chat.Id, messageToReply.Id, false);
         messages = await Service.GetMessages(user2.Id, chat.Id);
         replyMessage = messages.FirstOrDefault(c => c.Id == replyMessage.Id);
         Assert.That(replyMessage!.ChatId == chat.Id && replyMessage.ToReplyMessageId == null);

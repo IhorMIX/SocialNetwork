@@ -82,7 +82,7 @@ public class ReactionServiceTest : DefaultServiceTest<IReactionService, Reaction
     }
     
      [Test]
-    public async Task ReplyMessage_EditReplyMessage_DeleteMessageToReply_ReturnMessages()
+    public async Task CreateMessages_AddReactions_EditReaction()
     {
         var user1 = await UserModelHelper.CreateTestData();
         var user2 = await UserModelHelper.CreateTestData();
