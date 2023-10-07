@@ -12,7 +12,7 @@ using SocialNetwork.DAL;
 namespace SocialNetwork.DAL.Migrations
 {
     [DbContext(typeof(SocialNetworkDbContext))]
-    [Migration("20231005075741_Message_Migration")]
+    [Migration("20231006233403_Message_Migration")]
     partial class Message_Migration
     {
         /// <inheritdoc />
@@ -177,6 +177,9 @@ namespace SocialNetwork.DAL.Migrations
                     b.Property<string>("Files")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
 
                     b.Property<bool>("IsEdited")
                         .HasColumnType("bit");
