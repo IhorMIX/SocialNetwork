@@ -1,8 +1,12 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
+using SocialNetwork.BL.Services;
 using SocialNetwork.DAL;
+using SocialNetwork.DAL.Options;
+using SocialNetwork.DAL.Services;
 using SocialNetwork.Test.Extensions;
 using SocialNetwork.Web;
 
@@ -15,23 +19,42 @@ namespace SocialNetwork.Test.Services
 
         public virtual TService Service => ServiceProvider.GetRequiredService<TService>();
 
-
+        public IConfiguration Configuration;
+        
         protected virtual void SetUpAdditionalDependencies(IServiceCollection services)
         {
             services.AddScoped<TService>();
             services.AddScoped<ILogger<TService>, NullLogger<TService>>();
             services.AddAutoMapper(typeof(Startup));
+            services.AddSingleton(typeof(CacheService<>));
+            services.Configure<CacheOptions>(Configuration.GetSection("CacheOptions"));
+            services.Configure<RoleOption>(Configuration.GetSection("Roles"));
         }
 
+        private void SetUpConfiguration()
+        {
+            Configuration = new ConfigurationBuilder()
+                .AddInMemoryCollection(new Dictionary<string, string>
+                {
+                    {"CacheOptions:CacheTime", "00:10:00"},
+                    {"Roles:RoleEveryone", "1"},
+                    {"Roles:RoleAdminId", "2"},
+                    {"Roles:RoleP2PAdminId", "3"}
+                }!)
+                .Build();
+        }
+        
+        
         [SetUp]
         public virtual void SetUp()
         {
             ServiceCollection = new ServiceCollection();
+            SetUpConfiguration();
             ServiceCollection.AddDbContext<SocialNetworkDbContext>(options =>
                 options.UseInMemoryDatabase("TestSocialNetworkDB"));
             ServiceCollection.AddLogging();
+            
             SetUpAdditionalDependencies(ServiceCollection);
-
             ServiceCollection.AddScoped<SocialNetworkDbContext>();
 
             var rootServiceProvider = ServiceCollection.BuildServiceProvider(new ServiceProviderOptions()

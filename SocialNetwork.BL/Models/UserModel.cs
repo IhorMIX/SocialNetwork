@@ -1,4 +1,4 @@
-﻿using Scriban.Runtime;
+using Scriban.Runtime;
 using SocialNetwork.BL.Models.Enums;
 using SocialNetwork.DAL.Entity;
 
@@ -18,6 +18,7 @@ public class UserModel : BaseModel
     public ProfileModel Profile { get; set; }
 
     public AuthorizationInfoModel AuthorizationInfo { get; set; }
+    
 
     public IScriptObject ToScriptObject() {
 

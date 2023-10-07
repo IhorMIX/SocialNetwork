@@ -13,6 +13,14 @@ public class SocialNetworkDbContext : DbContext
     public DbSet<User> Users { get; set; }
 
     public DbSet<Profile> Profiles { get; set; }
+    
+    public DbSet<Friendship> Friends { get; set; }
+    
+    public DbSet<FriendRequest> FriendRequests { get; set; }
+    
+    public DbSet<Chat> Chats { get; set; }
+    public DbSet<ChatMember> ChatMembers { get; set; }
+    public DbSet<Role> Roles { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

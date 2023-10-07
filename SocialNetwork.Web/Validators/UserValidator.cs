@@ -16,8 +16,8 @@ public class UserValidator : AbstractValidator<UserCreateViewModel>
         
         RuleFor(x => x.Password).NotEmpty().NotNull()
             .Length(8, 50)
-            .Matches("^[A-Za-z\\d!@#$%^&*()\\-_=+{};:,<.>]+$")
-            .WithMessage("Not a valid password format. Only Latin letters, digits and this symbols ! @ # $ % ^ & * ( ) - _ = + { } ; : , < . > are allowed.");
+            .Matches("^[a-zA-Z0-9\\s\\S]*$")
+            .WithMessage("Not a valid password format. Only Latin letters and digits are allowed.");
         
         RuleFor(x => x.Profile)
             .NotNull()

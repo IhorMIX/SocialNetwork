@@ -12,7 +12,7 @@ namespace SocialNetwork.Web.Validators
                 RuleFor(x => x.Password) //value can be null or empty or contains 8-50 characters and contains only latin letters and numbers
                      .Must(x => x.IsNullOrEmpty() ||
                      (x.Length >= 8 && x.Length <= 50 && Regex.IsMatch(x, "^[A-Za-z\\d!@#$%^&*()\\-_=+{};:,<.>]+$")))
-                    .WithMessage("Not a valid password format. The password must be at least 8 characters long. Only Latin letters, digits and this symbols ! @ # $ % ^ & * ( ) - _ = + { } ; : , < . > are allowed.");
+                    .WithMessage("Not a valid password format. The password must be at least 8 characters long. Only Latin letters and digits are allowed.");
 
                 RuleFor(x => x.Profile)
                     .NotNull()
