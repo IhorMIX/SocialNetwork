@@ -5,7 +5,7 @@ namespace SocialNetwork.BL.Services.Interfaces;
 
 public interface IUserService : IBaseService<UserModel>
 {
-    Task CreateUserAsync(UserModel user, CancellationToken cancellationToken = default);
+    Task<UserModel> CreateUserAsync(UserModel user, CancellationToken cancellationToken = default);
 
     Task DeleteUserAsync(int id, CancellationToken cancellationToken = default);
 
@@ -23,5 +23,8 @@ public interface IUserService : IBaseService<UserModel>
         CancellationToken cancellationToken = default);
 
     Task LogOutAsync(int userId, CancellationToken cancellationToken = default);
-    
+
+   
+
+    Task ActivateUserAsync(int id);
 }

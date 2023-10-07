@@ -12,6 +12,15 @@ using System.Data;
 using SocialNetwork.BL.Models.Enums;
 using Profile = SocialNetwork.DAL.Entity.Profile;
 using Microsoft.IdentityModel.Tokens;
+using System.Net.Mime;
+using MimeKit;
+using Microsoft.Extensions.Options;
+using MailKit.Security;
+using MailKit.Net.Smtp;
+using System.Threading;
+using Scriban;
+using SocialNetwork.BL.Settings;
+using Scriban.Runtime;
 
 namespace SocialNetwork.BL.Services;
 
@@ -42,7 +51,7 @@ public class UserService : IUserService
         return userModel;
     }
 
-    public async Task CreateUserAsync(UserModel user, CancellationToken cancellationToken = default)
+    public async Task<UserModel> CreateUserAsync(UserModel user, CancellationToken cancellationToken = default)
     {
         var userDb = await _userRepository.GetAll().FirstOrDefaultAsync(i => i.Login == user.Login || i.Profile.Email == user.Profile.Email, cancellationToken);
 
@@ -64,6 +73,8 @@ public class UserService : IUserService
         userDbModel.Password = PasswordHelper.HashPassword(userDbModel.Password);
 
         await _userRepository.CreateUser(userDbModel, cancellationToken);
+
+        return _mapper.Map<UserModel>(userDbModel); 
     }
 
     public async Task<UserModel> UpdateUserAsync(int id, UserModel user, CancellationToken cancellationToken = default)
@@ -89,7 +100,7 @@ public class UserService : IUserService
             var userTargetValue = userDbProperty.GetValue(userDb.Profile);
 
             if (userSourceValue != null && userSourceValue != "" && !userSourceValue.Equals(userTargetValue))
-              
+
             {
                 userDbProperty.SetValue(userDb.Profile, userSourceValue);
             }
@@ -123,7 +134,7 @@ public class UserService : IUserService
             _logger.LogError("User with this {Id} not found", user.Id);
             throw new UserNotFoundException($"User with Id '{user.Id}' not found");
         }
-            
+
         if (userDb.AuthorizationInfo is not null)
         {
             if (userDb.AuthorizationInfo.ExpiredDate <= DateTime.Now.AddDays(-1))
@@ -146,7 +157,7 @@ public class UserService : IUserService
         }
         await _userRepository.UpdateUserAsync(userDb, cancellationToken);
     }
-    
+
     public async Task LogOutAsync(int userId, CancellationToken cancellationToken = default)
     {
         var userDb = await _userRepository.GetById(userId, cancellationToken);
@@ -156,7 +167,7 @@ public class UserService : IUserService
             _logger.LogError("User with this token not found");
             throw new UserNotFoundException($"User with this token not found");
         }
-            
+
         if (userDb.AuthorizationInfo is not null)
         {
             userDb.AuthorizationInfo = null;
@@ -189,9 +200,9 @@ public class UserService : IUserService
         CancellationToken cancellationToken = default)
     {
         var userDb = await _userRepository.GetAll()
-            .FirstOrDefaultAsync(i => 
-                i.AuthorizationInfo != null && 
-                i.AuthorizationInfo.RefreshToken == refreshToken, 
+            .FirstOrDefaultAsync(i =>
+                i.AuthorizationInfo != null &&
+                i.AuthorizationInfo.RefreshToken == refreshToken,
                 cancellationToken);
 
         if (userDb is null)
@@ -234,4 +245,19 @@ public class UserService : IUserService
         var userModel = _mapper.Map<UserModel>(userDb);
         return userModel;
     }
+
+    public async Task ActivateUserAsync(int id)
+    {
+        var userDb = await _userRepository.GetById(id);
+        if (userDb is null)
+        {
+            _logger.LogError("User with this Login {Id} not found", id);
+            throw new UserNotFoundException($"User not found");
+        }
+        userDb.IsEnabled = true;
+
+        await _userRepository.UpdateUserAsync(userDb);
+
+    }
+
 }

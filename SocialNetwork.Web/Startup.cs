@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using SocialNetwork.BL.Services;
 using SocialNetwork.BL.Services.Interfaces;
+using SocialNetwork.BL.Settings;
 using SocialNetwork.DAL;
 using SocialNetwork.DAL.Repository;
 using SocialNetwork.DAL.Repository.Interfaces;
@@ -28,7 +29,11 @@ public class Startup
     public void ConfigureServices(IServiceCollection services)
     {
         services.AddControllers().AddNewtonsoftJson();
-        
+
+        //Add mailsettings
+        services.Configure<MailSettingsModel>(Configuration.GetSection("MailSettings"));
+        services.Configure<TemplatePathesModel>(Configuration.GetSection("TemplatePathes"));
+
         //automapper
         services.AddAutoMapper(typeof(Startup));
 

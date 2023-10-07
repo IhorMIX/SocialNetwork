@@ -14,8 +14,8 @@ public class AuthorizeValidator: AbstractValidator<UserAuthorizeModel>
         
         RuleFor(x => x.Password).NotEmpty().NotNull()
             .Length(8, 50).WithMessage("Not a valid password format for login")
-            .Matches("^[a-zA-Z0-9]*$")
-            .WithMessage("Not a valid password format for login. Only Latin letters and digits are allowed.");
+            .Matches("^[A-Za-z\\d!@#$%^&*()\\-_=+{};:,<.>]+$")
+            .WithMessage("Not a valid password format for login. Only Latin letters, digits and this symbols ! @ # $ % ^ & * ( ) - _ = + { } ; : , < . > are allowed.");
 
     }
 }
