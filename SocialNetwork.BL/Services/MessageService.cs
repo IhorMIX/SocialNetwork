@@ -52,6 +52,7 @@ public class MessageService : IMessageService
             CreatedAt = DateTime.Now,
             IsRead = false,
             IsEdited = false,
+            IsDeleted = false,
             AuthorId = chatMemberDb!.Id,
             ChatId = chatId,
             ToReplyMessageId = null,
@@ -64,7 +65,7 @@ public class MessageService : IMessageService
         return _mapper.Map<MessageModel>(messageDb);
     }
 
-    public async Task DeleteMessage(int userId, int chatId, int messageId, CancellationToken cancellationToken = default)
+    public async Task DeleteMessage(int userId, int chatId, int messageId, bool isForAuthor, CancellationToken cancellationToken = default)
     {
         var chatMemberDb = await _chatMemberRepository.GetByUserIdAndChatId(userId, chatId, cancellationToken);
         _logger.IsExists(chatMemberDb, new UserNotFoundException($"Chat member with id-{userId} not found"));
@@ -79,7 +80,16 @@ public class MessageService : IMessageService
         var messageDb = await _messageRepository.GetByIdAsync(messageId, cancellationToken);
         _logger.IsExists(chatDb, new UserNotFoundException($"Message with id-{messageId} not found"));
         
-        await _messageRepository.DeleteAsync(messageDb!, cancellationToken);
+        if (isForAuthor && messageDb!.AuthorId == chatMemberDb.Id)
+        {
+            messageDb!.IsDeleted = true;
+            await _messageRepository.EditMessageAsync(messageDb, cancellationToken);
+        }
+        else
+        {
+            await _messageRepository.DeleteAsync(messageDb!, cancellationToken);
+        }
+        
     }
 
     public async Task<MessageModel> EditMessage(int userId, int chatId, int messageId, MessageModel messageModel,
@@ -130,6 +140,7 @@ public class MessageService : IMessageService
             CreatedAt = DateTime.Now,
             IsRead = false,
             IsEdited = false,
+            IsDeleted = false,
             AuthorId = chatMemberDb!.Id,
             ChatId = chatId,
             ToReplyMessageId = messageToReply!.Id,
@@ -150,7 +161,9 @@ public class MessageService : IMessageService
         var chatDb = await _chatRepository.GetByIdAsync(chatId, cancellationToken);
         _logger.IsExists(chatDb, new UserNotFoundException($"Chat with id-{chatId} not found"));
         
-        return _mapper.Map<List<MessageModel>>(await _messageRepository.GetAll().Where(m => m.ChatId == chatId).ToListAsync(cancellationToken));
+        return _mapper.Map<List<MessageModel>>(await _messageRepository.GetAll()
+            .Where(m => m.ChatId == chatId && (!m.IsDeleted || m.AuthorId != chatMemberDb.Id))
+            .ToListAsync(cancellationToken));
     }
 
     public async Task<MessageModel> GetLastMessage(int userId, int chatId, CancellationToken cancellationToken = default)
@@ -161,6 +174,6 @@ public class MessageService : IMessageService
         var chatDb = await _chatRepository.GetByIdAsync(chatId, cancellationToken);
         _logger.IsExists(chatDb, new UserNotFoundException($"Chat with id-{chatId} not found"));
 
-        return _mapper.Map<MessageModel> (await _messageRepository.GetAll().Where(m => m.ChatId == chatId).LastOrDefaultAsync(cancellationToken));
+        return _mapper.Map<MessageModel> (await _messageRepository.GetAll().Where(m => m.ChatId == chatId && m.IsDeleted == false).LastOrDefaultAsync(cancellationToken));
     }
 }

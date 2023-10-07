@@ -175,6 +175,9 @@ namespace SocialNetwork.DAL.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
                     b.Property<bool>("IsEdited")
                         .HasColumnType("bit");
 

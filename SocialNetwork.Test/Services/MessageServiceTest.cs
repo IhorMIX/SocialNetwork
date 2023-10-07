@@ -272,4 +272,77 @@ public class MessageServiceTest : DefaultServiceTest<IMessageService, MessageSer
         Assert.That(lastMsg.Text == "editedMessage");
     }
     
+    [Test]
+    public async Task CreateMessage_DeleteForAuthor_GetOnlyUndeleted()
+    {
+        var user1 = await UserModelHelper.CreateTestData();
+        var user2 = await UserModelHelper.CreateTestData();
+        var user3 = await UserModelHelper.CreateTestData();
+        var userService = ServiceProvider.GetRequiredService<IUserService>();
+        await userService.CreateUserAsync(user1);
+        user1 = await userService.GetUserByLogin(user1.Login);
+        await userService.CreateUserAsync(user2);
+        user2 = await userService.GetUserByLogin(user2.Login);
+        await userService.CreateUserAsync(user3);
+        user3 = await userService.GetUserByLogin(user3.Login);
+        Assert.That(user1, Is.Not.EqualTo(null));
+        Assert.That(user2, Is.Not.EqualTo(null));
+        Assert.That(user3, Is.Not.EqualTo(null));
+
+        var friendService = ServiceProvider.GetRequiredService<IFriendshipService>();
+        await friendService.AddFriendshipAsync(user1!.Id, user2!.Id);
+        await friendService.AddFriendshipAsync(user1!.Id, user3!.Id);
+
+        await CreateRole();
+
+        var chatService = ServiceProvider.GetRequiredService<IChatService>();
+        await chatService.CreateGroupChat(user1.Id, new ChatModel
+        {
+            Name = "Chat2",
+            Logo = "null",
+            isGroup = true,
+        });
+
+        var chatList = await chatService.FindChatByName(user1.Id, "Chat2");
+        var chat = chatList.First();
+
+        await chatService.AddUsers(user1.Id, chat.Id, new List<int>
+        {
+            user2.Id,
+            user3.Id
+        });
+        
+        await Service.CreateMessage(user1.Id, chat.Id, new MessageModel()
+        {
+            Text = "Test message 1",
+            Files = "test1.png"
+        });
+        var messageToReply = await Service.CreateMessage(user2.Id, chat.Id, new MessageModel()
+        {
+            Text = "Test message 2",
+            Files = "test2.png"
+        });
+        var replyMessage = await Service.ReplyMessage(user3.Id, chat.Id, messageToReply.Id, new MessageModel()
+        {
+            Text = "Test message 3",
+            Files = "test3.png"
+        });
+        
+        await Service.DeleteMessage(user3.Id, chat.Id, replyMessage.Id, true);
+        var messages = await Service.GetMessages(user3.Id, chat.Id);
+        Assert.That(messages.Count == 2);
+        Assert.That(messages.Any(c => c.Text == "Test message 1"));
+        Assert.That(messages.Any(c => c.Text == "Test message 2"));
+        Assert.That(messages.Any(c => c.Text == "Test message 3") is false);
+        
+        messages = await Service.GetMessages(user2.Id, chat.Id);
+        Assert.That(messages.Count == 3);
+        Assert.That(messages.Any(c => c.Text == "Test message 1"));
+        Assert.That(messages.Any(c => c.Text == "Test message 2"));
+        Assert.That(messages.Any(c => c.Text == "Test message 3"));
+        
+        
+        Assert.That(replyMessage.ChatId == chat.Id && replyMessage.ToReplyMessageId == messageToReply.Id);
+    }
+    
 }

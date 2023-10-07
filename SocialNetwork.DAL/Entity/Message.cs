@@ -9,6 +9,7 @@ public class Message : BaseEntity
     
     public bool IsRead { get; set; }
     public bool IsEdited { get; set; }
+    public bool IsDeleted { get; set; }
     
     public int AuthorId { get; set; }
     public int ChatId { get; set; }
