@@ -1,6 +1,5 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.Extensions.Logging;
 using SocialNetwork.BL.Exceptions;
 using SocialNetwork.BL.Helpers;
@@ -8,10 +7,8 @@ using SocialNetwork.BL.Models;
 using SocialNetwork.BL.Services.Interfaces;
 using SocialNetwork.DAL.Entity;
 using SocialNetwork.DAL.Repository.Interfaces;
-using System.Data;
 using SocialNetwork.BL.Models.Enums;
 using Profile = SocialNetwork.DAL.Entity.Profile;
-using Microsoft.IdentityModel.Tokens;
 
 namespace SocialNetwork.BL.Services;
 
