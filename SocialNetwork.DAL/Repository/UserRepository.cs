@@ -34,8 +34,9 @@ public class UserRepository : IUserRepository
         return await _cacheService.GetOrSetAsync($"User-{id}", async (token) =>
         {
             return await _socialNetworkDbContext.Users.Include(i => i.Profile).Include(i => i.AuthorizationInfo)
-                .FirstOrDefaultAsync(i => i.Id == id, token);
-        }, cancellationToken, _socialNetworkDbContext);
+                .FirstOrDefaultAsync(i => i.Id == id && i.IsEnabled, token);
+        }, cancellationToken);
+
     }
 
 
@@ -52,7 +53,7 @@ public class UserRepository : IUserRepository
         return await _socialNetworkDbContext.Users
             .Include(i => i.Profile)
             .Include(i => i.AuthorizationInfo)
-            .FirstOrDefaultAsync(i => i.Login == login, cancellationToken);
+            .FirstOrDefaultAsync(i => i.Login == login && i.IsEnabled, cancellationToken);
     }
 
     public async Task UpdateUserAsync(User user, CancellationToken cancellationToken = default)
@@ -73,5 +74,10 @@ public class UserRepository : IUserRepository
 
         await _socialNetworkDbContext.SaveChangesAsync(cancellationToken);
         await _cacheService.RemoveFromCacheAsync($"User-{user.Id}", cancellationToken);
+    }
+
+    public Task<User?> GetByIdDisabledUser(int id, CancellationToken cancellationToken = default)
+    {
+        return _socialNetworkDbContext.Users.FirstOrDefaultAsync(i => i.Id == id && !i.IsEnabled, cancellationToken);
     }
 }

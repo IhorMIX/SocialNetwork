@@ -30,7 +30,7 @@ public class FriendRequestService : IFriendRequestService
     public async Task<FriendRequestModel?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
     {
         var friendRequest = await _friendRequestRepository.GetByIdAsync(id, cancellationToken);
-        _logger.IsExists(friendRequest, new FriendRequestException($"Friend request by id {id} not found"));
+        _logger.LogAndThrowErrorIfNull(friendRequest, new FriendRequestException($"Friend request by id {id} not found"));
         return _mapper.Map<FriendRequestModel>(friendRequest);
     }
     
@@ -40,7 +40,7 @@ public class FriendRequestService : IFriendRequestService
             .Where(i => i.ReceiverId == receiverId && i.SenderId == senderId)
             .FirstOrDefaultAsync(cancellationToken);
         
-        _logger.IsExists(friendRequest, new FriendRequestException("Friend request not found"));
+        _logger.LogAndThrowErrorIfNull(friendRequest, new FriendRequestException("Friend request not found"));
         return _mapper.Map<FriendRequestModel>(friendRequest);
     }
     
@@ -49,8 +49,8 @@ public class FriendRequestService : IFriendRequestService
         var senderModel = await _userService.GetByIdAsync(userId, cancellationToken);
         var receiverModel = await _userService.GetByIdAsync(receiverId, cancellationToken);
         
-        _logger.IsExists(senderModel, new UserNotFoundException($"User with ID {userId} not found."));
-        _logger.IsExists(receiverModel, new UserNotFoundException($"User with ID {receiverId} not found."));
+        _logger.LogAndThrowErrorIfNull(senderModel, new UserNotFoundException($"User with ID {userId} not found."));
+        _logger.LogAndThrowErrorIfNull(receiverModel, new UserNotFoundException($"User with ID {receiverId} not found."));
         
         var friends = await _friendshipRepository
             .GetAllFriendsByUserId(userId)
@@ -84,8 +84,8 @@ public class FriendRequestService : IFriendRequestService
         var userModel = await _userService.GetByIdAsync(userId, cancellationToken);
         var friendRequest = await _friendRequestRepository.GetByIdAsync(requestId, cancellationToken);
         
-        _logger.IsExists(userModel, new UserNotFoundException($"User with ID {userId} not found."));
-        _logger.IsExists(friendRequest, new FriendRequestException($"Friend request by id {requestId} not found"));
+        _logger.LogAndThrowErrorIfNull(userModel, new UserNotFoundException($"User with ID {userId} not found."));
+        _logger.LogAndThrowErrorIfNull(friendRequest, new FriendRequestException($"Friend request by id {requestId} not found"));
 
         var friends = await _friendshipRepository
             .GetAllFriendsByUserId(userId)
@@ -126,8 +126,8 @@ public class FriendRequestService : IFriendRequestService
         var userModel = await _userService.GetByIdAsync(userId, cancellationToken);
         var friendRequest = await _friendRequestRepository.GetByIdAsync(requestId, cancellationToken);
         
-        _logger.IsExists(userModel, new UserNotFoundException($"User with ID {userId} not found."));
-        _logger.IsExists(friendRequest, new FriendRequestException($"Friend request by id {requestId} not found"));
+        _logger.LogAndThrowErrorIfNull(userModel, new UserNotFoundException($"User with ID {userId} not found."));
+        _logger.LogAndThrowErrorIfNull(friendRequest, new FriendRequestException($"Friend request by id {requestId} not found"));
         
         if (friendRequest!.ReceiverId == userModel!.Id)
         {

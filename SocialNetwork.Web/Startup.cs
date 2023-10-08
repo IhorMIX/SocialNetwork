@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using SocialNetwork.BL.Services;
 using SocialNetwork.BL.Services.Interfaces;
+using SocialNetwork.BL.Settings;
 using SocialNetwork.DAL;
 using SocialNetwork.DAL.Options;
 using SocialNetwork.DAL.Repository;
@@ -30,6 +31,12 @@ public class Startup
     public void ConfigureServices(IServiceCollection services)
     {
         services.AddControllers().AddNewtonsoftJson();
+
+        //Options
+        services.Configure<MailSettingsOptions>(Configuration.GetSection("MailSettings"));
+        services.Configure<TemplatePatheOptions>(Configuration.GetSection("TemplatePathes"));
+        services.Configure<CacheOptions>(Configuration.GetSection("CacheOptions"));
+        services.Configure<RoleOption>(Configuration.GetSection("Roles"));
         
         //automapper
         services.AddAutoMapper(typeof(Startup));
@@ -42,8 +49,7 @@ public class Startup
         services.AddValidatorsFromAssemblyContaining<AuthorizeValidator>();
         services.AddValidatorsFromAssemblyContaining<ChatValidator>();
         services.AddSingleton(typeof(CacheService<>));
-        services.Configure<CacheOptions>(Configuration.GetSection("CacheOptions"));
-        services.Configure<RoleOption>(Configuration.GetSection("Roles"));
+       
 
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>
@@ -81,6 +87,8 @@ public class Startup
         services.AddScoped<IChatRepository,ChatRepository>();
         services.AddScoped<IRoleRepository,RoleRepository>();
         services.AddScoped<IChatMemberRepository,ChatMemberRepository>();
+
+        services.AddScoped<IMailService, MailService>();
         
         var connectionString = Environment.GetEnvironmentVariable("SQLSERVER_CONNECTION_STRING") ?? Configuration.GetConnectionString("ConnectionString");
 

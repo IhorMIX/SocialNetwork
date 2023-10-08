@@ -11,4 +11,6 @@ public interface IUserRepository : IBasicRepository<User>
     Task UpdateUserAsync(User user, CancellationToken cancellationToken = default);
 
     Task DeleteUserAsync(User user, CancellationToken cancellationToken = default);
+
+    Task<User?> GetByIdDisabledUser(int id, CancellationToken cancellationToken = default);
 }
