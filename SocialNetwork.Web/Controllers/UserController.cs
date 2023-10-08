@@ -1,7 +1,7 @@
-﻿using System.Web;
-using AutoMapper;
+﻿using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using SocialNetwork.BL.Extensions;
 using SocialNetwork.BL.Models;
 using SocialNetwork.BL.Models.Enums;
 using SocialNetwork.BL.Services.Interfaces;
@@ -125,5 +125,22 @@ public class UserController : ControllerBase
         return Ok();
 
     }
+
+    [AllowAnonymous]
+    [HttpGet("activation/{activationKey}")]
+    public async Task<IActionResult> ActivateAccount(string activationKey, CancellationToken cancellationToken)
+    {
+        var stringId = activationKey.FromBase64ToString();
+
+        if (!int.TryParse(stringId, out var id))
+        {
+            return BadRequest("Invalid confirmation code");
+        }
+
+        await _userService.ActivateUser(id, cancellationToken);
+
+        return Content("<h1>Account activated</h1>", "text/html");
+    }
+    
 }
 
