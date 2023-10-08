@@ -6,7 +6,7 @@ using SocialNetwork.BL.Helpers;
 using SocialNetwork.BL.Models;
 using SocialNetwork.BL.Services.Interfaces;
 using SocialNetwork.DAL.Entity;
-using SocialNetwork.DAL.Repository;
+using SocialNetwork.DAL.Entity.Enums;
 using SocialNetwork.DAL.Repository.Interfaces;
 
 namespace SocialNetwork.BL.Services;
@@ -38,9 +38,21 @@ public class MessageService : IMessageService
         var chatMemberDb = await _chatMemberRepository.GetByUserIdAndChatId(userId, chatId, cancellationToken);
         _logger.IsExists(chatMemberDb, new UserNotFoundException($"Chat member with id-{userId} not found"));
         
-        var userInChat = chatMemberDb!.Role.Where(c => 
-            c is { SendMessages: true, SendFiles: true});
-        _logger.IsExists(userInChat, new NoRightException($"You have no rights for it"));
+        var access = new List<ChatAccess>
+        {
+            ChatAccess.SendMessages
+        };
+        if (!string.IsNullOrEmpty(messageModel.Files))
+        {
+            access.Add(ChatAccess.SendFiles);
+        }
+
+        var hasUserAccess = chatMemberDb!.Role.HasAccess(access);
+
+        if (!hasUserAccess)
+        {
+            throw new NoRightException($"You have no rights for it");
+        }
         
         var chatDb = await _chatRepository.GetByIdAsync(chatId, cancellationToken);
         _logger.IsExists(chatDb, new UserNotFoundException($"Chat with id-{chatId} not found"));
