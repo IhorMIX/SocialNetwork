@@ -3,7 +3,7 @@ using SocialNetwork.BL.Exceptions;
 
 namespace SocialNetwork.BL.Helpers;
 
-public static class IsExistsHelper
+public static class LoggerHelper
 {
     public static void LogAndThrowErrorIfNull(this ILogger logger, Object? model, CustomException exceptionType)
     {
