@@ -23,5 +23,7 @@ public interface IUserService : IBaseService<UserModel>
         CancellationToken cancellationToken = default);
 
     Task LogOutAsync(int userId, CancellationToken cancellationToken = default);
-    
+
+    Task ActivateUser(int userId, CancellationToken cancellationToken = default);
+
 }

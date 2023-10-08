@@ -1,17 +1,18 @@
 ﻿using Microsoft.AspNetCore.Http;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Scriban.Runtime;
 
 namespace SocialNetwork.BL.Models
 {
-    internal class MailModel
+    public class MailModel
     {
-        public string ToEmail { get; set; }
-        public string Subject { get; set; }
-        public string Body { get; set; }
+        public IScriptObject? Data { get; set; } 
+
+        public string FilePath { get; set; } = null!;
+
+        public string Subject { get; set; } = "";
+
+        public string EmailTo { get; set; } = null!;
+        
         public List<IFormFile>? Attachments { get; set; }
     }
 }

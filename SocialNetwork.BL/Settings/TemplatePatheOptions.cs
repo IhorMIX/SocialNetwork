@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace SocialNetwork.BL.Settings
 {
-    public class TemplatePathesModel
+    public class TemplatePatheOptions
     {
         public string MailActivation { get; set; }
     }

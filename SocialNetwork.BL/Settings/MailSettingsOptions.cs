@@ -1,6 +1,6 @@
 ﻿namespace SocialNetwork.BL.Settings
 {
-    public class MailSettingsModel
+    public class MailSettingsOptions
     {
         public string Mail { get; set; }
         public string DisplayName { get; set; }

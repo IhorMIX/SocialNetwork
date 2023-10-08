@@ -1,6 +1,6 @@
 using Scriban.Runtime;
+using SocialNetwork.BL.Extensions;
 using SocialNetwork.BL.Models.Enums;
-using SocialNetwork.DAL.Entity;
 
 namespace SocialNetwork.BL.Models;
 
@@ -13,7 +13,6 @@ public class UserModel : BaseModel
     public OnlineStatus OnlineStatus { get; set; }
 
     public bool IsEnabled { get; set; }
-    
 
     public ProfileModel Profile { get; set; }
 
@@ -22,11 +21,15 @@ public class UserModel : BaseModel
 
     public IScriptObject ToScriptObject() {
 
-        IScriptObject test = new ScriptObject();
-        test.SetValue("name", Profile.Name, false);
-        test.SetValue("email", Profile.Email, false);
-        test.SetValue("id", Id, false);
+        IScriptObject data = new ScriptObject();
+        data.SetValue("name", Profile.Name, true);
+        data.SetValue("email", Profile.Email, true);
 
-        return test;
+        var link = $"{Environment.GetEnvironmentVariable("ASPNETCORE_URLS")}/api/User/activation/{Id.ToString().ToBase64()}";
+        
+        data.SetValue("link", link, true);
+        
+
+        return data;
     }
 }

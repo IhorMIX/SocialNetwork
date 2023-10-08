@@ -1,15 +1,10 @@
-﻿using Scriban.Runtime;
-using SocialNetwork.BL.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using SocialNetwork.BL.Models;
+
 
 namespace SocialNetwork.BL.Services.Interfaces
 {
     public interface IMailService
     {
-        Task SendHTMLEmailAsync(IScriptObject test, string template);
+        Task SendHtmlEmailAsync(MailModel mailModel);
     }
 }

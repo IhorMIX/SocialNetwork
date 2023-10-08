@@ -32,10 +32,12 @@ public class Startup
     {
         services.AddControllers().AddNewtonsoftJson();
 
-        //Add mailsettings
-        services.Configure<MailSettingsModel>(Configuration.GetSection("MailSettings"));
-        services.Configure<TemplatePathesModel>(Configuration.GetSection("TemplatePathes"));
-
+        //Options
+        services.Configure<MailSettingsOptions>(Configuration.GetSection("MailSettings"));
+        services.Configure<TemplatePatheOptions>(Configuration.GetSection("TemplatePathes"));
+        services.Configure<CacheOptions>(Configuration.GetSection("CacheOptions"));
+        services.Configure<RoleOption>(Configuration.GetSection("Roles"));
+        
         //automapper
         services.AddAutoMapper(typeof(Startup));
 
@@ -47,8 +49,7 @@ public class Startup
         services.AddValidatorsFromAssemblyContaining<AuthorizeValidator>();
         services.AddValidatorsFromAssemblyContaining<ChatValidator>();
         services.AddSingleton(typeof(CacheService<>));
-        services.Configure<CacheOptions>(Configuration.GetSection("CacheOptions"));
-        services.Configure<RoleOption>(Configuration.GetSection("Roles"));
+       
 
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>
@@ -86,6 +87,8 @@ public class Startup
         services.AddScoped<IChatRepository,ChatRepository>();
         services.AddScoped<IRoleRepository,RoleRepository>();
         services.AddScoped<IChatMemberRepository,ChatMemberRepository>();
+
+        services.AddScoped<IMailService, MailService>();
         
         var connectionString = Environment.GetEnvironmentVariable("SQLSERVER_CONNECTION_STRING") ?? Configuration.GetConnectionString("ConnectionString");
 
