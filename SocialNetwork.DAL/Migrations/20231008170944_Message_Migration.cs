@@ -147,6 +147,13 @@ namespace SocialNetwork.DAL.Migrations
                 name: "IX_Reactions_MessageId",
                 table: "Reactions",
                 column: "MessageId");
+
+            migrationBuilder.Sql(
+                $"INSERT INTO Roles VALUES ('Admin', '#FF0000', NULL, 0, 'SendMessages,SendAudioMess,SendFiles,EditRoles,AddMembers,DelMembers,MuteMembers,DelMessages,EditNicknames,EditChat')");
+            
+            migrationBuilder.Sql(
+                $"INSERT INTO Roles VALUES ('P2PAdmin', '#FF0000', NULL, 0, 'SendMessages,SendAudioMess,SendFiles,MuteMembers,DelMessages')");
+
         }
 
         /// <inheritdoc />

@@ -125,20 +125,6 @@ namespace SocialNetwork.DAL.Migrations
                 name: "IX_Roles_ChatId",
                 table: "Roles",
                 column: "ChatId");
-            migrationBuilder.InsertData(
-                table: "Roles",
-                columns: new[] { "RoleName", "RoleColor", "SendMessages", "SendFiles", "SendAudioMess", "MuteMembers", "EditRoles", "EditNicknames", "DelMessages", "DelMembers", "AddMembers", "EditChat", "ChatId", "Rank" },
-                values: new object[,]
-                {
-                    // Second role: Admin
-                    { "@everyone", "#FF0000", true, true, true, false, false, false, false, false, false, false, null, 1000000 },
-                    
-                    // Second role: Admin
-                    { "Admin", "#FF0000", true, true, true, true, true, true, true, true, true, true, null, 0 },
-
-                    // Third role: P2P
-                    { "P2P", "#FF0000", true, true, true, false, false, false, true, false, false, false, null, 0 }
-                });
         }
 
         /// <inheritdoc />

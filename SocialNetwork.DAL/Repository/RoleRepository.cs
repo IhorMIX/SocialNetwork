@@ -71,4 +71,12 @@ public class RoleRepository : IRoleRepository
         foreach (var role in roles)
             await _cacheService.UpdateAsync($"Role-{role.Id}", (_) => Task.FromResult(role)!, cancellationToken);
     }
+
+    public async Task<Role?> GetByName(string name, CancellationToken cancellationToken = default)
+    {
+        return await _socialNetworkDbContext.Roles
+            .Include(r => r.ChatMembers)
+            .ThenInclude(cm => cm.User)
+            .FirstOrDefaultAsync(r => r.RoleName == name, cancellationToken);
+    }
 }

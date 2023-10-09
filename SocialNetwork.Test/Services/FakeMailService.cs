@@ -1,7 +1,7 @@
 ﻿using SocialNetwork.BL.Models;
 using SocialNetwork.BL.Services.Interfaces;
 
-namespace SocialNetwork.BL.Services;
+namespace SocialNetwork.Test.Services;
 
 public class FakeMailService : IMailService
 {
