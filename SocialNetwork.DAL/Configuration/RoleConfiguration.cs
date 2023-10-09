@@ -1,5 +1,6 @@
 ﻿using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using SocialNetwork.DAL.Entity;
 using SocialNetwork.DAL.Entity.Enums;
@@ -13,7 +14,12 @@ public class RoleConfiguration : IEntityTypeConfiguration<Role>
     {
         builder.Property(r => r.RoleAccesses)
             .HasConversion(
-                d => !d.Any() ? "[]" : JsonSerializer.Serialize(d, JsonSerializerOptions.Default),
-                s => string.IsNullOrEmpty(s) ? new List<ChatAccess>() : JsonSerializer.Deserialize<List<ChatAccess>>(s, JsonSerializerOptions.Default)!);
+                v => string.Join(',', v),
+                v => !string.IsNullOrEmpty(v)
+                    ? v.Split(',', StringSplitOptions.RemoveEmptyEntries).Select(Enum.Parse<ChatAccess>)
+                        .ToList()
+                    : new List<ChatAccess>())
+            .Metadata.SetValueComparer(new CollectionValueComparer<ChatAccess>());
     }
 }
+
