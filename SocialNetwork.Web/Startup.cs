@@ -1,8 +1,10 @@
-﻿using FluentValidation;
+﻿using System.Text.Json.Serialization;
+using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Newtonsoft.Json.Converters;
 using SocialNetwork.BL.Services;
 using SocialNetwork.BL.Services.Interfaces;
 using SocialNetwork.BL.Settings;
@@ -30,7 +32,8 @@ public class Startup
     //service to adding dependency injection 
     public void ConfigureServices(IServiceCollection services)
     {
-        services.AddControllers().AddNewtonsoftJson();
+        services.AddControllers().AddNewtonsoftJson(opt => 
+            opt.SerializerSettings.Converters.Add(new StringEnumConverter()));
 
         //Options
         services.Configure<MailSettingsOptions>(Configuration.GetSection("MailSettings"));
