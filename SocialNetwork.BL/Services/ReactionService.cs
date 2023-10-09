@@ -37,10 +37,10 @@ public class ReactionService : IReactionService
     public async Task<ReactionModel> AddReaction(int userId, int messageId, ReactionModel reactionModel, CancellationToken cancellationToken = default)
     {
         var messageDb = await _messageRepository.GetByIdAsync(messageId, cancellationToken);
-        _logger.IsExists(messageDb, new UserNotFoundException($"Message with id-{messageId} not found"));
+        _logger.LogAndThrowErrorIfNull(messageDb, new UserNotFoundException($"Message with id-{messageId} not found"));
         
         var chatMemberDb = await _chatMemberRepository.GetByUserIdAndChatId(userId, messageDb!.ChatId, cancellationToken);
-        _logger.IsExists(chatMemberDb, new UserNotFoundException($"Chat member with id-{userId} not found"));
+        _logger.LogAndThrowErrorIfNull(chatMemberDb, new UserNotFoundException($"Chat member with id-{userId} not found"));
 
         var reactionDb = await _reactionRepository.GetAll()
             .FirstOrDefaultAsync(r => r.MessageId == messageDb.Id && r.AuthorId == chatMemberDb!.Id, cancellationToken: cancellationToken);
@@ -66,10 +66,10 @@ public class ReactionService : IReactionService
     public async Task RemoveReaction(int userId, int chatId, int reactionId, CancellationToken cancellationToken = default)
     {
         var chatMemberDb = await _chatMemberRepository.GetByUserIdAndChatId(userId, chatId, cancellationToken);
-        _logger.IsExists(chatMemberDb, new UserNotFoundException($"Chat member with id-{userId} not found"));
+        _logger.LogAndThrowErrorIfNull(chatMemberDb, new UserNotFoundException($"Chat member with id-{userId} not found"));
         
         var reactionDb = await _reactionRepository.GetByIdAsync(reactionId, cancellationToken);
-        _logger.IsExists(reactionDb, new UserNotFoundException($"Reaction with id-{reactionId} not found"));
+        _logger.LogAndThrowErrorIfNull(reactionDb, new UserNotFoundException($"Reaction with id-{reactionId} not found"));
 
         await _reactionRepository.DeleteReactionAsync(reactionDb!, cancellationToken);
     }
@@ -78,10 +78,10 @@ public class ReactionService : IReactionService
         CancellationToken cancellationToken = default)
     {
         var messageDb = await _messageRepository.GetByIdAsync(messageId, cancellationToken);
-        _logger.IsExists(messageDb, new UserNotFoundException($"Message with id-{messageId} not found"));
+        _logger.LogAndThrowErrorIfNull(messageDb, new UserNotFoundException($"Message with id-{messageId} not found"));
         
         var chatMemberDb = await _chatMemberRepository.GetByUserIdAndChatId(userId, messageDb!.ChatId, cancellationToken);
-        _logger.IsExists(chatMemberDb, new UserNotFoundException($"Chat member with id-{userId} not found"));
+        _logger.LogAndThrowErrorIfNull(chatMemberDb, new UserNotFoundException($"Chat member with id-{userId} not found"));
 
         var reactionsDb = await _reactionRepository.GetAll().Where(r => r.MessageId == messageDb.Id && r.AuthorId == chatMemberDb.Id)
             .ToListAsync(cancellationToken);

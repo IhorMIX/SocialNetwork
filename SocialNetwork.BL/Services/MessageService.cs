@@ -36,7 +36,7 @@ public class MessageService : IMessageService
     public async Task<MessageModel> CreateMessage(int userId, int chatId, MessageModel messageModel, CancellationToken cancellationToken = default)
     {
         var chatMemberDb = await _chatMemberRepository.GetByUserIdAndChatId(userId, chatId, cancellationToken);
-        _logger.IsExists(chatMemberDb, new UserNotFoundException($"Chat member with id-{userId} not found"));
+        _logger.LogAndThrowErrorIfNull(chatMemberDb, new UserNotFoundException($"Chat member with id-{userId} not found"));
         
         var access = new List<ChatAccess>
         {
@@ -55,7 +55,7 @@ public class MessageService : IMessageService
         }
         
         var chatDb = await _chatRepository.GetByIdAsync(chatId, cancellationToken);
-        _logger.IsExists(chatDb, new UserNotFoundException($"Chat with id-{chatId} not found"));
+        _logger.LogAndThrowErrorIfNull(chatDb, new UserNotFoundException($"Chat with id-{chatId} not found"));
         
         var messageDb = await _messageRepository.CreateMessageAsync(new Message
         {
@@ -80,17 +80,18 @@ public class MessageService : IMessageService
     public async Task DeleteMessage(int userId, int chatId, int messageId, bool isForAuthor, CancellationToken cancellationToken = default)
     {
         var chatMemberDb = await _chatMemberRepository.GetByUserIdAndChatId(userId, chatId, cancellationToken);
-        _logger.IsExists(chatMemberDb, new UserNotFoundException($"Chat member with id-{userId} not found"));
+        _logger.LogAndThrowErrorIfNull(chatMemberDb, new UserNotFoundException($"Chat member with id-{userId} not found"));
         
-        var userInChat = chatMemberDb!.Role.Where(c => 
-            c is { DelMessages: true});
-        _logger.IsExists(userInChat, new NoRightException($"You have no rights for it"));
+        var hasAccess = chatMemberDb!.Role.HasAccess(new List<ChatAccess>{ ChatAccess.DelMessages });
+        if (!hasAccess)
+            throw new NoRightException($"You have no rights for it");
+       
         
         var chatDb = await _chatRepository.GetByIdAsync(chatId, cancellationToken);
-        _logger.IsExists(chatDb, new UserNotFoundException($"Chat with id-{chatId} not found"));
+        _logger.LogAndThrowErrorIfNull(chatDb, new UserNotFoundException($"Chat with id-{chatId} not found"));
 
         var messageDb = await _messageRepository.GetByIdAsync(messageId, cancellationToken);
-        _logger.IsExists(chatDb, new UserNotFoundException($"Message with id-{messageId} not found"));
+        _logger.LogAndThrowErrorIfNull(chatDb, new UserNotFoundException($"Message with id-{messageId} not found"));
         
         if (isForAuthor && messageDb!.AuthorId == chatMemberDb.Id)
         {
@@ -108,17 +109,27 @@ public class MessageService : IMessageService
         CancellationToken cancellationToken = default)
     {
         var chatMemberDb = await _chatMemberRepository.GetByUserIdAndChatId(userId, chatId, cancellationToken);
-        _logger.IsExists(chatMemberDb, new UserNotFoundException($"Chat member with id-{userId} not found"));
+        _logger.LogAndThrowErrorIfNull(chatMemberDb, new UserNotFoundException($"Chat member with id-{userId} not found"));
         
-        var userInChat = chatMemberDb!.Role.Where(c => 
-            c is { SendMessages: true, SendFiles: true});
-        _logger.IsExists(userInChat, new NoRightException($"You have no rights for it"));
+        var access = new List<ChatAccess>
+        {
+            ChatAccess.SendMessages
+        };
+        if (!string.IsNullOrEmpty(messageModel.Files))
+        {
+            access.Add(ChatAccess.SendFiles);
+        }
+        var hasUserAccess = chatMemberDb!.Role.HasAccess(access);
+        if (!hasUserAccess)
+        {
+            throw new NoRightException($"You have no rights for it");
+        }
         
         var chatDb = await _chatRepository.GetByIdAsync(chatId, cancellationToken);
-        _logger.IsExists(chatDb, new UserNotFoundException($"Chat with id-{chatId} not found"));
+        _logger.LogAndThrowErrorIfNull(chatDb, new UserNotFoundException($"Chat with id-{chatId} not found"));
 
         var messageDb = await _messageRepository.GetByIdAsync(messageId, cancellationToken);
-        _logger.IsExists(messageDb, new UserNotFoundException($"Message with id-{messageId} not found"));
+        _logger.LogAndThrowErrorIfNull(messageDb, new UserNotFoundException($"Message with id-{messageId} not found"));
 
         
         foreach (var propertyMap in ReflectionHelper.WidgetUtil<MessageModel, Message>.PropertyMap)
@@ -143,17 +154,27 @@ public class MessageService : IMessageService
         CancellationToken cancellationToken = default)
     {
         var chatMemberDb = await _chatMemberRepository.GetByUserIdAndChatId(userId, chatId, cancellationToken);
-        _logger.IsExists(chatMemberDb, new UserNotFoundException($"Chat member with id-{userId} not found"));
+        _logger.LogAndThrowErrorIfNull(chatMemberDb, new UserNotFoundException($"Chat member with id-{userId} not found"));
         
-        var userInChat = chatMemberDb!.Role.Where(c => 
-            c is { SendMessages: true, SendFiles: true});
-        _logger.IsExists(userInChat, new NoRightException($"You have no rights for it"));
+        var access = new List<ChatAccess>
+        {
+            ChatAccess.SendMessages
+        };
+        if (!string.IsNullOrEmpty(messageModel.Files))
+        {
+            access.Add(ChatAccess.SendFiles);
+        }
+        var hasUserAccess = chatMemberDb!.Role.HasAccess(access);
+        if (!hasUserAccess)
+        {
+            throw new NoRightException($"You have no rights for it");
+        }
         
         var chatDb = await _chatRepository.GetByIdAsync(chatId, cancellationToken);
-        _logger.IsExists(chatDb, new UserNotFoundException($"Chat with id-{chatId} not found"));
+        _logger.LogAndThrowErrorIfNull(chatDb, new UserNotFoundException($"Chat with id-{chatId} not found"));
 
         var messageToReply = await _messageRepository.GetByIdAsync(messageId, cancellationToken);
-        _logger.IsExists(chatDb, new UserNotFoundException($"Message with id-{messageId} not found"));
+        _logger.LogAndThrowErrorIfNull(chatDb, new UserNotFoundException($"Message with id-{messageId} not found"));
         
         var messageDb = await _messageRepository.CreateMessageAsync(new Message
         {
@@ -178,10 +199,10 @@ public class MessageService : IMessageService
     public async Task<List<MessageModel>> GetMessages(int userId, int chatId, CancellationToken cancellationToken = default)
     {
         var chatMemberDb = await _chatMemberRepository.GetByUserIdAndChatId(userId, chatId, cancellationToken);
-        _logger.IsExists(chatMemberDb, new UserNotFoundException($"Chat member with id-{userId} not found"));
+        _logger.LogAndThrowErrorIfNull(chatMemberDb, new UserNotFoundException($"Chat member with id-{userId} not found"));
         
         var chatDb = await _chatRepository.GetByIdAsync(chatId, cancellationToken);
-        _logger.IsExists(chatDb, new UserNotFoundException($"Chat with id-{chatId} not found"));
+        _logger.LogAndThrowErrorIfNull(chatDb, new UserNotFoundException($"Chat with id-{chatId} not found"));
         
         return _mapper.Map<List<MessageModel>>(await _messageRepository.GetAll()
             .Where(m => m.ChatId == chatId && (!m.IsDeleted || m.AuthorId != chatMemberDb.Id))
@@ -191,10 +212,10 @@ public class MessageService : IMessageService
     public async Task<MessageModel> GetLastMessage(int userId, int chatId, CancellationToken cancellationToken = default)
     {
         var chatMemberDb = await _chatMemberRepository.GetByUserIdAndChatId(userId, chatId, cancellationToken);
-        _logger.IsExists(chatMemberDb, new UserNotFoundException($"Chat member with id-{userId} not found"));
+        _logger.LogAndThrowErrorIfNull(chatMemberDb, new UserNotFoundException($"Chat member with id-{userId} not found"));
         
         var chatDb = await _chatRepository.GetByIdAsync(chatId, cancellationToken);
-        _logger.IsExists(chatDb, new UserNotFoundException($"Chat with id-{chatId} not found"));
+        _logger.LogAndThrowErrorIfNull(chatDb, new UserNotFoundException($"Chat with id-{chatId} not found"));
 
         return _mapper.Map<MessageModel> (await _messageRepository.GetAll().Where(m => m.ChatId == chatId && m.IsDeleted == false).LastOrDefaultAsync(cancellationToken));
     }
