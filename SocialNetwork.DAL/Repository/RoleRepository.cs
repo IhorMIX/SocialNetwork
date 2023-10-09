@@ -27,14 +27,18 @@ public class RoleRepository : IRoleRepository
     public async Task<Role?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
     {
         
-        return await _cacheService.GetOrSetAsync($"Role - {id}", async (token) =>
-        {
-            return await _socialNetworkDbContext.Roles
-                .Include(r => r.ChatMembers)
-                .ThenInclude(cm => cm.User)
-                .FirstOrDefaultAsync(r => r.Id == id, token);
-        }, cancellationToken, _socialNetworkDbContext);
+        // return await _cacheService.GetOrSetAsync($"Role - {id}", async (token) =>
+        // {
+        //     return await _socialNetworkDbContext.Roles
+        //         .Include(r => r.ChatMembers)
+        //         .ThenInclude(cm => cm.User)
+        //         .FirstOrDefaultAsync(r => r.Id == id, token);
+        // }, cancellationToken, _socialNetworkDbContext);
         
+        return await _socialNetworkDbContext.Roles
+            .Include(r => r.ChatMembers)
+            .ThenInclude(cm => cm.User)
+            .FirstOrDefaultAsync(r => r.Id == id, cancellationToken);
        
     }
 

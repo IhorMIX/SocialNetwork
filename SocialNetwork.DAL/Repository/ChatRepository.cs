@@ -27,13 +27,18 @@ public class ChatRepository : IChatRepository
 
     public async Task<Chat?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
     {
-        return await _cacheService.GetOrSetAsync($"Chat - {id}", async (token) =>
-        {
-            return await _socialNetworkDbContext.Chats
-                .Include(i => i.ChatMembers)
-                .Include(c => c.Roles)
-                .FirstOrDefaultAsync(i => i.Id == id, token);
-        }, cancellationToken, _socialNetworkDbContext);
+        // return await _cacheService.GetOrSetAsync($"Chat - {id}", async (token) =>
+        // {
+        //     return await _socialNetworkDbContext.Chats
+        //         .Include(i => i.ChatMembers)
+        //         .Include(c => c.Roles)
+        //         .FirstOrDefaultAsync(i => i.Id == id, token);
+        // }, cancellationToken, _socialNetworkDbContext);
+        
+        return await _socialNetworkDbContext.Chats
+            .Include(i => i.ChatMembers)
+            .Include(c => c.Roles)
+            .FirstOrDefaultAsync(i => i.Id == id, cancellationToken);
     }
 
     public async Task<int> CreateChat(Chat chat, CancellationToken cancellationToken = default)
