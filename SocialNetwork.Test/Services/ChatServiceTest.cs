@@ -6,6 +6,7 @@ using SocialNetwork.BL.Models;
 using SocialNetwork.BL.Services;
 using SocialNetwork.BL.Services.Interfaces;
 using SocialNetwork.DAL.Entity;
+using SocialNetwork.DAL.Entity.Enums;
 using SocialNetwork.DAL.Repository;
 using SocialNetwork.DAL.Repository.Interfaces;
 using SocialNetwork.Test.Helpers;
@@ -14,6 +15,7 @@ namespace SocialNetwork.Test.Services;
 
 public class ChatServiceTest : DefaultServiceTest<IChatService, ChatService>
 {
+    
     protected override void SetUpAdditionalDependencies(IServiceCollection services)
     {
         services.AddScoped<IFriendRequestRepository, FriendRequestRepository>();
@@ -21,7 +23,6 @@ public class ChatServiceTest : DefaultServiceTest<IChatService, ChatService>
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<IFriendshipService, FriendshipService>();
         services.AddScoped<IFriendshipRepository, FriendshipRepository>();
-        
         services.AddScoped<IChatService, ChatService>();
         services.AddScoped<IRoleRepository, RoleRepository>();
         services.AddScoped<IChatRepository, ChatRepository>();
@@ -36,56 +37,60 @@ public class ChatServiceTest : DefaultServiceTest<IChatService, ChatService>
         {
             RoleName = "@everyone",
             RoleColor = "null",
-            SendMessages = true,
-            SendAudioMess = true,
-            SendFiles = true,
-            EditRoles = false,
-            AddMembers = false,
-            DelMembers = false,
-            MuteMembers = false,
-            DelMessages = false,
-            EditNicknames = false
+            RoleAccesses = new List<ChatAccess>()
+            {
+                ChatAccess.SendMessages,
+                ChatAccess.SendAudioMess,
+                ChatAccess.SendFiles,
+                ChatAccess.DelMessages
+            }
         });
         
         await _roleRepository.CreateRole(new Role
         {
             RoleName = "Admin",
             RoleColor = "null",
-            SendMessages = true,
-            SendAudioMess = true,
-            SendFiles = true,
-            EditRoles = true,
-            AddMembers = true,
-            DelMembers = true,
-            MuteMembers = true,
-            DelMessages = true,
-            EditNicknames = true
+            RoleAccesses = new List<ChatAccess>()
+            {
+                ChatAccess.SendMessages,
+                ChatAccess.SendAudioMess,
+                ChatAccess.SendFiles,
+                ChatAccess.EditRoles,
+                ChatAccess.AddMembers,
+                ChatAccess.DelMembers,
+                ChatAccess.MuteMembers,
+                ChatAccess.DelMessages,
+                ChatAccess.EditNicknames,
+                ChatAccess.EditChat
+            }
         });
         await _roleRepository.CreateRole(new Role
         {
             RoleName = "P2PAdmin",
             RoleColor = "null",
-            SendMessages = true,
-            SendAudioMess = true,
-            SendFiles = true,
-            EditRoles = false,
-            AddMembers = false,
-            DelMembers = false,
-            MuteMembers = false,
-            DelMessages = true,
-            EditNicknames = false
+            RoleAccesses = new List<ChatAccess>()
+            {
+                ChatAccess.SendMessages,
+                ChatAccess.SendAudioMess,
+                ChatAccess.SendFiles,
+                ChatAccess.EditRoles,
+                ChatAccess.AddMembers,
+                ChatAccess.DelMembers,
+                ChatAccess.MuteMembers,
+                ChatAccess.DelMessages,
+                ChatAccess.EditNicknames,
+                ChatAccess.EditChat
+            }
         });
     }
     
     [Test]
     public async Task CreateP2PChat_Ok_ChatCreated()
     {
-        var user1 = await UserModelHelper.CreateTestData();
-        var user2 = await UserModelHelper.CreateTestData();
         var userService = ServiceProvider.GetRequiredService<IUserService>();
-        await userService.CreateUserAsync(user1);
+        var user1 = await UserModelHelper.CreateTestDataAsync(userService);
+        var user2 = await UserModelHelper.CreateTestDataAsync(userService);
         user1 = await userService.GetUserByLogin(user1.Login);
-        await userService.CreateUserAsync(user2);
         user2 = await userService.GetUserByLogin(user2.Login);
         Assert.That(user1, Is.Not.EqualTo(null));
         Assert.That(user2, Is.Not.EqualTo(null));
@@ -112,25 +117,21 @@ public class ChatServiceTest : DefaultServiceTest<IChatService, ChatService>
     
     [Test]
     public async Task CreateGroupChat_AddMember_ChatCreatedWith2Members()
-    {
-        var user1 = await UserModelHelper.CreateTestData();
-        var user2 = await UserModelHelper.CreateTestData();
-        var user3 = await UserModelHelper.CreateTestData();
-        var user4 = await UserModelHelper.CreateTestData();
+    { 
         var userService = ServiceProvider.GetRequiredService<IUserService>();
-        await userService.CreateUserAsync(user1);
+        var user1 = await UserModelHelper.CreateTestDataAsync(userService);
+        var user2 = await UserModelHelper.CreateTestDataAsync(userService);
+        var user3 = await UserModelHelper.CreateTestDataAsync(userService);
+        var user4 = await UserModelHelper.CreateTestDataAsync(userService);
         user1 = await userService.GetUserByLogin(user1.Login);
-        await userService.CreateUserAsync(user2);
         user2 = await userService.GetUserByLogin(user2.Login);
-        await userService.CreateUserAsync(user3);
         user3 = await userService.GetUserByLogin(user3.Login);
-        await userService.CreateUserAsync(user4);
         user4 = await userService.GetUserByLogin(user4.Login);
-        
         Assert.That(user1, Is.Not.EqualTo(null));
         Assert.That(user2, Is.Not.EqualTo(null));
         Assert.That(user3, Is.Not.EqualTo(null));
         Assert.That(user4, Is.Not.EqualTo(null));
+        
         
         await CreateRole();
         
@@ -156,9 +157,8 @@ public class ChatServiceTest : DefaultServiceTest<IChatService, ChatService>
     [Test]
     public async Task CreateGroupChats_GetChats_ChatCreatedWith2Members()
     {
-        var user1 = await UserModelHelper.CreateTestData();
         var userService = ServiceProvider.GetRequiredService<IUserService>();
-        await userService.CreateUserAsync(user1);
+        var user1 = await UserModelHelper.CreateTestDataAsync(userService);
         user1 = await userService.GetUserByLogin(user1.Login);
         Assert.That(user1, Is.Not.EqualTo(null));
 
@@ -192,21 +192,15 @@ public class ChatServiceTest : DefaultServiceTest<IChatService, ChatService>
     [Test]
     public async Task CreateRole_EditRole_RoleEdited()
     {
-        
-        var user1 = await UserModelHelper.CreateTestData();
-        var user2 = await UserModelHelper.CreateTestData();
-        var user3 = await UserModelHelper.CreateTestData();
-        var user4 = await UserModelHelper.CreateTestData();
         var userService = ServiceProvider.GetRequiredService<IUserService>();
-        await userService.CreateUserAsync(user1);
+        var user1 = await UserModelHelper.CreateTestDataAsync(userService);
+        var user2 = await UserModelHelper.CreateTestDataAsync(userService);
+        var user3 = await UserModelHelper.CreateTestDataAsync(userService);
+        var user4 = await UserModelHelper.CreateTestDataAsync(userService);
         user1 = await userService.GetUserByLogin(user1.Login);
-        await userService.CreateUserAsync(user2);
         user2 = await userService.GetUserByLogin(user2.Login);
-        await userService.CreateUserAsync(user3);
         user3 = await userService.GetUserByLogin(user3.Login);
-        await userService.CreateUserAsync(user4);
         user4 = await userService.GetUserByLogin(user4.Login);
-        
         Assert.That(user1, Is.Not.EqualTo(null));
         Assert.That(user2, Is.Not.EqualTo(null));
         Assert.That(user3, Is.Not.EqualTo(null));
@@ -246,36 +240,30 @@ public class ChatServiceTest : DefaultServiceTest<IChatService, ChatService>
 
         role.RoleName = "Role21";
         role.RoleColor = "black1";
-        role.DelMessages = true;
-        role.EditNicknames = true;
+        role.RoleAccesses.Add(ChatAccess.DelMembers);
+        role.RoleAccesses.Add(ChatAccess.EditNicknames);
         await Service.EditRole(user1.Id, chat.Id, role.Id, role);
         
         role = (await Service.GetAllChatRoles(user1.Id, chat.Id)).First();
         chat = (await Service.FindChatByName(user1.Id, "Chat3")).First();
         Assert.That(role.RoleName != "Role2" &&
                     chat.ChatMembers.Any(c => c.Role.Any(r => r.RoleName != "Role2")));
-        Assert.That(role.DelMessages != false && role.EditNicknames == true);
+        Assert.That(role.RoleAccesses.Contains(ChatAccess.DelMembers) && role.RoleAccesses.Contains(ChatAccess.DelMembers));
     }
     
     [Test]
     public async Task CreateRole_DelRole_RoleDeleted()
     {
-        
-        var user1 = await UserModelHelper.CreateTestData();
-        var user2 = await UserModelHelper.CreateTestData();
-        var user3 = await UserModelHelper.CreateTestData();
         var userService = ServiceProvider.GetRequiredService<IUserService>();
-        await userService.CreateUserAsync(user1);
+        var user1 = await UserModelHelper.CreateTestDataAsync(userService);
+        var user2 = await UserModelHelper.CreateTestDataAsync(userService);
+        var user3 = await UserModelHelper.CreateTestDataAsync(userService);
         user1 = await userService.GetUserByLogin(user1.Login);
-        await userService.CreateUserAsync(user2);
         user2 = await userService.GetUserByLogin(user2.Login);
-        await userService.CreateUserAsync(user3);
         user3 = await userService.GetUserByLogin(user3.Login);
-
         Assert.That(user1, Is.Not.EqualTo(null));
         Assert.That(user2, Is.Not.EqualTo(null));
         Assert.That(user3, Is.Not.EqualTo(null));
-        //await CreateRole();
         
         await Service.CreateGroupChat(user1.Id, new ChatModel
         {

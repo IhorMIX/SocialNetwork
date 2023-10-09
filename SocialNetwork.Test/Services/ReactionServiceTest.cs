@@ -3,6 +3,7 @@ using SocialNetwork.BL.Models;
 using SocialNetwork.BL.Services;
 using SocialNetwork.BL.Services.Interfaces;
 using SocialNetwork.DAL.Entity;
+using SocialNetwork.DAL.Entity.Enums;
 using SocialNetwork.DAL.Repository;
 using SocialNetwork.DAL.Repository.Interfaces;
 using SocialNetwork.Test.Helpers;
@@ -29,7 +30,6 @@ public class ReactionServiceTest : DefaultServiceTest<IReactionService, Reaction
         
         services.AddScoped<IMessageService, MessageService>();
         services.AddScoped<IMessageRepository, MessageRepository>();
-        
         base.SetUpAdditionalDependencies(services);
     }
     
@@ -40,59 +40,62 @@ public class ReactionServiceTest : DefaultServiceTest<IReactionService, Reaction
         {
             RoleName = "@everyone",
             RoleColor = "null",
-            SendMessages = true,
-            SendAudioMess = true,
-            SendFiles = true,
-            EditRoles = false,
-            AddMembers = false,
-            DelMembers = false,
-            MuteMembers = false,
-            DelMessages = false,
-            EditNicknames = false
+            RoleAccesses = new List<ChatAccess>()
+            {
+                ChatAccess.SendMessages,
+                ChatAccess.SendAudioMess,
+                ChatAccess.SendFiles,
+                ChatAccess.DelMessages
+            }
         });
         
         await _roleRepository.CreateRole(new Role
         {
             RoleName = "Admin",
             RoleColor = "null",
-            SendMessages = true,
-            SendAudioMess = true,
-            SendFiles = true,
-            EditRoles = true,
-            AddMembers = true,
-            DelMembers = true,
-            MuteMembers = true,
-            DelMessages = true,
-            EditNicknames = true
+            RoleAccesses = new List<ChatAccess>()
+            {
+                ChatAccess.SendMessages,
+                ChatAccess.SendAudioMess,
+                ChatAccess.SendFiles,
+                ChatAccess.EditRoles,
+                ChatAccess.AddMembers,
+                ChatAccess.DelMembers,
+                ChatAccess.MuteMembers,
+                ChatAccess.DelMessages,
+                ChatAccess.EditNicknames,
+                ChatAccess.EditChat
+            }
         });
         await _roleRepository.CreateRole(new Role
         {
             RoleName = "P2PAdmin",
             RoleColor = "null",
-            SendMessages = true,
-            SendAudioMess = true,
-            SendFiles = true,
-            EditRoles = false,
-            AddMembers = false,
-            DelMembers = false,
-            MuteMembers = false,
-            DelMessages = true,
-            EditNicknames = false
+            RoleAccesses = new List<ChatAccess>()
+            {
+                ChatAccess.SendMessages,
+                ChatAccess.SendAudioMess,
+                ChatAccess.SendFiles,
+                ChatAccess.EditRoles,
+                ChatAccess.AddMembers,
+                ChatAccess.DelMembers,
+                ChatAccess.MuteMembers,
+                ChatAccess.DelMessages,
+                ChatAccess.EditNicknames,
+                ChatAccess.EditChat
+            }
         });
     }
     
      [Test]
     public async Task CreateMessages_AddReactions_EditReaction()
     {
-        var user1 = await UserModelHelper.CreateTestData();
-        var user2 = await UserModelHelper.CreateTestData();
-        var user3 = await UserModelHelper.CreateTestData();
         var userService = ServiceProvider.GetRequiredService<IUserService>();
-        await userService.CreateUserAsync(user1);
+        var user1 = await UserModelHelper.CreateTestDataAsync(userService);
+        var user2 = await UserModelHelper.CreateTestDataAsync(userService);
+        var user3 = await UserModelHelper.CreateTestDataAsync(userService);
         user1 = await userService.GetUserByLogin(user1.Login);
-        await userService.CreateUserAsync(user2);
         user2 = await userService.GetUserByLogin(user2.Login);
-        await userService.CreateUserAsync(user3);
         user3 = await userService.GetUserByLogin(user3.Login);
         Assert.That(user1, Is.Not.EqualTo(null));
         Assert.That(user2, Is.Not.EqualTo(null));
