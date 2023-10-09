@@ -12,7 +12,7 @@ using SocialNetwork.DAL;
 namespace SocialNetwork.DAL.Migrations
 {
     [DbContext(typeof(SocialNetworkDbContext))]
-    [Migration("20231006233403_Message_Migration")]
+    [Migration("20231008170944_Message_Migration")]
     partial class Message_Migration
     {
         /// <inheritdoc />
@@ -285,32 +285,15 @@ namespace SocialNetwork.DAL.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<bool>("AddMembers")
-                        .HasColumnType("bit");
-
                     b.Property<int?>("ChatId")
                         .HasColumnType("int");
 
-                    b.Property<bool>("DelMembers")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("DelMessages")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("EditChat")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("EditNicknames")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("EditRoles")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("MuteMembers")
-                        .HasColumnType("bit");
-
                     b.Property<int>("Rank")
                         .HasColumnType("int");
+
+                    b.Property<string>("RoleAccesses")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("RoleColor")
                         .IsRequired()
@@ -319,15 +302,6 @@ namespace SocialNetwork.DAL.Migrations
                     b.Property<string>("RoleName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("SendAudioMess")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("SendFiles")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("SendMessages")
-                        .HasColumnType("bit");
 
                     b.HasKey("Id");
 

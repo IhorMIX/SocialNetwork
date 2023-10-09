@@ -11,6 +11,53 @@ namespace SocialNetwork.DAL.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropColumn(
+                name: "AddMembers",
+                table: "Roles");
+
+            migrationBuilder.DropColumn(
+                name: "DelMembers",
+                table: "Roles");
+
+            migrationBuilder.DropColumn(
+                name: "DelMessages",
+                table: "Roles");
+
+            migrationBuilder.DropColumn(
+                name: "EditChat",
+                table: "Roles");
+
+            migrationBuilder.DropColumn(
+                name: "EditNicknames",
+                table: "Roles");
+
+            migrationBuilder.DropColumn(
+                name: "EditRoles",
+                table: "Roles");
+
+            migrationBuilder.DropColumn(
+                name: "MuteMembers",
+                table: "Roles");
+
+            migrationBuilder.DropColumn(
+                name: "SendAudioMess",
+                table: "Roles");
+
+            migrationBuilder.DropColumn(
+                name: "SendFiles",
+                table: "Roles");
+
+            migrationBuilder.DropColumn(
+                name: "SendMessages",
+                table: "Roles");
+
+            migrationBuilder.AddColumn<string>(
+                name: "RoleAccesses",
+                table: "Roles",
+                type: "nvarchar(max)",
+                nullable: false,
+                defaultValue: "");
+
             migrationBuilder.CreateTable(
                 name: "Messages",
                 columns: table => new
@@ -110,6 +157,80 @@ namespace SocialNetwork.DAL.Migrations
 
             migrationBuilder.DropTable(
                 name: "Messages");
+
+            migrationBuilder.DropColumn(
+                name: "RoleAccesses",
+                table: "Roles");
+
+            migrationBuilder.AddColumn<bool>(
+                name: "AddMembers",
+                table: "Roles",
+                type: "bit",
+                nullable: false,
+                defaultValue: false);
+
+            migrationBuilder.AddColumn<bool>(
+                name: "DelMembers",
+                table: "Roles",
+                type: "bit",
+                nullable: false,
+                defaultValue: false);
+
+            migrationBuilder.AddColumn<bool>(
+                name: "DelMessages",
+                table: "Roles",
+                type: "bit",
+                nullable: false,
+                defaultValue: false);
+
+            migrationBuilder.AddColumn<bool>(
+                name: "EditChat",
+                table: "Roles",
+                type: "bit",
+                nullable: false,
+                defaultValue: false);
+
+            migrationBuilder.AddColumn<bool>(
+                name: "EditNicknames",
+                table: "Roles",
+                type: "bit",
+                nullable: false,
+                defaultValue: false);
+
+            migrationBuilder.AddColumn<bool>(
+                name: "EditRoles",
+                table: "Roles",
+                type: "bit",
+                nullable: false,
+                defaultValue: false);
+
+            migrationBuilder.AddColumn<bool>(
+                name: "MuteMembers",
+                table: "Roles",
+                type: "bit",
+                nullable: false,
+                defaultValue: false);
+
+            migrationBuilder.AddColumn<bool>(
+                name: "SendAudioMess",
+                table: "Roles",
+                type: "bit",
+                nullable: false,
+                defaultValue: false);
+
+            migrationBuilder.AddColumn<bool>(
+                name: "SendFiles",
+                table: "Roles",
+                type: "bit",
+                nullable: false,
+                defaultValue: false);
+
+            migrationBuilder.AddColumn<bool>(
+                name: "SendMessages",
+                table: "Roles",
+                type: "bit",
+                nullable: false,
+                defaultValue: false);
         }
     }
 }
