@@ -12,8 +12,8 @@ using SocialNetwork.DAL;
 namespace SocialNetwork.DAL.Migrations
 {
     [DbContext(typeof(SocialNetworkDbContext))]
-    [Migration("20231008170944_Message_Migration")]
-    partial class Message_Migration
+    [Migration("20231010183743_Added_RoleAccess")]
+    partial class Added_RoleAccess
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -291,10 +291,6 @@ namespace SocialNetwork.DAL.Migrations
                     b.Property<int>("Rank")
                         .HasColumnType("int");
 
-                    b.Property<string>("RoleAccesses")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("RoleColor")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -308,6 +304,27 @@ namespace SocialNetwork.DAL.Migrations
                     b.HasIndex("ChatId");
 
                     b.ToTable("Roles");
+                });
+
+            modelBuilder.Entity("SocialNetwork.DAL.Entity.RoleChatAccess", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("ChatAccess")
+                        .HasColumnType("int");
+
+                    b.Property<int>("RoleId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RoleId");
+
+                    b.ToTable("RoleChatAccess");
                 });
 
             modelBuilder.Entity("SocialNetwork.DAL.Entity.User", b =>
@@ -490,6 +507,17 @@ namespace SocialNetwork.DAL.Migrations
                     b.Navigation("Chat");
                 });
 
+            modelBuilder.Entity("SocialNetwork.DAL.Entity.RoleChatAccess", b =>
+                {
+                    b.HasOne("SocialNetwork.DAL.Entity.Role", "Role")
+                        .WithMany("RoleAccesses")
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.ClientCascade)
+                        .IsRequired();
+
+                    b.Navigation("Role");
+                });
+
             modelBuilder.Entity("SocialNetwork.DAL.Entity.Chat", b =>
                 {
                     b.Navigation("ChatMembers");
@@ -509,6 +537,11 @@ namespace SocialNetwork.DAL.Migrations
             modelBuilder.Entity("SocialNetwork.DAL.Entity.Message", b =>
                 {
                     b.Navigation("Reactions");
+                });
+
+            modelBuilder.Entity("SocialNetwork.DAL.Entity.Role", b =>
+                {
+                    b.Navigation("RoleAccesses");
                 });
 
             modelBuilder.Entity("SocialNetwork.DAL.Entity.User", b =>

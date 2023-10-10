@@ -1,12 +1,13 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
+using SocialNetwork.DAL.Entity.Enums;
 
 #nullable disable
 
 namespace SocialNetwork.DAL.Migrations
 {
     /// <inheritdoc />
-    public partial class Message_Migration : Migration
+    public partial class Added_RoleAccess : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -51,13 +52,6 @@ namespace SocialNetwork.DAL.Migrations
                 name: "SendMessages",
                 table: "Roles");
 
-            migrationBuilder.AddColumn<string>(
-                name: "RoleAccesses",
-                table: "Roles",
-                type: "nvarchar(max)",
-                nullable: false,
-                defaultValue: "");
-
             migrationBuilder.CreateTable(
                 name: "Messages",
                 columns: table => new
@@ -93,6 +87,25 @@ namespace SocialNetwork.DAL.Migrations
                         name: "FK_Messages_Messages_ToReplyMessageId",
                         column: x => x.ToReplyMessageId,
                         principalTable: "Messages",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "RoleChatAccess",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    ChatAccess = table.Column<int>(type: "int", nullable: false),
+                    RoleId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_RoleChatAccess", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_RoleChatAccess_Roles_RoleId",
+                        column: x => x.RoleId,
+                        principalTable: "Roles",
                         principalColumn: "Id");
                 });
 
@@ -148,12 +161,38 @@ namespace SocialNetwork.DAL.Migrations
                 table: "Reactions",
                 column: "MessageId");
 
-            migrationBuilder.Sql(
-                $"INSERT INTO Roles VALUES ('Admin', '#FF0000', NULL, 0, 'SendMessages,SendAudioMess,SendFiles,EditRoles,AddMembers,DelMembers,MuteMembers,DelMessages,EditNicknames,EditChat')");
+            migrationBuilder.CreateIndex(
+                name: "IX_RoleChatAccess_RoleId",
+                table: "RoleChatAccess",
+                column: "RoleId");
+            
+             migrationBuilder.Sql(
+                $"INSERT INTO Roles VALUES ('Admin', '#FF0000', NULL, 0)");
             
             migrationBuilder.Sql(
-                $"INSERT INTO Roles VALUES ('P2PAdmin', '#FF0000', NULL, 0, 'SendMessages,SendAudioMess,SendFiles,MuteMembers,DelMessages')");
-
+                $"INSERT INTO Roles VALUES ('P2PAdmin', '#FF0000', NULL, 0)");
+            
+            
+                
+            foreach (var enumValue in Enum.GetValues(typeof(ChatAccess)))
+            {
+                migrationBuilder.Sql($"INSERT INTO RoleChatAccess VALUES ({(int)enumValue}, 1)");
+            }
+            
+            migrationBuilder.Sql(
+                $"INSERT INTO RoleChatAccess VALUES ({(int)ChatAccess.SendMessages}, 2)");
+            
+            migrationBuilder.Sql(
+                $"INSERT INTO RoleChatAccess VALUES ({(int)ChatAccess.SendAudioMess}, 2)");
+            
+            migrationBuilder.Sql(
+                $"INSERT INTO RoleChatAccess VALUES ({(int)ChatAccess.SendFiles}, 2)");
+            
+            migrationBuilder.Sql(
+                $"INSERT INTO RoleChatAccess VALUES ({(int)ChatAccess.MuteMembers}, 2)");
+            
+            migrationBuilder.Sql(
+                $"INSERT INTO RoleChatAccess VALUES ({(int)ChatAccess.DelMessages}, 2)");
         }
 
         /// <inheritdoc />
@@ -163,11 +202,10 @@ namespace SocialNetwork.DAL.Migrations
                 name: "Reactions");
 
             migrationBuilder.DropTable(
-                name: "Messages");
+                name: "RoleChatAccess");
 
-            migrationBuilder.DropColumn(
-                name: "RoleAccesses",
-                table: "Roles");
+            migrationBuilder.DropTable(
+                name: "Messages");
 
             migrationBuilder.AddColumn<bool>(
                 name: "AddMembers",

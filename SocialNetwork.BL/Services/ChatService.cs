@@ -51,7 +51,7 @@ public class ChatService : IChatService
         return await _chatMemberRepository.GetAll()
             .Where(c => c.Chat.Id == chatId)
             .Where(c => c.User.Id == userId)
-            .SingleOrDefaultAsync(c => c.Role.Any(r => r.RoleAccesses.Contains(access)), cancellationToken);
+            .SingleOrDefaultAsync(c => c.Role.Any(r => r.RoleAccesses.Any(i => i.ChatAccess == access)), cancellationToken);
     }
 
     public async Task<ChatModel?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
@@ -109,12 +109,24 @@ public class ChatService : IChatService
         {
             RoleName = "everyone",
             RoleColor = "#FFFFFF",
-            RoleAccesses = new List<ChatAccess>()
+            RoleAccesses = new List<RoleChatAccess>()
             {
-                ChatAccess.SendMessages,
-                ChatAccess.SendAudioMess,
-                ChatAccess.SendFiles,
-                ChatAccess.DelMessages,
+                new ()
+                {
+                    ChatAccess =  ChatAccess.SendMessages
+                },
+                new ()
+                {
+                    ChatAccess =  ChatAccess.SendAudioMess
+                },
+                new ()
+                {
+                    ChatAccess =  ChatAccess.SendFiles
+                },
+                new ()
+                {
+                    ChatAccess =  ChatAccess.DelMessages
+                },
             },
             Chat = chatDb,
             Rank = 100000
