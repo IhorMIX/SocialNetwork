@@ -33,57 +33,96 @@ public class ChatServiceTest : DefaultServiceTest<IChatService, ChatService>
     private async Task CreateRole()
     {
         var _roleRepository =  ServiceProvider.GetRequiredService<IRoleRepository>();
-        await _roleRepository.CreateRole(new Role
-        {
-            RoleName = "@everyone",
-            RoleColor = "null",
-            RoleAccesses = new List<ChatAccess>()
-            {
-                ChatAccess.SendMessages,
-                ChatAccess.SendAudioMess,
-                ChatAccess.SendFiles,
-                ChatAccess.DelMessages
-            }
-        });
-        
+
         await _roleRepository.CreateRole(new Role
         {
             RoleName = "Admin",
-            RoleColor = "null",
-            RoleAccesses = new List<ChatAccess>()
+            RoleColor = "#FFFFFF",
+            RoleAccesses = new List<RoleChatAccess>()
             {
-                ChatAccess.SendMessages,
-                ChatAccess.SendAudioMess,
-                ChatAccess.SendFiles,
-                ChatAccess.EditRoles,
-                ChatAccess.AddMembers,
-                ChatAccess.DelMembers,
-                ChatAccess.MuteMembers,
-                ChatAccess.DelMessages,
-                ChatAccess.EditNicknames,
-                ChatAccess.EditChat
-            }
+                new()
+                {
+                    ChatAccess = ChatAccess.SendMessages
+                },
+                new()
+                {
+                    ChatAccess = ChatAccess.SendAudioMess
+                },
+                new()
+                {
+                    ChatAccess = ChatAccess.SendFiles
+                },
+                new()
+                {
+                    ChatAccess = ChatAccess.EditRoles
+                },
+                new()
+                {
+                    ChatAccess = ChatAccess.AddMembers
+                },
+                new()
+                {
+                    ChatAccess = ChatAccess.DelMembers
+                },
+                new()
+                {
+                    ChatAccess = ChatAccess.MuteMembers
+                },
+                new()
+                {
+                    ChatAccess = ChatAccess.DelMessages
+                },
+                new()
+                {
+                    ChatAccess = ChatAccess.EditNicknames
+                },                
+                new()
+                {
+                    ChatAccess = ChatAccess.EditChat
+                },
+            },
+            Rank = 100000
         });
         await _roleRepository.CreateRole(new Role
         {
             RoleName = "P2PAdmin",
             RoleColor = "null",
-            RoleAccesses = new List<ChatAccess>()
+            RoleAccesses = new List<RoleChatAccess>()
             {
-                ChatAccess.SendMessages,
-                ChatAccess.SendAudioMess,
-                ChatAccess.SendFiles,
-                ChatAccess.EditRoles,
-                ChatAccess.AddMembers,
-                ChatAccess.DelMembers,
-                ChatAccess.MuteMembers,
-                ChatAccess.DelMessages,
-                ChatAccess.EditNicknames,
-                ChatAccess.EditChat
-            }
+                new()
+                {
+                    ChatAccess = ChatAccess.SendMessages
+                },
+                new()
+                {
+                    ChatAccess = ChatAccess.SendAudioMess
+                },
+                new()
+                {
+                    ChatAccess = ChatAccess.SendFiles
+                },
+                new()
+                {
+                    ChatAccess = ChatAccess.MuteMembers
+                },
+                new()
+                {
+                    ChatAccess = ChatAccess.DelMessages
+                },
+                new()
+                {
+                    ChatAccess = ChatAccess.EditChat
+                },
+            },
         });
     }
-    
+    public override void SetUp()
+    {
+        base.SetUp();
+        CreateRole().Wait();
+    }
+
+
     [Test]
     public async Task CreateP2PChat_Ok_ChatCreated()
     {
@@ -97,9 +136,7 @@ public class ChatServiceTest : DefaultServiceTest<IChatService, ChatService>
 
         var friendService = ServiceProvider.GetRequiredService<IFriendshipService>();
         await friendService.AddFriendshipAsync(user1!.Id, user2!.Id);
-
-        await CreateRole();
-
+        
         await Service.CreateP2PChat(user1.Id, user2.Id, new ChatModel
         {
             Name = "Chat1",
@@ -132,9 +169,6 @@ public class ChatServiceTest : DefaultServiceTest<IChatService, ChatService>
         Assert.That(user3, Is.Not.EqualTo(null));
         Assert.That(user4, Is.Not.EqualTo(null));
         
-        
-        await CreateRole();
-        
         await Service.CreateGroupChat(user1.Id, new ChatModel
         {
             Name = "Chat2",
@@ -161,8 +195,6 @@ public class ChatServiceTest : DefaultServiceTest<IChatService, ChatService>
         var user1 = await UserModelHelper.CreateTestDataAsync(userService);
         user1 = await userService.GetUserByLogin(user1.Login);
         Assert.That(user1, Is.Not.EqualTo(null));
-
-        await CreateRole();
         
         await Service.CreateGroupChat(user1.Id, new ChatModel
         {
@@ -205,8 +237,6 @@ public class ChatServiceTest : DefaultServiceTest<IChatService, ChatService>
         Assert.That(user2, Is.Not.EqualTo(null));
         Assert.That(user3, Is.Not.EqualTo(null));
         Assert.That(user4, Is.Not.EqualTo(null));
-        
-        await CreateRole();
         
         await Service.CreateGroupChat(user1.Id, new ChatModel
         {
@@ -264,8 +294,6 @@ public class ChatServiceTest : DefaultServiceTest<IChatService, ChatService>
         Assert.That(user1, Is.Not.EqualTo(null));
         Assert.That(user2, Is.Not.EqualTo(null));
         Assert.That(user3, Is.Not.EqualTo(null));
-
-        await CreateRole();
         
         await Service.CreateGroupChat(user1.Id, new ChatModel
         {

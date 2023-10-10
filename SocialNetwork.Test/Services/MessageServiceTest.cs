@@ -30,60 +30,6 @@ public class MessageServiceTest : DefaultServiceTest<IMessageService, MessageSer
         base.SetUpAdditionalDependencies(services);
     }
     
-    private async Task CreateRole()
-    {
-        var _roleRepository =  ServiceProvider.GetRequiredService<IRoleRepository>();
-        await _roleRepository.CreateRole(new Role
-        {
-            RoleName = "@everyone",
-            RoleColor = "null",
-            RoleAccesses = new List<ChatAccess>()
-            {
-                ChatAccess.SendMessages,
-                ChatAccess.SendAudioMess,
-                ChatAccess.SendFiles,
-                ChatAccess.DelMessages
-            }
-        });
-        
-        await _roleRepository.CreateRole(new Role
-        {
-            RoleName = "Admin",
-            RoleColor = "null",
-            RoleAccesses = new List<ChatAccess>()
-            {
-                ChatAccess.SendMessages,
-                ChatAccess.SendAudioMess,
-                ChatAccess.SendFiles,
-                ChatAccess.EditRoles,
-                ChatAccess.AddMembers,
-                ChatAccess.DelMembers,
-                ChatAccess.MuteMembers,
-                ChatAccess.DelMessages,
-                ChatAccess.EditNicknames,
-                ChatAccess.EditChat
-            }
-        });
-        await _roleRepository.CreateRole(new Role
-        {
-            RoleName = "P2PAdmin",
-            RoleColor = "null",
-            RoleAccesses = new List<ChatAccess>()
-            {
-                ChatAccess.SendMessages,
-                ChatAccess.SendAudioMess,
-                ChatAccess.SendFiles,
-                ChatAccess.EditRoles,
-                ChatAccess.AddMembers,
-                ChatAccess.DelMembers,
-                ChatAccess.MuteMembers,
-                ChatAccess.DelMessages,
-                ChatAccess.EditNicknames,
-                ChatAccess.EditChat
-            }
-        });
-    }
-
     [Test]
     public async Task CreateMessage_MessageCreated_returnLastMessage()
     {
@@ -97,9 +43,7 @@ public class MessageServiceTest : DefaultServiceTest<IMessageService, MessageSer
 
         var friendService = ServiceProvider.GetRequiredService<IFriendshipService>();
         await friendService.AddFriendshipAsync(createdUser1!.Id, createdUser2!.Id);
-
-        await CreateRole();
-
+        
         var chatService = ServiceProvider.GetRequiredService<IChatService>();
         await chatService.CreateP2PChat(user1.Id, user2.Id, new ChatModel
         {
@@ -142,9 +86,7 @@ public class MessageServiceTest : DefaultServiceTest<IMessageService, MessageSer
         var friendService = ServiceProvider.GetRequiredService<IFriendshipService>();
         await friendService.AddFriendshipAsync(user1!.Id, user2!.Id);
         await friendService.AddFriendshipAsync(user1!.Id, user3!.Id);
-
-        await CreateRole();
-
+        
         var chatService = ServiceProvider.GetRequiredService<IChatService>();
         await chatService.CreateGroupChat(user1.Id, new ChatModel
         {
@@ -204,9 +146,7 @@ public class MessageServiceTest : DefaultServiceTest<IMessageService, MessageSer
         var friendService = ServiceProvider.GetRequiredService<IFriendshipService>();
         await friendService.AddFriendshipAsync(user1!.Id, user2!.Id);
         await friendService.AddFriendshipAsync(user1!.Id, user3!.Id);
-
-        await CreateRole();
-
+        
         var chatService = ServiceProvider.GetRequiredService<IChatService>();
         await chatService.CreateGroupChat(user1.Id, new ChatModel
         {
@@ -286,8 +226,6 @@ public class MessageServiceTest : DefaultServiceTest<IMessageService, MessageSer
         var friendService = ServiceProvider.GetRequiredService<IFriendshipService>();
         await friendService.AddFriendshipAsync(user1!.Id, user2!.Id);
         await friendService.AddFriendshipAsync(user1!.Id, user3!.Id);
-
-        await CreateRole();
 
         var chatService = ServiceProvider.GetRequiredService<IChatService>();
         await chatService.CreateGroupChat(user1.Id, new ChatModel
