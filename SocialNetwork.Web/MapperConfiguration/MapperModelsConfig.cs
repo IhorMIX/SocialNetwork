@@ -48,16 +48,15 @@ namespace SocialNetwork.Web.MapperConfiguration
             
             CreateMap<AuthorizationInfoModel, AuthorizationInfo>().ReverseMap();
             CreateMap<ProfileModel, SocialNetwork.DAL.Entity.Profile>().ReverseMap();
-            CreateMap<ChatModel, Chat>()
-                .ForMember(dest => dest.Roles, opt => opt.MapFrom(src => src.Roles))
-                .ForPath(dest => dest.Roles.SelectMany(i => i.RoleAccesses).Select(i => i.ChatAccess), opt => opt.MapFrom(src => src.Roles.SelectMany(i => i.RoleAccesses)))
-                .ReverseMap();
+            CreateMap<ChatModel, Chat>().ReverseMap();
 
+            
             CreateMap<ChatMemberModel, ChatMember>().ReverseMap();
             
             CreateMap<Role, RoleModel>()
                 .ForMember(dest => dest.Chat, opt => opt.Ignore())
                 .ForMember(dest => dest.UsersIds, opt => opt.MapFrom(src => src.ChatMembers.Select(cm => cm.User.Id)))
+                .ForMember(dest => dest.RoleAccesses, from => from.MapFrom(f => f.RoleAccesses.Select(i => i.ChatAccess)))
                 .ReverseMap();
             
             CreateMap<ChatCreateViewModel, ChatModel>()
