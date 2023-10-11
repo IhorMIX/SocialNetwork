@@ -42,6 +42,11 @@ public class UserRepository : IUserRepository
     }
 
 
+    public Task<List<User>> GetByIdsAsync(List<int> ids, CancellationToken cancellationToken = default)
+    {
+        return _socialNetworkDbContext.Users.Where(u => ids.Contains(u.Id)).ToListAsync(cancellationToken);
+    }
+
     public async Task CreateUser(User user, CancellationToken cancellationToken = default)
     {
         await _socialNetworkDbContext.Users.AddAsync(user, cancellationToken);

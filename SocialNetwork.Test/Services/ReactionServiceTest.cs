@@ -2,38 +2,14 @@
 using SocialNetwork.BL.Models;
 using SocialNetwork.BL.Services;
 using SocialNetwork.BL.Services.Interfaces;
-using SocialNetwork.DAL.Entity;
-using SocialNetwork.DAL.Entity.Enums;
-using SocialNetwork.DAL.Repository;
-using SocialNetwork.DAL.Repository.Interfaces;
 using SocialNetwork.Test.Helpers;
 
 namespace SocialNetwork.Test.Services;
 
-public class ReactionServiceTest : DefaultServiceTest<IReactionService, ReactionService>
+public class ReactionServiceTest : BaseMessageTestService<IReactionService, ReactionService>
 {
-    protected override void SetUpAdditionalDependencies(IServiceCollection services)
-    {
-        services.AddScoped<IReactionService, ReactionService>();
-        services.AddScoped<IReactionRepository, ReactionRepository>();
-        
-        services.AddScoped<IFriendRequestRepository, FriendRequestRepository>();
-        services.AddScoped<IUserRepository, UserRepository>();
-        services.AddScoped<IUserService, UserService>();
-        services.AddScoped<IFriendshipService, FriendshipService>();
-        services.AddScoped<IFriendshipRepository, FriendshipRepository>();
-
-        services.AddScoped<IChatService, ChatService>();
-        services.AddScoped<IRoleRepository, RoleRepository>();
-        services.AddScoped<IChatRepository, ChatRepository>();
-        services.AddScoped<IChatMemberRepository, ChatMemberRepository>();
-        
-        services.AddScoped<IMessageService, MessageService>();
-        services.AddScoped<IMessageRepository, MessageRepository>();
-        base.SetUpAdditionalDependencies(services);
-    }
     
-     [Test]
+    [Test]
     public async Task CreateMessages_AddReactions_EditReaction()
     {
         var userService = ServiceProvider.GetRequiredService<IUserService>();

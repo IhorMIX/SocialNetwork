@@ -2,33 +2,12 @@
 using SocialNetwork.BL.Models;
 using SocialNetwork.BL.Services;
 using SocialNetwork.BL.Services.Interfaces;
-using SocialNetwork.DAL.Entity;
-using SocialNetwork.DAL.Entity.Enums;
-using SocialNetwork.DAL.Repository;
-using SocialNetwork.DAL.Repository.Interfaces;
 using SocialNetwork.Test.Helpers;
 
 namespace SocialNetwork.Test.Services;
 
-public class MessageServiceTest : DefaultServiceTest<IMessageService, MessageService>
+public class MessageServiceTest : BaseMessageTestService<IMessageService, MessageService>
 {
-    protected override void SetUpAdditionalDependencies(IServiceCollection services)
-    {
-        services.AddScoped<IFriendRequestRepository, FriendRequestRepository>();
-        services.AddScoped<IUserRepository, UserRepository>();
-        services.AddScoped<IUserService, UserService>();
-        services.AddScoped<IFriendshipService, FriendshipService>();
-        services.AddScoped<IFriendshipRepository, FriendshipRepository>();
-
-        services.AddScoped<IChatService, ChatService>();
-        services.AddScoped<IRoleRepository, RoleRepository>();
-        services.AddScoped<IChatRepository, ChatRepository>();
-        services.AddScoped<IChatMemberRepository, ChatMemberRepository>();
-        
-        services.AddScoped<IMessageService, MessageService>();
-        services.AddScoped<IMessageRepository, MessageRepository>();
-        base.SetUpAdditionalDependencies(services);
-    }
     
     [Test]
     public async Task CreateMessage_MessageCreated_returnLastMessage()

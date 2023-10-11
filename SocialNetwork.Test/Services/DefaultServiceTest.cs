@@ -39,9 +39,8 @@ namespace SocialNetwork.Test.Services
                 .AddInMemoryCollection(new Dictionary<string, string>
                 {
                     {"CacheOptions:CacheTime", "00:10:00"},
-                    {"Roles:RoleEveryone", "1"},
-                    {"Roles:RoleAdminId", "2"},
-                    {"Roles:RoleP2PAdminId", "3"}
+                    {"Roles:RoleAdminId", "1"},
+                    {"Roles:RoleP2PAdminId", "2"}
                 }!)
                 .Build();
         }

@@ -18,6 +18,7 @@ public class RoleRepository : IRoleRepository
     public IQueryable<Role> GetAll()
     {
         return _socialNetworkDbContext.Roles
+            .Include(r => r.RoleAccesses)
             .Include(i=>i.Chat)
             .Include(i=>i.ChatMembers)
             .ThenInclude(cm => cm.User)
@@ -36,6 +37,7 @@ public class RoleRepository : IRoleRepository
         // }, cancellationToken, _socialNetworkDbContext);
         
         return await _socialNetworkDbContext.Roles
+            .Include(r => r.RoleAccesses)
             .Include(r => r.ChatMembers)
             .ThenInclude(cm => cm.User)
             .FirstOrDefaultAsync(r => r.Id == id, cancellationToken);

@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore.SqlServer.Design.Internal;
 using SocialNetwork.BL.Models;
 using SocialNetwork.DAL.Entity;
+using SocialNetwork.DAL.Entity.Enums;
 using SocialNetwork.Web.Models;
 using Profile = AutoMapper.Profile;
 
@@ -58,6 +59,10 @@ namespace SocialNetwork.Web.MapperConfiguration
                 .ForMember(dest => dest.UsersIds, opt => opt.MapFrom(src => src.ChatMembers.Select(cm => cm.User.Id)))
                 .ForMember(dest => dest.RoleAccesses, from => from.MapFrom(f => f.RoleAccesses.Select(i => i.ChatAccess)))
                 .ReverseMap();
+
+            CreateMap<ChatAccess, RoleChatAccess>()
+                .ForMember(dest => dest.ChatAccess, from => from.MapFrom(f => f));
+          
             
             CreateMap<ChatCreateViewModel, ChatModel>()
                 .ForMember(dest => dest.ChatMembers, opt=>opt.Ignore())

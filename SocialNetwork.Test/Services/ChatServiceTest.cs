@@ -1,128 +1,15 @@
-﻿using System.Security.AccessControl;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
+using SocialNetwork.BL.Exceptions;
 using SocialNetwork.BL.Models;
 using SocialNetwork.BL.Services;
 using SocialNetwork.BL.Services.Interfaces;
-using SocialNetwork.DAL.Entity;
 using SocialNetwork.DAL.Entity.Enums;
-using SocialNetwork.DAL.Repository;
-using SocialNetwork.DAL.Repository.Interfaces;
 using SocialNetwork.Test.Helpers;
 
 namespace SocialNetwork.Test.Services;
 
-public class ChatServiceTest : DefaultServiceTest<IChatService, ChatService>
+public class ChatServiceTest : BaseMessageTestService<IChatService, ChatService>
 {
-    
-    protected override void SetUpAdditionalDependencies(IServiceCollection services)
-    {
-        services.AddScoped<IFriendRequestRepository, FriendRequestRepository>();
-        services.AddScoped<IUserRepository, UserRepository>();
-        services.AddScoped<IUserService, UserService>();
-        services.AddScoped<IFriendshipService, FriendshipService>();
-        services.AddScoped<IFriendshipRepository, FriendshipRepository>();
-        services.AddScoped<IChatService, ChatService>();
-        services.AddScoped<IRoleRepository, RoleRepository>();
-        services.AddScoped<IChatRepository, ChatRepository>();
-        services.AddScoped<IChatMemberRepository, ChatMemberRepository>();
-        base.SetUpAdditionalDependencies(services);
-    }
-    
-    private async Task CreateRole()
-    {
-        var _roleRepository =  ServiceProvider.GetRequiredService<IRoleRepository>();
-
-        await _roleRepository.CreateRole(new Role
-        {
-            RoleName = "Admin",
-            RoleColor = "#FFFFFF",
-            RoleAccesses = new List<RoleChatAccess>()
-            {
-                new()
-                {
-                    ChatAccess = ChatAccess.SendMessages
-                },
-                new()
-                {
-                    ChatAccess = ChatAccess.SendAudioMess
-                },
-                new()
-                {
-                    ChatAccess = ChatAccess.SendFiles
-                },
-                new()
-                {
-                    ChatAccess = ChatAccess.EditRoles
-                },
-                new()
-                {
-                    ChatAccess = ChatAccess.AddMembers
-                },
-                new()
-                {
-                    ChatAccess = ChatAccess.DelMembers
-                },
-                new()
-                {
-                    ChatAccess = ChatAccess.MuteMembers
-                },
-                new()
-                {
-                    ChatAccess = ChatAccess.DelMessages
-                },
-                new()
-                {
-                    ChatAccess = ChatAccess.EditNicknames
-                },                
-                new()
-                {
-                    ChatAccess = ChatAccess.EditChat
-                },
-            },
-            Rank = 100000
-        });
-        await _roleRepository.CreateRole(new Role
-        {
-            RoleName = "P2PAdmin",
-            RoleColor = "null",
-            RoleAccesses = new List<RoleChatAccess>()
-            {
-                new()
-                {
-                    ChatAccess = ChatAccess.SendMessages
-                },
-                new()
-                {
-                    ChatAccess = ChatAccess.SendAudioMess
-                },
-                new()
-                {
-                    ChatAccess = ChatAccess.SendFiles
-                },
-                new()
-                {
-                    ChatAccess = ChatAccess.MuteMembers
-                },
-                new()
-                {
-                    ChatAccess = ChatAccess.DelMessages
-                },
-                new()
-                {
-                    ChatAccess = ChatAccess.EditChat
-                },
-            },
-        });
-    }
-    public override void SetUp()
-    {
-        base.SetUp();
-        CreateRole().Wait();
-    }
-
-
     [Test]
     public async Task CreateP2PChat_Ok_ChatCreated()
     {
@@ -186,6 +73,27 @@ public class ChatServiceTest : DefaultServiceTest<IChatService, ChatService>
         await Service.DelMember(user1.Id, chat.First().Id, new List<int>(){user2.Id});
         chat = await Service.FindChatByName(user1.Id, "Chat2");
         Assert.That(chat.First().ChatMembers!.Count == 3);
+        
+        Assert.ThrowsAsync<UserNotFoundException>( async () => await Service.AddUsers(user1.Id, chat.First().Id, new List<int>{user2!.Id, user3!.Id, user4.Id, 50000}));
+    }
+
+    [Test]
+    public async Task TryToAddUser_UserNotFound_ThrowError()
+    {
+        var userService = ServiceProvider.GetRequiredService<IUserService>();
+        var user1 = await UserModelHelper.CreateTestDataAsync(userService);
+        var user2 = await UserModelHelper.CreateTestDataAsync(userService);
+        user1 = await userService.GetUserByLogin(user1.Login);
+        user2 = await userService.GetUserByLogin(user2.Login);
+        await Service.CreateGroupChat(user1.Id, new ChatModel
+        {
+            Name = "Chat2",
+            Logo = "null",
+            isGroup = true,
+        });
+        var chat = await Service.FindChatByName(user1.Id, "Chat2");
+        Assert.ThrowsAsync<UserNotFoundException>( async () => await Service.AddUsers(user1.Id, chat.First().Id, new List<int>{5000, 6000, 7000}));
+        Assert.ThrowsAsync<UserNotFoundException>( async () => await Service.AddUsers(user1.Id, chat.First().Id, new List<int>{user2!.Id, 6000, 7000}));
     }
     
     [Test]
@@ -267,7 +175,12 @@ public class ChatServiceTest : DefaultServiceTest<IChatService, ChatService>
         role = (await Service.GetAllChatRoles(user1.Id, chat.Id)).First();
         chat = (await Service.FindChatByName(user1.Id, "Chat3")).First();
         Assert.That(chat.ChatMembers.Any(m => m.Role.Any(r => r.RoleName == role.RoleName) && m.User.Login == user2.Login));
-
+        
+        role.RoleAccesses.Clear();
+        await Service.EditRole(user1.Id, chat.Id, role.Id, role);
+        role = (await Service.GetAllChatRoles(user1.Id, chat.Id)).First();
+        Assert.That(!role.RoleAccesses.Contains(ChatAccess.DelMembers) && !role.RoleAccesses.Contains(ChatAccess.DelMembers));
+        
         role.RoleName = "Role21";
         role.RoleColor = "black1";
         role.RoleAccesses.Add(ChatAccess.DelMembers);

@@ -167,4 +167,21 @@ public class ChatController : ControllerBase
         return Ok(_mapper.Map<List<RoleViewModel>>(roles));
     }
 
+    [HttpPost("leave")]
+    public async Task<IActionResult> EditRolesRank([FromQuery] int chatId, CancellationToken cancellationToken)
+    {
+        var userId = User.GetUserId();
+        await _chatService.LeaveChat(userId, chatId, cancellationToken);
+        return Ok();
+    }
+    
+
+    [HttpPost("make-host")]
+    public async Task<IActionResult> MakeHost([FromQuery] int chatId, [FromQuery] int chatMemberId, CancellationToken cancellationToken)
+    {
+        var userId = User.GetUserId();
+        await _chatService.MakeHost(userId, chatId, chatMemberId, cancellationToken);
+        return Ok();
+    }
+    
 }
