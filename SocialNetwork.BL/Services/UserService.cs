@@ -45,7 +45,7 @@ public class UserService : IUserService
         var userDb = await _userRepository.GetAll()
             .FirstOrDefaultAsync(i => i.Login == user.Login || i.Profile.Email == user.Profile.Email,
                 cancellationToken);
-
+        
         if (userDb != null)
         {
             if (userDb.Login == user.Login)
@@ -55,12 +55,11 @@ public class UserService : IUserService
                 throw new AlreadyLoginAndEmailException("Email is already used by another user");
         }
 
+        user.IsEnabled = false;
+        
         var userDbModel = _mapper.Map<User>(user);
-
         userDbModel.Password = PasswordHelper.HashPassword(userDbModel.Password);
-
         await _userRepository.CreateUser(userDbModel, cancellationToken);
-
         user.Id = userDbModel.Id;
 
         await _mailService.SendHtmlEmailAsync(new MailModel()

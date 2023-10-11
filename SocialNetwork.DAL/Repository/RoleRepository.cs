@@ -18,6 +18,7 @@ public class RoleRepository : IRoleRepository
     public IQueryable<Role> GetAll()
     {
         return _socialNetworkDbContext.Roles
+            .Include(r => r.RoleAccesses)
             .Include(i=>i.Chat)
             .Include(i=>i.ChatMembers)
             .ThenInclude(cm => cm.User)
@@ -27,14 +28,19 @@ public class RoleRepository : IRoleRepository
     public async Task<Role?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
     {
         
-        return await _cacheService.GetOrSetAsync($"Role - {id}", async (token) =>
-        {
-            return await _socialNetworkDbContext.Roles
-                .Include(r => r.ChatMembers)
-                .ThenInclude(cm => cm.User)
-                .FirstOrDefaultAsync(r => r.Id == id, token);
-        }, cancellationToken);
+        // return await _cacheService.GetOrSetAsync($"Role - {id}", async (token) =>
+        // {
+        //     return await _socialNetworkDbContext.Roles
+        //         .Include(r => r.ChatMembers)
+        //         .ThenInclude(cm => cm.User)
+        //         .FirstOrDefaultAsync(r => r.Id == id, token);
+        // }, cancellationToken, _socialNetworkDbContext);
         
+        return await _socialNetworkDbContext.Roles
+            .Include(r => r.RoleAccesses)
+            .Include(r => r.ChatMembers)
+            .ThenInclude(cm => cm.User)
+            .FirstOrDefaultAsync(r => r.Id == id, cancellationToken);
        
     }
 
@@ -42,7 +48,7 @@ public class RoleRepository : IRoleRepository
     {
        await _socialNetworkDbContext.Roles.AddAsync(role, cancellationToken);
        await _socialNetworkDbContext.SaveChangesAsync(cancellationToken);
-       await _cacheService.GetOrSetAsync($"Role-{role.Id}", (_) => Task.FromResult(role)!, cancellationToken);
+       await _cacheService.GetOrSetAsync($"Role-{role.Id}", (_) => Task.FromResult(role)!, cancellationToken, _socialNetworkDbContext);
        return role;
     }
 
@@ -66,5 +72,13 @@ public class RoleRepository : IRoleRepository
 
         foreach (var role in roles)
             await _cacheService.UpdateAsync($"Role-{role.Id}", (_) => Task.FromResult(role)!, cancellationToken);
+    }
+
+    public async Task<Role?> GetByName(string name, CancellationToken cancellationToken = default)
+    {
+        return await _socialNetworkDbContext.Roles
+            .Include(r => r.ChatMembers)
+            .ThenInclude(cm => cm.User)
+            .FirstOrDefaultAsync(r => r.RoleName == name, cancellationToken);
     }
 }

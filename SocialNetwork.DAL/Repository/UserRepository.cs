@@ -31,20 +31,28 @@ public class UserRepository : IUserRepository
 
     public async Task<User?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
     {
-        return await _cacheService.GetOrSetAsync($"User-{id}", async (token) =>
-        {
-            return await _socialNetworkDbContext.Users.Include(i => i.Profile).Include(i => i.AuthorizationInfo)
-                .FirstOrDefaultAsync(i => i.Id == id && i.IsEnabled, token);
-        }, cancellationToken);
+        // return await _cacheService.GetOrSetAsync($"User-{id}", async (token) =>
+        // {
+        //     return await _socialNetworkDbContext.Users.Include(i => i.Profile).Include(i => i.AuthorizationInfo)
+        //         .FirstOrDefaultAsync(i => i.Id == id && i.IsEnabled, token);
+        // }, cancellationToken);
+        
+        return await _socialNetworkDbContext.Users.Include(i => i.Profile).Include(i => i.AuthorizationInfo)
+                .FirstOrDefaultAsync(i => i.Id == id && i.IsEnabled, cancellationToken);
     }
 
+
+    public Task<List<User>> GetByIdsAsync(List<int> ids, CancellationToken cancellationToken = default)
+    {
+        return _socialNetworkDbContext.Users.Where(u => ids.Contains(u.Id)).ToListAsync(cancellationToken);
+    }
 
     public async Task CreateUser(User user, CancellationToken cancellationToken = default)
     {
         await _socialNetworkDbContext.Users.AddAsync(user, cancellationToken);
         await _socialNetworkDbContext.SaveChangesAsync(cancellationToken);
 
-        await _cacheService.GetOrSetAsync($"User-{user.Id}", (_) => Task.FromResult(user)!, cancellationToken);
+        await _cacheService.GetOrSetAsync($"User-{user.Id}", (_) => Task.FromResult(user)!, cancellationToken, _socialNetworkDbContext);
     }
 
     public async Task<User?> FindUserAsync(string login, CancellationToken cancellationToken = default)

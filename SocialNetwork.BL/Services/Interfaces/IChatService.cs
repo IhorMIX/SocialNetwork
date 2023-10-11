@@ -29,4 +29,7 @@ public interface IChatService : IBaseService<ChatModel>
     
     Task<List<ChatMemberModel>> GetChatMembers(int userId, int chatId, CancellationToken cancellationToken = default);
     Task<List<RoleModel>> EditRolesRank(int userId, int chatId, List<RoleModel> roleModels, CancellationToken cancellationToken = default);
+
+    Task LeaveChat(int userId, int chatId, CancellationToken cancellationToken = default);
+    Task MakeHost(int userId, int chatId, int chatMemberId, CancellationToken cancellationToken = default);
 }

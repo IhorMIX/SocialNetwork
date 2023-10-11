@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using SocialNetwork.BL.Services;
+using SocialNetwork.BL.Services.Interfaces;
 using SocialNetwork.DAL;
 using SocialNetwork.DAL.Options;
 using SocialNetwork.DAL.Services;
@@ -29,6 +30,7 @@ namespace SocialNetwork.Test.Services
             services.AddSingleton(typeof(CacheService<>));
             services.Configure<CacheOptions>(Configuration.GetSection("CacheOptions"));
             services.Configure<RoleOption>(Configuration.GetSection("Roles"));
+            services.AddScoped<IMailService, FakeMailService>();
         }
 
         private void SetUpConfiguration()
@@ -37,9 +39,8 @@ namespace SocialNetwork.Test.Services
                 .AddInMemoryCollection(new Dictionary<string, string>
                 {
                     {"CacheOptions:CacheTime", "00:10:00"},
-                    {"Roles:RoleEveryone", "1"},
-                    {"Roles:RoleAdminId", "2"},
-                    {"Roles:RoleP2PAdminId", "3"}
+                    {"Roles:RoleAdminId", "1"},
+                    {"Roles:RoleP2PAdminId", "2"}
                 }!)
                 .Build();
         }

@@ -26,19 +26,34 @@ public class ChatMemberRepository : IChatMemberRepository
 
     public async Task<ChatMember?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
     {
-        return await _cacheService.GetOrSetAsync($"Chat member - {id}", async (token) =>
-        {
-            return await _socialNetworkDbContext.ChatMembers
-                .Include(c => c.Chat)
-                .Include(c => c.Role)
-                .Include(c => c.User)
-                .FirstOrDefaultAsync( i => i.Id == id, token);
-        }, cancellationToken);
+        // return await _cacheService.GetOrSetAsync($"Chat member - {id}", async (token) =>
+        // {
+        //     return await _socialNetworkDbContext.ChatMembers
+        //         .Include(c => c.Chat)
+        //         .Include(c => c.Role)
+        //         .Include(c => c.User)
+        //         .FirstOrDefaultAsync( i => i.Id == id, token);
+        // }, cancellationToken, _socialNetworkDbContext);
+        
+        return await _socialNetworkDbContext.ChatMembers
+            .Include(c => c.Chat)
+            .Include(c => c.Role)
+            .Include(c => c.User)
+            .FirstOrDefaultAsync( i => i.Id == id, cancellationToken);
     }
 
     public async Task SetRole(List<ChatMember> chatMembers, CancellationToken cancellationToken = default)
     {
         _socialNetworkDbContext.ChatMembers.UpdateRange(chatMembers);
         await _socialNetworkDbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    public async Task<ChatMember?> GetByUserIdAndChatId(int userId, int chatId, CancellationToken cancellationToken = default)
+    {
+        return await _socialNetworkDbContext.ChatMembers
+            .Include(c => c.Chat)
+            .Include(c => c.Role)
+            .Include(c => c.User)
+            .FirstOrDefaultAsync( i => i.User.Id == userId && i.Chat.Id == chatId, cancellationToken);
     }
 }

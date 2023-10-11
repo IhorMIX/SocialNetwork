@@ -10,6 +10,7 @@ namespace SocialNetwork.Test.Services;
 
 public class FriendRequestTest : DefaultServiceTest<IFriendRequestService, FriendRequestService>
 {
+
     protected override void SetUpAdditionalDependencies(IServiceCollection services)
     {
         services.AddScoped<IFriendRequestRepository, FriendRequestRepository>();
@@ -28,13 +29,14 @@ public class FriendRequestTest : DefaultServiceTest<IFriendRequestService, Frien
     [Test]
     public async Task CreateFriendRequest()
     {
-        var user1 = await UserModelHelper.CreateTestData();
-        var user2 = await UserModelHelper.CreateTestData();
         var userService = ServiceProvider.GetRequiredService<IUserService>();
-        await userService.CreateUserAsync(user1);
-        await userService.CreateUserAsync(user2);
+        var friendService = ServiceProvider.GetRequiredService<IFriendshipService>();
+        var user1 = await UserModelHelper.CreateTestDataAsync(userService);
+        var user2 = await UserModelHelper.CreateTestDataAsync(userService);
         var createdUser1 = await userService.GetUserByLogin(user1.Login);
         var createdUser2 = await userService.GetUserByLogin(user2.Login);
+        Assert.That(user1, Is.Not.EqualTo(null));
+        Assert.That(user2, Is.Not.EqualTo(null));
         
         await Service.SendRequest(createdUser1!.Id, createdUser2!.Id);
         Assert.That(Service.GetByUsersId(createdUser1.Id, createdUser2.Id), Is.Not.EqualTo(null));
@@ -43,15 +45,15 @@ public class FriendRequestTest : DefaultServiceTest<IFriendRequestService, Frien
     [Test]
     public async Task AcceptFriendRequest()
     {
-        var user1 = await UserModelHelper.CreateTestData();
-        var user2 = await UserModelHelper.CreateTestData();
         var userService = ServiceProvider.GetRequiredService<IUserService>();
         var friendService = ServiceProvider.GetRequiredService<IFriendshipService>();
-        await userService.CreateUserAsync(user1);
-        await userService.CreateUserAsync(user2);
+        var user1 = await UserModelHelper.CreateTestDataAsync(userService);
+        var user2 = await UserModelHelper.CreateTestDataAsync(userService);
         var createdUser1 = await userService.GetUserByLogin(user1.Login);
         var createdUser2 = await userService.GetUserByLogin(user2.Login);
-        
+        Assert.That(user1, Is.Not.EqualTo(null));
+        Assert.That(user2, Is.Not.EqualTo(null));
+
         await Service.SendRequest(createdUser1!.Id, createdUser2!.Id);
         Assert.That(Service.GetByUsersId(createdUser1.Id, createdUser2.Id), Is.Not.EqualTo(null));
         
@@ -64,14 +66,14 @@ public class FriendRequestTest : DefaultServiceTest<IFriendRequestService, Frien
     [Test]
     public async Task CancelFriendRequest()
     {
-        var user1 = await UserModelHelper.CreateTestData();
-        var user2 = await UserModelHelper.CreateTestData();
         var userService = ServiceProvider.GetRequiredService<IUserService>();
         var friendService = ServiceProvider.GetRequiredService<IFriendshipService>();
-        await userService.CreateUserAsync(user1);
-        await userService.CreateUserAsync(user2);
+        var user1 = await UserModelHelper.CreateTestDataAsync(userService);
+        var user2 = await UserModelHelper.CreateTestDataAsync(userService);
         var createdUser1 = await userService.GetUserByLogin(user1.Login);
         var createdUser2 = await userService.GetUserByLogin(user2.Login);
+        Assert.That(user1, Is.Not.EqualTo(null));
+        Assert.That(user2, Is.Not.EqualTo(null));
         
         await Service.SendRequest(createdUser1!.Id, createdUser2!.Id);
         Assert.That(Service.GetByUsersId(createdUser1.Id, createdUser2.Id), Is.Not.EqualTo(null));
@@ -87,18 +89,17 @@ public class FriendRequestTest : DefaultServiceTest<IFriendRequestService, Frien
     public async Task GetAllRequest()
     {
         var userService = ServiceProvider.GetRequiredService<IUserService>();
-
-        var user1 = await UserModelHelper.CreateTestData();
-        await userService.CreateUserAsync(user1);
+        var friendService = ServiceProvider.GetRequiredService<IFriendshipService>();
+        var user1 = await UserModelHelper.CreateTestDataAsync(userService);
+        var user2 = await UserModelHelper.CreateTestDataAsync(userService);
+        var user3 = await UserModelHelper.CreateTestDataAsync(userService);
         var createdUser1 = await userService.GetUserByLogin(user1.Login);
-        
-        var user2 = await UserModelHelper.CreateTestData();
-        await userService.CreateUserAsync(user2);
         var createdUser2 = await userService.GetUserByLogin(user2.Login);
-        
-        var user3 = await UserModelHelper.CreateTestData();
-        await userService.CreateUserAsync(user3);
         var createdUser3 = await userService.GetUserByLogin(user3.Login);
+        Assert.That(user1, Is.Not.EqualTo(null));
+        Assert.That(user2, Is.Not.EqualTo(null));
+        Assert.That(user3, Is.Not.EqualTo(null));
+
         
         await Service.SendRequest(createdUser2!.Id, createdUser1!.Id);
         await Service.SendRequest(createdUser3!.Id, createdUser1!.Id);

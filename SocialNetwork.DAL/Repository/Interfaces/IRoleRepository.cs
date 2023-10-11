@@ -9,5 +9,5 @@ public interface IRoleRepository : IBasicRepository<Role>
     public Task EditRole(Role role, CancellationToken cancellationToken = default);
     public Task EditRole(List<Role> roles, CancellationToken cancellationToken = default);
     
-    
+    public Task<Role?> GetByName(string name, CancellationToken cancellationToken = default);
 }

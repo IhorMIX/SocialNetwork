@@ -27,20 +27,25 @@ public class ChatRepository : IChatRepository
 
     public async Task<Chat?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
     {
-        return await _cacheService.GetOrSetAsync($"Chat - {id}", async (token) =>
-        {
-            return await _socialNetworkDbContext.Chats
-                .Include(i => i.ChatMembers)
-                .Include(c => c.Roles)
-                .FirstOrDefaultAsync(i => i.Id == id, token);
-        }, cancellationToken);
+        // return await _cacheService.GetOrSetAsync($"Chat - {id}", async (token) =>
+        // {
+        //     return await _socialNetworkDbContext.Chats
+        //         .Include(i => i.ChatMembers)
+        //         .Include(c => c.Roles)
+        //         .FirstOrDefaultAsync(i => i.Id == id, token);
+        // }, cancellationToken, _socialNetworkDbContext);
+        
+        return await _socialNetworkDbContext.Chats
+            .Include(i => i.ChatMembers)
+            .Include(c => c.Roles)
+            .FirstOrDefaultAsync(i => i.Id == id, cancellationToken);
     }
 
     public async Task<int> CreateChat(Chat chat, CancellationToken cancellationToken = default)
     {
         var chatEntity = await _socialNetworkDbContext.Chats.AddAsync(chat, cancellationToken); 
         await _socialNetworkDbContext.SaveChangesAsync(cancellationToken);
-        await _cacheService.GetOrSetAsync($"Chat-{chatEntity.Entity.Id}", (_) => Task.FromResult(chat)!, cancellationToken);
+        await _cacheService.GetOrSetAsync($"Chat-{chatEntity.Entity.Id}", (_) => Task.FromResult(chat)!, cancellationToken, _socialNetworkDbContext);
         return chatEntity.Entity.Id;
         
     }
