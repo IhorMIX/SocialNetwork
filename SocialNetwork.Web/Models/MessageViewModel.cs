@@ -1,7 +1,10 @@
-﻿namespace SocialNetwork.BL.Models;
+﻿using SocialNetwork.BL.Models;
 
-public class MessageModel : BaseModel
+namespace SocialNetwork.Web.Models;
+
+public class MessageViewModel
 {
+    public int Id { get; set; }
     public string Text { get; set; }
     public string Files { get; set; }
 
@@ -11,14 +14,9 @@ public class MessageModel : BaseModel
     public bool IsEdited { get; set; }
     public bool IsDeleted { get; set; }
     
-    
     public int AuthorId { get; set; }
     public int ChatId { get; set; }
-    public int? ToReplyMessageId { get; set; }
-    
-    public ChatMemberModel? Author { get; set; }
-    public ChatModel ChatModel { get; set; }
-    public MessageModel? ToReplyMessage { get; set; }
+    public int ToReplyMessageId { get; set; }
     
     public ICollection<ReactionModel>? Reactions { get; set; }
 }

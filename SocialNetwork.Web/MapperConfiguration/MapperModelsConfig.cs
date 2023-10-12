@@ -114,7 +114,25 @@ namespace SocialNetwork.Web.MapperConfiguration
             
             CreateMap<Reaction, ReactionModel>()
                 .ReverseMap();
-            
+
+            CreateMap<MessageModel, SendMessageModel>()
+                .ForMember(dest => dest.ChatId, opt => opt.Ignore());
+
+            CreateMap<SendMessageModel, MessageModel>()
+                .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
+                .ForMember(dest => dest.IsRead, opt => opt.Ignore())
+                .ForMember(dest => dest.IsEdited, opt => opt.Ignore())
+                .ForMember(dest => dest.IsDeleted, opt => opt.Ignore())
+                .ForMember(dest => dest.AuthorId, opt => opt.Ignore())
+                .ForMember(dest => dest.ChatModel, opt => opt.Ignore())
+                .ForMember(dest => dest.ToReplyMessage, opt => opt.Ignore())
+                .ForMember(dest => dest.Reactions, opt => opt.Ignore());
+
+            CreateMap<MessageViewModel, MessageModel>()
+                .ForMember(dest => dest.Author, opt => opt.Ignore())
+                .ForMember(dest => dest.ToReplyMessage, opt => opt.Ignore())
+                .ForMember(dest => dest.ChatModel, opt => opt.Ignore())
+                .ReverseMap();
         }
     }
 }
