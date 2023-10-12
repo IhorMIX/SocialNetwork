@@ -53,6 +53,7 @@ public class ChatMemberRepository : IChatMemberRepository
         return await _socialNetworkDbContext.ChatMembers
             .Include(c => c.Chat)
             .Include(c => c.Role)
+            .ThenInclude(r => r.RoleAccesses)
             .Include(c => c.User)
             .FirstOrDefaultAsync( i => i.User.Id == userId && i.Chat.Id == chatId, cancellationToken);
     }

@@ -2,8 +2,10 @@
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Http.Connections;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using Newtonsoft.Json.Converters;
 using SocialNetwork.BL.Services;
 using SocialNetwork.BL.Services.Interfaces;
@@ -15,8 +17,10 @@ using SocialNetwork.DAL.Repository.Interfaces;
 using SocialNetwork.DAL.Services;
 using SocialNetwork.Web.Extensions;
 using SocialNetwork.Web.Helpers;
+using SocialNetwork.Web.Hubs;
 using SocialNetwork.Web.Options;
 using SocialNetwork.Web.Validators;
+using Swashbuckle.AspNetCore.SwaggerUI;
 
 namespace SocialNetwork.Web;
 
@@ -76,10 +80,10 @@ public class Startup
                 };
             });
 
+        services.AddSignalR();
         services.AddSingleton<TokenHelper>();
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IUserService, UserService>();
-        
         services.AddScoped<IFriendshipRepository, FriendshipRepository>();
         services.AddScoped<IFriendshipService, FriendshipService>();
         
@@ -92,11 +96,41 @@ public class Startup
         services.AddScoped<IChatMemberRepository,ChatMemberRepository>();
 
         services.AddScoped<IMailService, MailService>();
+        services.AddScoped<IMessageRepository, MessageRepository>();
+        services.AddScoped<IMessageService, MessageService>();
         
         var connectionString = Environment.GetEnvironmentVariable("SQLSERVER_CONNECTION_STRING") ?? Configuration.GetConnectionString("ConnectionString");
 
         services.AddDbContext<SocialNetworkDbContext>(options =>
             options.UseSqlServer(connectionString));
+        services.AddSwaggerGen(c =>
+        {
+            c.SwaggerDoc("v1", new OpenApiInfo { Title = "My API", Version = "v1" });
+            
+            c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+            {
+                Description = "JWT Authorization header using the Bearer scheme",
+                Name = "Authorization",
+                In = ParameterLocation.Header,
+                Type = SecuritySchemeType.ApiKey,
+                Scheme = "Bearer"
+            });
+            
+            c.AddSecurityRequirement(new OpenApiSecurityRequirement
+            {
+                {
+                    new OpenApiSecurityScheme
+                    {
+                        Reference = new OpenApiReference
+                        {
+                            Type = ReferenceType.SecurityScheme,
+                            Id = "Bearer"
+                        }
+                    },
+                    new string[] { }
+                }
+            });
+        });
     }
 
     public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -118,10 +152,23 @@ public class Startup
 
         app.UseAuthentication();
         app.UseAuthorization();
+        app.UseStaticFiles();
         
         app.UseEndpoints(endpoints =>
         {
             endpoints.MapDefaultControllerRoute();
+            endpoints.MapHub<ChatHub>("/chatHub", options =>
+            {
+                options.Transports = HttpTransportType.LongPolling | HttpTransportType.WebSockets;
+            });
+        });
+        
+        app.UseSwagger();
+        app.UseSwaggerUI(c =>
+        {
+            c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
+            c.RoutePrefix = string.Empty; 
+            c.DocExpansion(DocExpansion.List); 
         });
     }
 }
