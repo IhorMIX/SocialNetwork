@@ -26,16 +26,37 @@ public class ChatHub : Hub
         _chatService = chatService;
     }
     
-    public async Task SendMessage(SendMessageModel sendMessageModel)
+    public async Task SendMessage(int chatId, string textMess, string files)
     {
         
         var userId = Context.GetHttpContext()!.User.GetUserId();
         
-        var message = await _messageService.CreateMessage(userId, sendMessageModel.ChatId, _mapper.Map<MessageModel>(sendMessageModel), CancellationToken.None);
+        var message = await _messageService.CreateMessage(userId, chatId,
+            new MessageModel()
+            {
+                Text = textMess, 
+                Files = files,
+            }, CancellationToken.None);
         
         await Clients.Group(message.ChatId.ToString()).SendAsync("ReceiveMessage", JsonSerializer.Serialize(_mapper.Map<MessageViewModel>(message)));
         
-        await Clients.GroupExcept(sendMessageModel.ChatId.ToString(), Context.ConnectionId).SendAsync("UserTyping", userId);
+        await Clients.GroupExcept(chatId.ToString(), Context.ConnectionId).SendAsync("UserTyping", userId);
+    }
+
+    public async Task ReplyMessage(int chatId, string textMess, string files, int messageToReplyId)
+    {
+        var userId = Context.GetHttpContext()!.User.GetUserId();
+        
+        var message = await _messageService.ReplyMessage(userId, chatId, messageToReplyId,
+            new MessageModel()
+            {
+                Text = textMess, 
+                Files = files,
+            }, CancellationToken.None);
+        
+        await Clients.Group(message.ChatId.ToString()).SendAsync("ReceiveMessage", JsonSerializer.Serialize(_mapper.Map<MessageViewModel>(message)));
+        
+        await Clients.GroupExcept(chatId.ToString(), Context.ConnectionId).SendAsync("UserTyping", userId);
     }
     
     public async Task TextTyping(int chatId)
