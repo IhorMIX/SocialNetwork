@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using System.Text.Json;
 using SocialNetwork.BL.Models;
+using SocialNetwork.BL.Models.Enums;
 using SocialNetwork.BL.Services.Interfaces;
 using SocialNetwork.Web.Extensions;
 using SocialNetwork.Web.Models;
@@ -48,16 +49,19 @@ public class ChatHub : Hub
     public override async Task OnConnectedAsync()
     {
         var userId = Context.GetHttpContext()!.User.GetUserId();
+        await _userService.ChangeOnlineStatus(userId, CancellationToken.None);
         var userChats = await _chatService.GetAllChats(userId, CancellationToken.None);
+        
         foreach (var chat in userChats)
         {
             await Groups.AddToGroupAsync(Context.ConnectionId, chat.Id.ToString());
         }
         await base.OnConnectedAsync();
-    }
+    } 
     public override async Task OnDisconnectedAsync(Exception? exception)
     {
         var userId = Context.GetHttpContext()!.User.GetUserId();
+        await _userService.ChangeOnlineStatus(userId, CancellationToken.None);
         var userChats = await _chatService.GetAllChats(userId, CancellationToken.None);
         foreach (var chat in userChats)
         {
