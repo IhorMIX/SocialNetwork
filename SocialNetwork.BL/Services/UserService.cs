@@ -10,6 +10,7 @@ using SocialNetwork.DAL.Entity;
 using SocialNetwork.DAL.Repository.Interfaces;
 using SocialNetwork.BL.Models.Enums;
 using SocialNetwork.BL.Settings;
+using OnlineStatus = SocialNetwork.DAL.Entity.Enums.OnlineStatus;
 using Profile = SocialNetwork.DAL.Entity.Profile;
 
 namespace SocialNetwork.BL.Services;
@@ -154,6 +155,16 @@ public class UserService : IUserService
         await _userRepository.UpdateUserAsync(userDb, cancellationToken);
 
         _logger.LogInformation("User activated");
+    }
+
+    public async Task ChangeOnlineStatus(int userId, CancellationToken cancellationToken = default)
+    {
+        var userDb = await _userRepository.GetByIdAsync(userId, cancellationToken);
+        _logger.LogAndThrowErrorIfNull(userDb, new UserNotFoundException($"User with this Id {userId} not found"));
+
+        userDb!.OnlineStatus = userDb.OnlineStatus == OnlineStatus.Online ? OnlineStatus.Offline : OnlineStatus.Online;
+
+        await _userRepository.UpdateUserAsync(userDb, cancellationToken);
     }
 
     public async Task<UserModel?> GetUserByLoginAndPasswordAsync(string login, string password,

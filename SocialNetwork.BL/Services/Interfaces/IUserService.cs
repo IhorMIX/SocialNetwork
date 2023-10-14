@@ -26,4 +26,6 @@ public interface IUserService : IBaseService<UserModel>
 
     Task ActivateUser(int userId, CancellationToken cancellationToken = default);
 
+    Task ChangeOnlineStatus(int userId, CancellationToken cancellationToken = default);
+
 }
