@@ -56,29 +56,8 @@ public class Startup
         services.AddValidatorsFromAssemblyContaining<AuthorizeValidator>();
         services.AddValidatorsFromAssemblyContaining<ChatValidator>();
         services.AddSingleton(typeof(CacheService<>));
-       
-
-        services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-            .AddJwtBearer(options =>
-            {
-                options.RequireHttpsMetadata = false;
-                options.TokenValidationParameters = new TokenValidationParameters
-                {
-                    ValidateIssuer = true,
-
-                    ValidIssuer = AuthOption.AuthOptions.ISSUER,
-                    
-                    ValidateAudience = true,
-
-                    ValidAudience = AuthOption.AuthOptions.AUDIENCE,
-
-                    ValidateLifetime = true,
-
-      
-                    IssuerSigningKey = AuthOption.AuthOptions.GetSymmetricSecurityKey(),
-                    ValidateIssuerSigningKey = true,
-                };
-            });
+        
+        services.AddJwtAuth();
 
         services.AddSignalR();
         services.AddSingleton<TokenHelper>();
@@ -103,34 +82,8 @@ public class Startup
 
         services.AddDbContext<SocialNetworkDbContext>(options =>
             options.UseSqlServer(connectionString));
-        services.AddSwaggerGen(c =>
-        {
-            c.SwaggerDoc("v1", new OpenApiInfo { Title = "My API", Version = "v1" });
-            
-            c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-            {
-                Description = "JWT Authorization header using the Bearer scheme",
-                Name = "Authorization",
-                In = ParameterLocation.Header,
-                Type = SecuritySchemeType.ApiKey,
-                Scheme = "Bearer"
-            });
-            
-            c.AddSecurityRequirement(new OpenApiSecurityRequirement
-            {
-                {
-                    new OpenApiSecurityScheme
-                    {
-                        Reference = new OpenApiReference
-                        {
-                            Type = ReferenceType.SecurityScheme,
-                            Id = "Bearer"
-                        }
-                    },
-                    new string[] { }
-                }
-            });
-        });
+        
+        services.AddSwagger();
     }
 
     public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
