@@ -1,4 +1,4 @@
-﻿.idea/*
+.idea/*
 SocialNetwork.Web/obj/*
 SocialNetwork.Web/bin/*
 SocialNetwork.BL/obj/*
@@ -13,3 +13,4 @@ SocialNetwork.Test/bin/*
 /SocialNetwork.Web/SocialNetwork.Web.csproj.user
 SocialNetwork.DAL/bin/*
 /.vs
+appsettings.*.json
