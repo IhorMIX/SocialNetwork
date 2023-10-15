@@ -42,7 +42,7 @@ public class MessageService : IMessageService
         {
             ChatAccess.SendMessages
         };
-        if (!string.IsNullOrEmpty(messageModel.Files))
+        if (messageModel.FileModels != null && messageModel.FileModels.Count != 0)
         {
             access.Add(ChatAccess.SendFiles);
         }
@@ -60,7 +60,7 @@ public class MessageService : IMessageService
         var messageDb = await _messageRepository.CreateMessageAsync(new Message
         {
             Text = messageModel.Text,
-            Files = messageModel.Files,
+            Files = _mapper.Map<List<FileEntity>>(messageModel.FileModels),
             CreatedAt = DateTime.Now,
             IsRead = false,
             IsEdited = false,
@@ -115,7 +115,7 @@ public class MessageService : IMessageService
         {
             ChatAccess.SendMessages
         };
-        if (!string.IsNullOrEmpty(messageModel.Files))
+        if (messageModel.FileModels != null && messageModel.FileModels.Count != 0)
         {
             access.Add(ChatAccess.SendFiles);
         }
@@ -160,7 +160,7 @@ public class MessageService : IMessageService
         {
             ChatAccess.SendMessages
         };
-        if (!string.IsNullOrEmpty(messageModel.Files))
+        if (messageModel.FileModels != null && messageModel.FileModels.Count != 0)
         {
             access.Add(ChatAccess.SendFiles);
         }
@@ -179,7 +179,7 @@ public class MessageService : IMessageService
         var messageDb = await _messageRepository.CreateMessageAsync(new Message
         {
             Text = messageModel.Text,
-            Files = messageModel.Files,
+            Files = _mapper.Map<List<FileEntity>>(messageModel.FileModels),
             CreatedAt = DateTime.Now,
             IsRead = false,
             IsEdited = false,

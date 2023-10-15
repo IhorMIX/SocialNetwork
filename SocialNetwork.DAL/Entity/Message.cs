@@ -1,9 +1,11 @@
-﻿namespace SocialNetwork.DAL.Entity;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace SocialNetwork.DAL.Entity;
 
 public class Message : BaseEntity
 {
     public string Text { get; set; }
-    public string Files { get; set; }
+    public List<FileEntity> Files { get; set; }
 
     public DateTime CreatedAt { get; set; }
     
