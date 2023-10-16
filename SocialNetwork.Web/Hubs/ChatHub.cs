@@ -26,7 +26,7 @@ public class ChatHub : Hub
         _chatService = chatService;
     }
     
-    public async Task SendMessage(int chatId, string textMess, List<FileModel> files)
+    public async Task SendMessage(int chatId, string textMess, List<FileSend> files)
     {
         
         var userId = Context.GetHttpContext()!.User.GetUserId();
@@ -35,7 +35,7 @@ public class ChatHub : Hub
             new MessageModel()
             {
                 Text = textMess, 
-                FileModels = files,
+                FileModels = _mapper.Map<List<FileModel>>(files),
             }, CancellationToken.None);
         
         await Clients.Group(message.ChatId.ToString()).SendAsync("ReceiveMessage", JsonSerializer.Serialize(_mapper.Map<MessageViewModel>(message)));
@@ -43,7 +43,7 @@ public class ChatHub : Hub
         await Clients.GroupExcept(chatId.ToString(), Context.ConnectionId).SendAsync("UserTyping", userId);
     }
 
-    public async Task ReplyMessage(int chatId, string textMess, List<FileModel> files, int messageToReplyId)
+    public async Task ReplyMessage(int chatId, string textMess, List<FileSend> files, int messageToReplyId)
     {
         var userId = Context.GetHttpContext()!.User.GetUserId();
         
@@ -51,7 +51,7 @@ public class ChatHub : Hub
             new MessageModel()
             {
                 Text = textMess, 
-                FileModels = files,
+                FileModels = _mapper.Map<List<FileModel>>(files),
             }, CancellationToken.None);
         
         await Clients.Group(message.ChatId.ToString()).SendAsync("ReceiveMessage", JsonSerializer.Serialize(_mapper.Map<MessageViewModel>(message)));

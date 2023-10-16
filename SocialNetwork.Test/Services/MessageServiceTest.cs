@@ -37,12 +37,19 @@ public class MessageServiceTest : BaseMessageTestService<IMessageService, Messag
         var messageService = ServiceProvider.GetRequiredService<IMessageService>();
         var createdMessage = await messageService.CreateMessage(user1.Id, chat.Id, new MessageModel()
         {
-            Text = "Test message"
+            Text = "Test message",
+            FileModels = new List<FileModel>
+            {
+                new FileModel
+                {
+                    FilePath = "test.png",
+                }
+            }
         });
 
         Assert.That(createdMessage, Is.Not.EqualTo(null));
         Assert.That(createdMessage.Text, Is.EqualTo("Test message"));
-        // Assert.That(createdMessage.FileModels.Any(f => f.FilePath == "test.png"));
+        Assert.That(createdMessage.FileModels.Any(f => f.FilePath == "test.png"));
 
     }
 
@@ -86,14 +93,35 @@ public class MessageServiceTest : BaseMessageTestService<IMessageService, Messag
         await messageService.CreateMessage(user1.Id, chat.Id, new MessageModel()
         {
             Text = "Test message 1",
+            FileModels = new List<FileModel>
+            {
+                new FileModel
+                {
+                    FilePath = "test1.png",
+                }
+            }
         });
         await messageService.CreateMessage(user1.Id, chat.Id, new MessageModel()
         {
             Text = "Test message 2",
+            FileModels = new List<FileModel>
+            {
+                new FileModel
+                {
+                    FilePath = "test2.png",
+                }
+            }
         });
         await messageService.CreateMessage(user1.Id, chat.Id, new MessageModel()
         {
             Text = "Test message 3",
+            FileModels = new List<FileModel>
+            {
+                new FileModel
+                {
+                    FilePath = "test3.png",
+                }
+            }
         });
 
         var messages = await Service.GetMessages(user2.Id, chat.Id);
@@ -142,14 +170,35 @@ public class MessageServiceTest : BaseMessageTestService<IMessageService, Messag
         await Service.CreateMessage(user1.Id, chat.Id, new MessageModel()
         {
             Text = "Test message 1",
+            FileModels = new List<FileModel>
+            {
+                new FileModel
+                {
+                    FilePath = "test1.png",
+                }
+            }
         });
         var messageToReply = await Service.CreateMessage(user2.Id, chat.Id, new MessageModel()
         {
             Text = "Test message 2",
+            FileModels = new List<FileModel>
+            {
+                new FileModel
+                {
+                    FilePath = "test2.png",
+                }
+            }
         });
         var replyMessage = await Service.ReplyMessage(user3.Id, chat.Id, messageToReply.Id, new MessageModel()
         {
             Text = "Test message 3",
+            FileModels = new List<FileModel>
+            {
+                new FileModel
+                {
+                    FilePath = "test3.png",
+                }
+            }
         });
 
         var messages = await Service.GetMessages(user2.Id, chat.Id);
@@ -219,14 +268,35 @@ public class MessageServiceTest : BaseMessageTestService<IMessageService, Messag
         await Service.CreateMessage(user1.Id, chat.Id, new MessageModel()
         {
             Text = "Test message 1",
+            FileModels = new List<FileModel>
+            {
+                new FileModel
+                {
+                    FilePath = "test1.png",
+                }
+            }
         });
         var messageToReply = await Service.CreateMessage(user2.Id, chat.Id, new MessageModel()
         {
             Text = "Test message 2",
+            FileModels = new List<FileModel>
+            {
+                new FileModel
+                {
+                    FilePath = "test2.png",
+                }
+            }
         });
         var replyMessage = await Service.ReplyMessage(user3.Id, chat.Id, messageToReply.Id, new MessageModel()
         {
             Text = "Test message 3",
+            FileModels = new List<FileModel>
+            {
+                new FileModel
+                {
+                    FilePath = "test3.png",
+                }
+            }
         });
         
         await Service.DeleteMessage(user3.Id, chat.Id, replyMessage.Id, true);

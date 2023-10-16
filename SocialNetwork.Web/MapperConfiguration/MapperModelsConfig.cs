@@ -110,6 +110,7 @@ namespace SocialNetwork.Web.MapperConfiguration
                 .ReverseMap();
             
             CreateMap<Message, MessageModel>()
+                .ForMember(dest => dest.FileModels, opt => opt.MapFrom(d => d.Files))
                 .ReverseMap();
             
             CreateMap<Reaction, ReactionModel>()
@@ -133,6 +134,15 @@ namespace SocialNetwork.Web.MapperConfiguration
                 .ForMember(dest => dest.ToReplyMessage, opt => opt.Ignore())
                 .ForMember(dest => dest.ChatModel, opt => opt.Ignore())
                 .ReverseMap();
+
+            CreateMap<FileModel, FileEntity>()
+                .ReverseMap();
+            CreateMap<FileSend, FileModel>()
+                .ForMember(dest => dest.Id, opt => opt.Ignore())
+                .ForMember(dest => dest.Message, opt => opt.Ignore())
+                .ForMember(dest => dest.MessageId, opt => opt.Ignore())
+                .ReverseMap();
+
         }
     }
 }
