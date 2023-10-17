@@ -26,5 +26,5 @@ public class User : BaseEntity
     public IEnumerable<FriendRequest>? Requests { get; set; }
     
     public IEnumerable<ChatMember>? ChatMembers { get; set; }
-    
+    public IEnumerable<BlackList>? BlackLists { get; set; }
 }
