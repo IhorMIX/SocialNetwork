@@ -54,7 +54,7 @@ public class ReactionServiceTest : BaseMessageTestService<IReactionService, Reac
         {
             Text = "Test message 2",
         });
-        var message3 = await messageService.ReplyMessage(user3.Id, chat.Id, message2.Id, new MessageModel()
+        var message3 = await messageService.ReplyMessageAsync(user3.Id, chat.Id, message2.Id, new MessageModel()
         {
             Text = "Test message 3",
         });
@@ -72,7 +72,7 @@ public class ReactionServiceTest : BaseMessageTestService<IReactionService, Reac
             Type = "smile"
         });
         
-        var messages = await messageService.GetMessages(user2.Id, chat.Id);
+        var messages = await messageService.GetMessagesAsync(user2.Id, chat.Id);
 
         Assert.That(messages.Count() == 3);
         Assert.That(messages.Any(c => c.Text == "Test message 2" &&  c.Reactions.Any(c => c.Type == "like")));

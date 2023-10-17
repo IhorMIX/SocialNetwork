@@ -124,7 +124,7 @@ public class MessageServiceTest : BaseMessageTestService<IMessageService, Messag
             }
         });
 
-        var messages = await Service.GetMessages(user2.Id, chat.Id);
+        var messages = await Service.GetMessagesAsync(user2.Id, chat.Id);
 
         Assert.That(messages.Count() == 3);
         Assert.That(messages.Any(c => c.Text == "Test message 1"));
@@ -189,7 +189,7 @@ public class MessageServiceTest : BaseMessageTestService<IMessageService, Messag
                 }
             }
         });
-        var replyMessage = await Service.ReplyMessage(user3.Id, chat.Id, messageToReply.Id, new MessageModel()
+        var replyMessage = await Service.ReplyMessageAsync(user3.Id, chat.Id, messageToReply.Id, new MessageModel()
         {
             Text = "Test message 3",
             FileModels = new List<FileModel>
@@ -201,7 +201,7 @@ public class MessageServiceTest : BaseMessageTestService<IMessageService, Messag
             }
         });
 
-        var messages = await Service.GetMessages(user2.Id, chat.Id);
+        var messages = await Service.GetMessagesAsync(user2.Id, chat.Id);
 
         Assert.That(messages.Count() == 3);
         Assert.That(messages.Any(c => c.Text == "Test message 1"));
@@ -209,24 +209,24 @@ public class MessageServiceTest : BaseMessageTestService<IMessageService, Messag
         Assert.That(messages.Any(c => c.Text == "Test message 3"));
         Assert.That(replyMessage.ChatId == chat.Id && replyMessage.ToReplyMessageId == messageToReply.Id);
 
-        await Service.EditMessage(user3.Id, chat.Id, replyMessage.Id, new MessageModel
+        await Service.EditMessageAsync(user3.Id, chat.Id, replyMessage.Id, new MessageModel
         {
             Text = "editedMessage",
         });
         
-        messages = await Service.GetMessages(user2.Id, chat.Id);
+        messages = await Service.GetMessagesAsync(user2.Id, chat.Id);
         replyMessage = messages.FirstOrDefault(c => c.Id == replyMessage.Id);
 
         Assert.That(messages.Any(c => c.Text == "editedMessage" && c.Text == "editedMessage"));
         Assert.That(replyMessage.ChatId == chat.Id && replyMessage.Text == "editedMessage" && replyMessage.ToReplyMessageId == messageToReply.Id);
         
-        await Service.DeleteMessage(user1.Id, chat.Id, messageToReply.Id, false);
-        messages = await Service.GetMessages(user2.Id, chat.Id);
+        await Service.DeleteMessageAsync(user1.Id, chat.Id, messageToReply.Id, false);
+        messages = await Service.GetMessagesAsync(user2.Id, chat.Id);
         replyMessage = messages.FirstOrDefault(c => c.Id == replyMessage.Id);
         Assert.That(replyMessage!.ChatId == chat.Id && replyMessage.ToReplyMessageId == null);
         Assert.That(messages.Any(c => c.Text == "Test message 1"));
 
-        var lastMsg = await Service.GetLastMessage(user1.Id, chat.Id);
+        var lastMsg = await Service.GetLastMessageAsync(user1.Id, chat.Id);
         Assert.That(lastMsg.Text == "editedMessage");
     }
     
@@ -287,7 +287,7 @@ public class MessageServiceTest : BaseMessageTestService<IMessageService, Messag
                 }
             }
         });
-        var replyMessage = await Service.ReplyMessage(user3.Id, chat.Id, messageToReply.Id, new MessageModel()
+        var replyMessage = await Service.ReplyMessageAsync(user3.Id, chat.Id, messageToReply.Id, new MessageModel()
         {
             Text = "Test message 3",
             FileModels = new List<FileModel>
@@ -299,14 +299,14 @@ public class MessageServiceTest : BaseMessageTestService<IMessageService, Messag
             }
         });
         
-        await Service.DeleteMessage(user3.Id, chat.Id, replyMessage.Id, true);
-        var messages = await Service.GetMessages(user3.Id, chat.Id);
+        await Service.DeleteMessageAsync(user3.Id, chat.Id, replyMessage.Id, true);
+        var messages = await Service.GetMessagesAsync(user3.Id, chat.Id);
         Assert.That(messages.Count == 2);
         Assert.That(messages.Any(c => c.Text == "Test message 1"));
         Assert.That(messages.Any(c => c.Text == "Test message 2"));
         Assert.That(messages.Any(c => c.Text == "Test message 3") is false);
         
-        messages = await Service.GetMessages(user2.Id, chat.Id);
+        messages = await Service.GetMessagesAsync(user2.Id, chat.Id);
         Assert.That(messages.Count == 3);
         Assert.That(messages.Any(c => c.Text == "Test message 1"));
         Assert.That(messages.Any(c => c.Text == "Test message 2"));
