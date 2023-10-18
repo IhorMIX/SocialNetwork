@@ -3,7 +3,7 @@
 public class MessageModel : BaseModel
 {
     public string Text { get; set; }
-    public ICollection<FileModel> FileModels { get; set; }
+    public ICollection<FileModel>? FileModels { get; set; }
 
     public DateTime CreatedAt { get; set; }
     

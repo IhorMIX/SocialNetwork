@@ -5,7 +5,7 @@ namespace SocialNetwork.DAL.Entity;
 public class Message : BaseEntity
 {
     public string Text { get; set; }
-    public ICollection<FileEntity> Files { get; set; }
+    public ICollection<FileEntity>? Files { get; set; }
 
     public DateTime CreatedAt { get; set; }
     
