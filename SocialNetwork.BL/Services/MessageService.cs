@@ -42,7 +42,7 @@ public class MessageService : IMessageService
         {
             ChatAccess.SendMessages
         };
-        if (messageModel.FileModels != null && messageModel.FileModels.Count != 0)
+        if (messageModel.FileModels.Any())
         {
             access.Add(ChatAccess.SendFiles);
         }
@@ -115,7 +115,7 @@ public class MessageService : IMessageService
         {
             ChatAccess.SendMessages
         };
-        if (messageModel.FileModels != null && messageModel.FileModels.Count != 0)
+        if (messageModel.FileModels.Any())
         {
             access.Add(ChatAccess.SendFiles);
         }
@@ -160,7 +160,7 @@ public class MessageService : IMessageService
         {
             ChatAccess.SendMessages
         };
-        if (messageModel.FileModels != null && messageModel.FileModels.Count != 0)
+        if (messageModel.FileModels.Any())
         {
             access.Add(ChatAccess.SendFiles);
         }
