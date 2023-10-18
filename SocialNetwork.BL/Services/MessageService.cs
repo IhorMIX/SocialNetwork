@@ -229,7 +229,7 @@ public class MessageService : IMessageService
         _logger.LogAndThrowErrorIfNull(chatDb, new UserNotFoundException($"Chat with id-{chatId} not found"));
 
         return _mapper.Map<MessageModel> (await _messageRepository.GetAll()
-            .Where(m => m.ChatId == chatId && m.Id == messageId && m.IsDeleted)
+            .Where(m => m.ChatId == chatId && m.Id == messageId && !m.IsDeleted)
             .SingleOrDefaultAsync(cancellationToken));
     }
 }
