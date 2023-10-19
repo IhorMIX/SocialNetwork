@@ -42,7 +42,7 @@ public class MessageService : IMessageService
         {
             ChatAccess.SendMessages
         };
-        if (!string.IsNullOrEmpty(messageModel.Files))
+        if (messageModel.FileModels?.Any() == true)
         {
             access.Add(ChatAccess.SendFiles);
         }
@@ -60,7 +60,7 @@ public class MessageService : IMessageService
         var messageDb = await _messageRepository.CreateMessageAsync(new Message
         {
             Text = messageModel.Text,
-            Files = messageModel.Files,
+            Files = _mapper.Map<List<FileEntity>>(messageModel.FileModels),
             CreatedAt = DateTime.Now,
             IsRead = false,
             IsEdited = false,
@@ -77,7 +77,7 @@ public class MessageService : IMessageService
         return _mapper.Map<MessageModel>(messageDb);
     }
 
-    public async Task DeleteMessage(int userId, int chatId, int messageId, bool isForAuthor, CancellationToken cancellationToken = default)
+    public async Task DeleteMessageAsync(int userId, int chatId, int messageId, bool isForAuthor, CancellationToken cancellationToken = default)
     {
         var chatMemberDb = await _chatMemberRepository.GetByUserIdAndChatId(userId, chatId, cancellationToken);
         _logger.LogAndThrowErrorIfNull(chatMemberDb, new UserNotFoundException($"Chat member with id-{userId} not found"));
@@ -105,7 +105,7 @@ public class MessageService : IMessageService
         
     }
 
-    public async Task<MessageModel> EditMessage(int userId, int chatId, int messageId, MessageModel messageModel,
+    public async Task<MessageModel> EditMessageAsync(int userId, int chatId, int messageId, MessageModel messageModel,
         CancellationToken cancellationToken = default)
     {
         var chatMemberDb = await _chatMemberRepository.GetByUserIdAndChatId(userId, chatId, cancellationToken);
@@ -115,7 +115,7 @@ public class MessageService : IMessageService
         {
             ChatAccess.SendMessages
         };
-        if (!string.IsNullOrEmpty(messageModel.Files))
+        if (messageModel.FileModels?.Any() == true)
         {
             access.Add(ChatAccess.SendFiles);
         }
@@ -150,7 +150,7 @@ public class MessageService : IMessageService
         return _mapper.Map<MessageModel>(messageDb);
     }
 
-    public async Task<MessageModel> ReplyMessage(int userId, int chatId, int messageId, MessageModel messageModel,
+    public async Task<MessageModel> ReplyMessageAsync(int userId, int chatId, int messageId, MessageModel messageModel,
         CancellationToken cancellationToken = default)
     {
         var chatMemberDb = await _chatMemberRepository.GetByUserIdAndChatId(userId, chatId, cancellationToken);
@@ -160,7 +160,7 @@ public class MessageService : IMessageService
         {
             ChatAccess.SendMessages
         };
-        if (!string.IsNullOrEmpty(messageModel.Files))
+        if (messageModel.FileModels?.Any() == true)
         {
             access.Add(ChatAccess.SendFiles);
         }
@@ -179,7 +179,7 @@ public class MessageService : IMessageService
         var messageDb = await _messageRepository.CreateMessageAsync(new Message
         {
             Text = messageModel.Text,
-            Files = messageModel.Files,
+            Files = _mapper.Map<List<FileEntity>>(messageModel.FileModels),
             CreatedAt = DateTime.Now,
             IsRead = false,
             IsEdited = false,
@@ -196,7 +196,7 @@ public class MessageService : IMessageService
         return _mapper.Map<MessageModel>(messageDb);
     }
 
-    public async Task<List<MessageModel>> GetMessages(int userId, int chatId, CancellationToken cancellationToken = default)
+    public async Task<List<MessageModel>> GetMessagesAsync(int userId, int chatId, CancellationToken cancellationToken = default)
     {
         var chatMemberDb = await _chatMemberRepository.GetByUserIdAndChatId(userId, chatId, cancellationToken);
         _logger.LogAndThrowErrorIfNull(chatMemberDb, new UserNotFoundException($"Chat member with id-{userId} not found"));
@@ -209,7 +209,7 @@ public class MessageService : IMessageService
             .ToListAsync(cancellationToken));
     }
 
-    public async Task<MessageModel> GetLastMessage(int userId, int chatId, CancellationToken cancellationToken = default)
+    public async Task<MessageModel> GetLastMessageAsync(int userId, int chatId, CancellationToken cancellationToken = default)
     {
         var chatMemberDb = await _chatMemberRepository.GetByUserIdAndChatId(userId, chatId, cancellationToken);
         _logger.LogAndThrowErrorIfNull(chatMemberDb, new UserNotFoundException($"Chat member with id-{userId} not found"));
@@ -218,5 +218,18 @@ public class MessageService : IMessageService
         _logger.LogAndThrowErrorIfNull(chatDb, new UserNotFoundException($"Chat with id-{chatId} not found"));
 
         return _mapper.Map<MessageModel> (await _messageRepository.GetAll().Where(m => m.ChatId == chatId && m.IsDeleted == false).LastOrDefaultAsync(cancellationToken));
+    }
+
+    public async Task<MessageModel> GetByIdAsync(int userId, int chatId, int messageId, CancellationToken cancellationToken = default)
+    {
+        var chatMemberDb = await _chatMemberRepository.GetByUserIdAndChatId(userId, chatId, cancellationToken);
+        _logger.LogAndThrowErrorIfNull(chatMemberDb, new UserNotFoundException($"Chat member with id-{userId} not found"));
+        
+        var chatDb = await _chatRepository.GetByIdAsync(chatId, cancellationToken);
+        _logger.LogAndThrowErrorIfNull(chatDb, new UserNotFoundException($"Chat with id-{chatId} not found"));
+
+        return _mapper.Map<MessageModel> (await _messageRepository.GetAll()
+            .Where(m => m.ChatId == chatId && m.Id == messageId && !m.IsDeleted)
+            .SingleOrDefaultAsync(cancellationToken));
     }
 }

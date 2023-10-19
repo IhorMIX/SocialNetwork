@@ -1,6 +1,6 @@
 ﻿namespace SocialNetwork.BL.Models;
 
-public class ReactionModel
+public class ReactionModel : BaseModel
 {
     public string Type { get; set; }
     
