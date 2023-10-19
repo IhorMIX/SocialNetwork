@@ -17,14 +17,16 @@ public class FriendRequestService : IFriendRequestService
     private readonly IFriendshipRepository _friendshipRepository;
     private readonly ILogger<FriendRequestService> _logger;
     private readonly IMapper _mapper;
+    private readonly IBlackListService _blackListService;
     
-    public FriendRequestService(IFriendRequestRepository friendRequestRepository, ILogger<FriendRequestService> logger, IMapper mapper, IUserService userService, IFriendshipRepository friendshipRepository)
+    public FriendRequestService(IFriendRequestRepository friendRequestRepository, ILogger<FriendRequestService> logger, IMapper mapper, IUserService userService, IFriendshipRepository friendshipRepository, IBlackListService blackListService)
     {
         _friendRequestRepository = friendRequestRepository;
         _logger = logger;
         _mapper = mapper;
         _userService = userService;
         _friendshipRepository = friendshipRepository;
+        _blackListService = blackListService;
     }
     
     public async Task<FriendRequestModel?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
@@ -66,17 +68,27 @@ public class FriendRequestService : IFriendRequestService
 
         if (senderModel!.Id != receiverModel!.Id)
         {
-            await _friendRequestRepository.CreateFriendRequestAsync(new FriendRequest()
+            if (await _blackListService.IsBannedUser(senderModel.Id, receiverModel.Id, cancellationToken))
             {
-                SenderId = senderModel.Id,
-                ReceiverId = receiverModel.Id
-            }, cancellationToken);
+                _logger.LogError("You can't send a friend request to a banned user");
+                throw new FriendRequestException("Friend request can't be sent to a banned user");
+            }
+
+            else
+            {
+                await _friendRequestRepository.CreateFriendRequestAsync(new FriendRequest()
+                {
+                    SenderId = senderModel.Id,
+                    ReceiverId = receiverModel.Id
+                }, cancellationToken);
+            }
         }
         else
         {
-            _logger.LogError("You cant send a friend request to yourself");
-            throw new FriendRequestException("Friend request cant be sent to yourself");
+            _logger.LogError("You can't send a friend request to yourself");
+            throw new FriendRequestException("Friend request can't be sent to yourself");
         }
+
     }
 
     public async Task AcceptRequest(int userId, int requestId, CancellationToken cancellationToken = default)

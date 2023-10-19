@@ -23,15 +23,17 @@ namespace SocialNetwork.BL.Services
         private readonly IBlackListRepository _blackrepository;
         private readonly ILogger<BlackListService> _logger;
         private readonly IMapper _mapper;
+        private readonly IFriendshipService _friendshipService;
 
-        public BlackListService(IUserRepository userRepository, IUserService userService, IBlackListRepository blackListRepository, ILogger<BlackListService> logger, IMapper mapper)
+        public BlackListService(IUserRepository userRepository, IUserService userService, 
+            IBlackListRepository blackListRepository, ILogger<BlackListService> logger, IMapper mapper, IFriendshipService friendshipService)
         {
             _userRepository = userRepository;
             _userService = userService;
             _blackrepository = blackListRepository;
             _logger = logger;
             _mapper = mapper;
-
+            _friendshipService = friendshipService;
         }
 
         public async Task<BlackListModel?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
@@ -56,8 +58,9 @@ namespace SocialNetwork.BL.Services
                     UserId = userDb!.Id,
                     BannedUserId = user2Db!.Id,
                 };
-
+                
                 await _blackrepository.AddUserAsync(user2Db, blacklist, cancellationToken);
+                await _friendshipService.DeleteFriendshipAsync(userDb.Id, user2Db.Id, cancellationToken);
             }
             else
             {

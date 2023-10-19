@@ -17,6 +17,8 @@ public class UserModel : BaseModel
     public ProfileModel Profile { get; set; }
 
     public AuthorizationInfoModel AuthorizationInfo { get; set; }
+
+    public IEnumerable<BlackListModel> BlackList { get; set; }
     
 
     public IScriptObject ToScriptObject() {
