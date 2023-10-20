@@ -28,14 +28,14 @@ namespace SocialNetwork.Web.Controllers
             _tokenHelper = tokenHelper;
             _blackListService = blackListService;
         }
-        [HttpPost("add")]
+        [HttpPost]
         public async Task<IActionResult> AddUserToBlackList([FromQuery] int wantToBanId, CancellationToken cancellationToken)
         {
             var userId = User.GetUserId();
             await _blackListService.AddUserToBlackListAsync(userId, wantToBanId, cancellationToken);
             return Ok();
         }
-        [HttpDelete("del")]
+        [HttpDelete]
         public async Task<IActionResult> DelUserBlackList([FromQuery] int bannedID, CancellationToken cancellationToken)
         {
             var userId = User.GetUserId();
@@ -43,7 +43,7 @@ namespace SocialNetwork.Web.Controllers
             return Ok();
         }
 
-        [HttpGet("getBannedUsers")]
+        [HttpGet("{id}")]
         public async Task<IActionResult> GetBannedUsers([FromQuery] int userId, CancellationToken cancellationToken)
         {
             var loggedInUserId = User.GetUserId();
