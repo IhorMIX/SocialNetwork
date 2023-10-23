@@ -124,29 +124,53 @@ namespace SocialNetwork.Web.MapperConfiguration
                 .ReverseMap();
             
             CreateMap<Message, MessageModel>()
+                .ForMember(dest => dest.FileModels, opt => opt.MapFrom(d => d.Files))
                 .ReverseMap();
             
             CreateMap<Reaction, ReactionModel>()
                 .ReverseMap();
-
-            CreateMap<MessageModel, SendMessageModel>()
-                .ForMember(dest => dest.ChatId, opt => opt.Ignore());
-
-            CreateMap<SendMessageModel, MessageModel>()
-                .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
-                .ForMember(dest => dest.IsRead, opt => opt.Ignore())
-                .ForMember(dest => dest.IsEdited, opt => opt.Ignore())
-                .ForMember(dest => dest.IsDeleted, opt => opt.Ignore())
-                .ForMember(dest => dest.AuthorId, opt => opt.Ignore())
-                .ForMember(dest => dest.ChatModel, opt => opt.Ignore())
-                .ForMember(dest => dest.ToReplyMessage, opt => opt.Ignore())
-                .ForMember(dest => dest.Reactions, opt => opt.Ignore());
-
+            
+            CreateMap<FileModel, FileEntity>()
+                .ReverseMap();
+            
+            CreateMap<FileViewModel, FileModel>()
+                .ForMember(dest => dest.Message, opt => opt.Ignore())
+                .ForMember(dest => dest.MessageId, opt => opt.Ignore())
+                .ReverseMap();
+            
+            CreateMap<FileSend, FileModel>()
+                .ForMember(dest => dest.Id, opt => opt.Ignore())
+                .ForMember(dest => dest.Message, opt => opt.Ignore())
+                .ForMember(dest => dest.MessageId, opt => opt.Ignore())
+                .ReverseMap();
+            
             CreateMap<MessageViewModel, MessageModel>()
+                .ForMember(dest => dest.FileModels, opt => opt.MapFrom(d => d.FileModels))
                 .ForMember(dest => dest.Author, opt => opt.Ignore())
                 .ForMember(dest => dest.ToReplyMessage, opt => opt.Ignore())
                 .ForMember(dest => dest.ChatModel, opt => opt.Ignore())
+                .ForMember(dest => dest.Reactions, opt => opt.MapFrom(src => src.Reactions))
                 .ReverseMap();
+            
+            CreateMap<ReactionViewModel, ReactionModel>()
+                .ForMember(dest => dest.Message, opt => opt.Ignore())
+                .ForMember(dest => dest.MessageId, opt => opt.Ignore())
+                .ForMember(dest => dest.AuthorId, opt => opt.Ignore())
+                .ReverseMap();
+            
+            CreateMap<AddReactionModel, ReactionModel>()
+                .ForMember(dest => dest.Id, opt => opt.Ignore())
+                .ForMember(dest => dest.Message, opt => opt.Ignore())
+                .ForMember(dest => dest.MessageId, opt => opt.Ignore())
+                .ForMember(dest => dest.AuthorId, opt => opt.Ignore())
+                .ForMember(dest => dest.Author, opt => opt.Ignore())
+                .ReverseMap();
+
+            CreateMap<UserViewModel, ChatMemberModel>()
+                .ForMember(dest => dest.Chat, opt => opt.Ignore())
+                .ForMember(dest => dest.Role, opt => opt.Ignore())
+                .ReverseMap();
+
         }
     }
 }

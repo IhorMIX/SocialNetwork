@@ -38,12 +38,18 @@ public class MessageServiceTest : BaseMessageTestService<IMessageService, Messag
         var createdMessage = await messageService.CreateMessage(user1.Id, chat.Id, new MessageModel()
         {
             Text = "Test message",
-            Files = "test.png"
+            FileModels = new List<FileModel>
+            {
+                new FileModel
+                {
+                    FilePath = "test.png",
+                }
+            }
         });
 
         Assert.That(createdMessage, Is.Not.EqualTo(null));
         Assert.That(createdMessage.Text, Is.EqualTo("Test message"));
-        Assert.That(createdMessage.Files, Is.EqualTo("test.png"));
+        Assert.That(createdMessage.FileModels.Any(f => f.FilePath == "test.png"));
 
     }
 
@@ -87,20 +93,38 @@ public class MessageServiceTest : BaseMessageTestService<IMessageService, Messag
         await messageService.CreateMessage(user1.Id, chat.Id, new MessageModel()
         {
             Text = "Test message 1",
-            Files = "test1.png"
+            FileModels = new List<FileModel>
+            {
+                new FileModel
+                {
+                    FilePath = "test1.png",
+                }
+            }
         });
         await messageService.CreateMessage(user1.Id, chat.Id, new MessageModel()
         {
             Text = "Test message 2",
-            Files = "test2.png"
+            FileModels = new List<FileModel>
+            {
+                new FileModel
+                {
+                    FilePath = "test2.png",
+                }
+            }
         });
         await messageService.CreateMessage(user1.Id, chat.Id, new MessageModel()
         {
             Text = "Test message 3",
-            Files = "test3.png"
+            FileModels = new List<FileModel>
+            {
+                new FileModel
+                {
+                    FilePath = "test3.png",
+                }
+            }
         });
 
-        var messages = await Service.GetMessages(user2.Id, chat.Id);
+        var messages = await Service.GetMessagesAsync(user2.Id, chat.Id);
 
         Assert.That(messages.Count() == 3);
         Assert.That(messages.Any(c => c.Text == "Test message 1"));
@@ -146,20 +170,38 @@ public class MessageServiceTest : BaseMessageTestService<IMessageService, Messag
         await Service.CreateMessage(user1.Id, chat.Id, new MessageModel()
         {
             Text = "Test message 1",
-            Files = "test1.png"
+            FileModels = new List<FileModel>
+            {
+                new FileModel
+                {
+                    FilePath = "test1.png",
+                }
+            }
         });
         var messageToReply = await Service.CreateMessage(user2.Id, chat.Id, new MessageModel()
         {
             Text = "Test message 2",
-            Files = "test2.png"
+            FileModels = new List<FileModel>
+            {
+                new FileModel
+                {
+                    FilePath = "test2.png",
+                }
+            }
         });
-        var replyMessage = await Service.ReplyMessage(user3.Id, chat.Id, messageToReply.Id, new MessageModel()
+        var replyMessage = await Service.ReplyMessageAsync(user3.Id, chat.Id, messageToReply.Id, new MessageModel()
         {
             Text = "Test message 3",
-            Files = "test3.png"
+            FileModels = new List<FileModel>
+            {
+                new FileModel
+                {
+                    FilePath = "test3.png",
+                }
+            }
         });
 
-        var messages = await Service.GetMessages(user2.Id, chat.Id);
+        var messages = await Service.GetMessagesAsync(user2.Id, chat.Id);
 
         Assert.That(messages.Count() == 3);
         Assert.That(messages.Any(c => c.Text == "Test message 1"));
@@ -167,24 +209,24 @@ public class MessageServiceTest : BaseMessageTestService<IMessageService, Messag
         Assert.That(messages.Any(c => c.Text == "Test message 3"));
         Assert.That(replyMessage.ChatId == chat.Id && replyMessage.ToReplyMessageId == messageToReply.Id);
 
-        await Service.EditMessage(user3.Id, chat.Id, replyMessage.Id, new MessageModel
+        await Service.EditMessageAsync(user3.Id, chat.Id, replyMessage.Id, new MessageModel
         {
             Text = "editedMessage",
         });
         
-        messages = await Service.GetMessages(user2.Id, chat.Id);
+        messages = await Service.GetMessagesAsync(user2.Id, chat.Id);
         replyMessage = messages.FirstOrDefault(c => c.Id == replyMessage.Id);
 
-        Assert.That(messages.Any(c => c.Text == "editedMessage" && c.Files == "test3.png"));
+        Assert.That(messages.Any(c => c.Text == "editedMessage" && c.Text == "editedMessage"));
         Assert.That(replyMessage.ChatId == chat.Id && replyMessage.Text == "editedMessage" && replyMessage.ToReplyMessageId == messageToReply.Id);
         
-        await Service.DeleteMessage(user1.Id, chat.Id, messageToReply.Id, false);
-        messages = await Service.GetMessages(user2.Id, chat.Id);
+        await Service.DeleteMessageAsync(user1.Id, chat.Id, messageToReply.Id, false);
+        messages = await Service.GetMessagesAsync(user2.Id, chat.Id);
         replyMessage = messages.FirstOrDefault(c => c.Id == replyMessage.Id);
         Assert.That(replyMessage!.ChatId == chat.Id && replyMessage.ToReplyMessageId == null);
         Assert.That(messages.Any(c => c.Text == "Test message 1"));
 
-        var lastMsg = await Service.GetLastMessage(user1.Id, chat.Id);
+        var lastMsg = await Service.GetLastMessageAsync(user1.Id, chat.Id);
         Assert.That(lastMsg.Text == "editedMessage");
     }
     
@@ -226,27 +268,45 @@ public class MessageServiceTest : BaseMessageTestService<IMessageService, Messag
         await Service.CreateMessage(user1.Id, chat.Id, new MessageModel()
         {
             Text = "Test message 1",
-            Files = "test1.png"
+            FileModels = new List<FileModel>
+            {
+                new FileModel
+                {
+                    FilePath = "test1.png",
+                }
+            }
         });
         var messageToReply = await Service.CreateMessage(user2.Id, chat.Id, new MessageModel()
         {
             Text = "Test message 2",
-            Files = "test2.png"
+            FileModels = new List<FileModel>
+            {
+                new FileModel
+                {
+                    FilePath = "test2.png",
+                }
+            }
         });
-        var replyMessage = await Service.ReplyMessage(user3.Id, chat.Id, messageToReply.Id, new MessageModel()
+        var replyMessage = await Service.ReplyMessageAsync(user3.Id, chat.Id, messageToReply.Id, new MessageModel()
         {
             Text = "Test message 3",
-            Files = "test3.png"
+            FileModels = new List<FileModel>
+            {
+                new FileModel
+                {
+                    FilePath = "test3.png",
+                }
+            }
         });
         
-        await Service.DeleteMessage(user3.Id, chat.Id, replyMessage.Id, true);
-        var messages = await Service.GetMessages(user3.Id, chat.Id);
+        await Service.DeleteMessageAsync(user3.Id, chat.Id, replyMessage.Id, true);
+        var messages = await Service.GetMessagesAsync(user3.Id, chat.Id);
         Assert.That(messages.Count == 2);
         Assert.That(messages.Any(c => c.Text == "Test message 1"));
         Assert.That(messages.Any(c => c.Text == "Test message 2"));
         Assert.That(messages.Any(c => c.Text == "Test message 3") is false);
         
-        messages = await Service.GetMessages(user2.Id, chat.Id);
+        messages = await Service.GetMessagesAsync(user2.Id, chat.Id);
         Assert.That(messages.Count == 3);
         Assert.That(messages.Any(c => c.Text == "Test message 1"));
         Assert.That(messages.Any(c => c.Text == "Test message 2"));

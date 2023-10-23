@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SocialNetwork.DAL;
 
@@ -11,9 +12,11 @@ using SocialNetwork.DAL;
 namespace SocialNetwork.DAL.Migrations
 {
     [DbContext(typeof(SocialNetworkDbContext))]
-    partial class SocialNetworkDbContextModelSnapshot : ModelSnapshot
+    [Migration("20231015003519_Roles_Migration")]
+    partial class Roles_Migration
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -64,24 +67,6 @@ namespace SocialNetwork.DAL.Migrations
                         .IsUnique();
 
                     b.ToTable("AuthorizationInfo");
-                });
-
-            modelBuilder.Entity("SocialNetwork.DAL.Entity.BlackList", b =>
-                {
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("BannedUserId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Id")
-                        .HasColumnType("int");
-
-                    b.HasKey("UserId", "BannedUserId");
-
-                    b.HasIndex("BannedUserId");
-
-                    b.ToTable("BlackLists");
                 });
 
             modelBuilder.Entity("SocialNetwork.DAL.Entity.Chat", b =>
@@ -419,25 +404,6 @@ namespace SocialNetwork.DAL.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("SocialNetwork.DAL.Entity.BlackList", b =>
-                {
-                    b.HasOne("SocialNetwork.DAL.Entity.User", "BannedUser")
-                        .WithMany()
-                        .HasForeignKey("BannedUserId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.HasOne("SocialNetwork.DAL.Entity.User", "User")
-                        .WithMany("BlackLists")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.Navigation("BannedUser");
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("SocialNetwork.DAL.Entity.ChatMember", b =>
                 {
                     b.HasOne("SocialNetwork.DAL.Entity.Chat", "Chat")
@@ -612,8 +578,6 @@ namespace SocialNetwork.DAL.Migrations
             modelBuilder.Entity("SocialNetwork.DAL.Entity.User", b =>
                 {
                     b.Navigation("AuthorizationInfo");
-
-                    b.Navigation("BlackLists");
 
                     b.Navigation("ChatMembers");
 
