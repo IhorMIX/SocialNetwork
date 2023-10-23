@@ -58,7 +58,7 @@ public static class RoleHelper
                     ChatAccess = ChatAccess.EditChat
                 },
             },
-            Rank = 100000
+            Rank = 0
         };
         var p2pAdmin = new Role
         {
@@ -91,6 +91,7 @@ public static class RoleHelper
                     ChatAccess = ChatAccess.EditChat
                 },
             },
+            Rank = 0
         };
 
         return new List<Role>()
