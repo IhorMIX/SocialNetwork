@@ -232,4 +232,17 @@ public class MessageService : IMessageService
             .Where(m => m.ChatId == chatId && m.Id == messageId && !m.IsDeleted)
             .SingleOrDefaultAsync(cancellationToken));
     }
+
+    public async Task<List<MessageModel>> GetMessagesByTextAsync(int userId, int chatId, string text, CancellationToken cancellationToken = default)
+    {
+        var chatMemberDb = await _chatMemberRepository.GetByUserIdAndChatId(userId, chatId, cancellationToken);
+        _logger.LogAndThrowErrorIfNull(chatMemberDb, new UserNotFoundException($"Chat member with id-{userId} not found"));
+        
+        var chatDb = await _chatRepository.GetByIdAsync(chatId, cancellationToken);
+        _logger.LogAndThrowErrorIfNull(chatDb, new UserNotFoundException($"Chat with id-{chatId} not found"));
+
+        return _mapper.Map<List<MessageModel>> (await _messageRepository.GetAll()
+            .Where(m => m.ChatId == chatId && m.Text.Contains(text) && !m.IsDeleted)
+            .ToListAsync(cancellationToken));
+    }
 }
