@@ -6,7 +6,7 @@ public class MessageViewModel
 {
     public int Id { get; set; }
     public string Text { get; set; }
-    public string Files { get; set; }
+    public ICollection<FileViewModel>? FileModels { get; set; }
 
     public DateTime CreatedAt { get; set; }
     
@@ -18,5 +18,5 @@ public class MessageViewModel
     public int ChatId { get; set; }
     public int ToReplyMessageId { get; set; }
     
-    public ICollection<ReactionModel>? Reactions { get; set; }
+    public ICollection<ReactionViewModel> Reactions { get; set; }
 }

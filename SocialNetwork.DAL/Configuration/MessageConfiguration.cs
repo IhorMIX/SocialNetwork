@@ -19,6 +19,8 @@ public class MessageConfiguration : IEntityTypeConfiguration<Message>
             .WithMany(c => c.Messages)
             .HasForeignKey(m => m.ChatId)
             .OnDelete(DeleteBehavior.Restrict);
- 
+
+        builder.HasMany(m => m.Files).WithOne(m => m.Message);
+
     }
 }

@@ -18,6 +18,7 @@ public class MessageRepository : IMessageRepository
         return _socialNetworkDbContext.Messages.Include(m => m.Chat)
             .Include(m => m.Author)
             .Include(m => m.Reactions)
+            .Include(m => m.Files)
             .AsQueryable();
     }
 
@@ -26,6 +27,7 @@ public class MessageRepository : IMessageRepository
         return await _socialNetworkDbContext.Messages.Include(m => m.Chat)
             .Include(m => m.Author)
             .Include(m => m.Reactions)
+            .Include(m => m.Files)
             .Where(i => i.Id == id)
             .FirstOrDefaultAsync(cancellationToken);
     }
