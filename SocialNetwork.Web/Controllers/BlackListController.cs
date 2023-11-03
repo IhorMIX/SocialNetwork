@@ -44,14 +44,11 @@ namespace SocialNetwork.Web.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetBannedUsers([FromQuery] int userId, CancellationToken cancellationToken)
+        public async Task<IActionResult> GetBannedUsers(CancellationToken cancellationToken)
         {
             var loggedInUserId = User.GetUserId();
-            if (userId != loggedInUserId)
-            {
-                return Unauthorized();
-            }
-            var userModels = await _blackListService.GetAllBannedUser(userId, cancellationToken);
+            
+            var userModels = await _blackListService.GetAllBannedUser(loggedInUserId, cancellationToken);
             return Ok(_mapper.Map<List<BannedUserViewModel>>(userModels));
         }
     }
