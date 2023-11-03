@@ -226,7 +226,7 @@ public class ChatServiceTest : BaseMessageTestService<IChatService, ChatService>
         await Service.AddRole(user1.Id, chat.Id,new RoleModel
         {
             RoleName = "Role2",
-            RoleColor = "black"
+            RoleColor = "black",
         });
         
         var role = (await Service.GetAllChatRoles(user1.Id, chat.Id)).FirstOrDefault(r => r.RoleName == "Role2");

@@ -115,8 +115,7 @@ public class ChatHub : Hub
         await Clients.Group(chatId.ToString()).SendAsync("RemoveReactionToMessage", JsonSerializer.Serialize(_mapper.Map<MessageViewModel>(message)));
         await _reactionService.RemoveReaction(userId, chatId, reactionId, CancellationToken.None);
     }
-
-    //need to specify
+    
     public async Task DelMessage(int chatId, int messageId, bool isForAuthor)
     {
         var userId = Context.GetHttpContext()!.User.GetUserId();
@@ -139,4 +138,12 @@ public class ChatHub : Hub
             }, CancellationToken.None);
         await Clients.Group(chatId.ToString()).SendAsync("EditMessage", JsonSerializer.Serialize(_mapper.Map<MessageViewModel>(message)));
     }
+
+    public async Task GetMessagesByText(int chatId, string text)
+    {
+        var userId = Context.GetHttpContext()!.User.GetUserId();
+        var messages = await _messageService.GetMessagesByTextAsync(userId, chatId, text, CancellationToken.None);
+        await Clients.Caller.SendAsync("GetMessagesByText", JsonSerializer.Serialize(_mapper.Map<List<MessageViewModel>>(messages)));
+    }
+
 }
