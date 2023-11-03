@@ -1,9 +1,11 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore.Metadata;
 using SocialNetwork.BL.Models;
 using SocialNetwork.BL.Services;
 using SocialNetwork.BL.Services.Interfaces;
+using SocialNetwork.DAL.Entity;
 using SocialNetwork.Web.Extensions;
 using SocialNetwork.Web.Helpers;
 using SocialNetwork.Web.Models;
@@ -20,13 +22,16 @@ namespace SocialNetwork.Web.Controllers
         private readonly TokenHelper _tokenHelper;
         private readonly IMapper _mapper;
         private readonly IBlackListService _blackListService;
+        private readonly IPaginationService<BannedUserViewModel> _paginationService;
 
-        public BlackListController(IBlackListService blackListService, TokenHelper tokenHelper, ILogger<BlackListController> logger, IMapper mapper)
+        public BlackListController(IBlackListService blackListService, TokenHelper tokenHelper, ILogger<BlackListController> logger, IMapper mapper,
+            IPaginationService<BannedUserViewModel> paginationService)
         {
             _logger = logger;
             _mapper = mapper;
             _tokenHelper = tokenHelper;
             _blackListService = blackListService;
+            _paginationService = paginationService;
         }
         [HttpPost]
         public async Task<IActionResult> AddUserToBlackList([FromQuery] int wantToBanId, CancellationToken cancellationToken)

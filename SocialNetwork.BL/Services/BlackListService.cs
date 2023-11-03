@@ -168,6 +168,17 @@ var users = await _blackrepository
             var userModels = _mapper.Map<IEnumerable<UserModel>>(users);
             return userModels;
         }
+        public async Task<int> GetTotalBannedUsersCount(int userId, CancellationToken cancellationToken = default)
+        {
+            var bannedUser = await _userRepository.GetByIdAsync(userId, cancellationToken);
+            _logger.LogAndThrowErrorIfNull(bannedUser, new BannedUserNotFoundException("Banned user not found"));
+
+            var totalItems = await _blackrepository
+                .GetAllBannedUserByUserId(bannedUser.Id)
+                .CountAsync(cancellationToken);
+
+            return totalItems;
+        }
 
 
         public async Task<bool> IsBannedUser(int userId, int bannedUserId, CancellationToken cancellationToken = default)
