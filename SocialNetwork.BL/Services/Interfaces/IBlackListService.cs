@@ -13,7 +13,7 @@ namespace SocialNetwork.BL.Services.Interfaces
         Task DeleteUserFromBlackListAsync(int userId, int bannedUserId, CancellationToken cancellationToken = default);
 
         Task<IEnumerable<UserModel>> GetAllBannedUser(int userId, CancellationToken cancellationToken = default);
-
+        Task<int> GetTotalBannedUsersCount(int userId, CancellationToken cancellationToken = default);
         Task<IEnumerable<UserModel>> FindBannedUserByNameSurname(int userId, string nameSurname, CancellationToken cancellationToken = default);
 
         Task<UserModel> FindBannedUserByEmail(int userId, string bannedUserEmail, CancellationToken cancellationToken = default);
