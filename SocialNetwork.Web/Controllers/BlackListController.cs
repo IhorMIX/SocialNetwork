@@ -22,16 +22,16 @@ namespace SocialNetwork.Web.Controllers
         private readonly TokenHelper _tokenHelper;
         private readonly IMapper _mapper;
         private readonly IBlackListService _blackListService;
-        private readonly IPaginationService<BannedUserViewModel> _paginationService;
+       
 
-        public BlackListController(IBlackListService blackListService, TokenHelper tokenHelper, ILogger<BlackListController> logger, IMapper mapper,
-            IPaginationService<BannedUserViewModel> paginationService)
+        public BlackListController(IBlackListService blackListService, TokenHelper tokenHelper,
+            ILogger<BlackListController> logger, IMapper mapper)
         {
             _logger = logger;
             _mapper = mapper;
             _tokenHelper = tokenHelper;
             _blackListService = blackListService;
-            _paginationService = paginationService;
+          
         }
         [HttpPost]
         public async Task<IActionResult> AddUserToBlackList([FromQuery] int wantToBanId, CancellationToken cancellationToken)
@@ -52,7 +52,6 @@ namespace SocialNetwork.Web.Controllers
         public async Task<IActionResult> GetBannedUsers(CancellationToken cancellationToken)
         {
             var loggedInUserId = User.GetUserId();
-            
             var userModels = await _blackListService.GetAllBannedUser(loggedInUserId, cancellationToken);
             return Ok(_mapper.Map<List<BannedUserViewModel>>(userModels));
         }
