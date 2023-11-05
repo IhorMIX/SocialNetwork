@@ -70,26 +70,6 @@ public class BlackListServiceTest : BaseMessageTestService<IBlackListService, Bl
         Assert.That(bannedUsers, Is.Not.Empty);
 
     }
-    [Test]
-    public async Task FindBannedUserByEmail_UserFound_ReturnsBannedUser()
-    {
-        var userService = ServiceProvider.GetRequiredService<IUserService>();
-        var blackListService = ServiceProvider.GetRequiredService<IBlackListService>();
-
-        var bannedUser = await UserModelHelper.CreateTestDataAsync(userService);
-        var user1 = await UserModelHelper.CreateTestDataAsync(userService);
-
-
-        await blackListService.AddUserToBlackListAsync(user1.Id, bannedUser.Id);
-
-
-        var bannedUserEmail = bannedUser.Profile.Email;
-        var result = await blackListService.FindBannedUserByEmail(user1.Id, bannedUserEmail);
-
-        Assert.That(result, Is.Not.Null);
-        Assert.That(result.Profile.Email, Is.EqualTo(bannedUserEmail));
-
-    }
 
     [Test]
     public async Task CreateFriendship_AddToBlackList_UserIsBanned()

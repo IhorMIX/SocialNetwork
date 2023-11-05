@@ -66,6 +66,7 @@ namespace SocialNetwork.BL.Services
                     SenderId = userDb!.Id,
                     ReceiverId = user2Db!.Id
                 }, cancellationToken);
+
                 await _friendshipService.DeleteFriendshipAsync(userDb.Id, user2Db.Id, cancellationToken);
                 await _blackrepository.AddUserAsync(user2Db, blacklist, cancellationToken);
                 
@@ -92,32 +93,11 @@ namespace SocialNetwork.BL.Services
             await _blackrepository.RemoveUserAsync(blacklist, cancellationToken);
 
         }
-        public async Task<UserModel> FindBannedUserByEmail(int userId, string bannedUserEmail, CancellationToken cancellationToken = default)
+
+        public async Task<IEnumerable<UserModel>> FindBannedUserByNameSurname(int searchingUserId, string nameSurname, CancellationToken cancellationToken = default)
         {
-            var user2Model = await _userService.GetUserByEmail(bannedUserEmail, cancellationToken);
-            var userDb = await _userRepository.GetByIdAsync(userId, cancellationToken);
-            _logger.LogAndThrowErrorIfNull(user2Model, new UserNotFoundException("User not found"));
-            _logger.LogAndThrowErrorIfNull(userDb, new UserNotFoundException("User not found"));
-            var bannedUser = await _blackrepository.GetAll()
-                .Where(f => f.UserId == userDb.Id && f.BannedUser.Profile.Email == bannedUserEmail)
-                .Select(f => f.BannedUser)
-                .Union(_blackrepository.GetAll()
-                    .Where(f => f.BannedUserId == userDb.Id && f.User.Profile.Email == bannedUserEmail)
-                    .Select(f => f.User))
-                .SingleOrDefaultAsync(cancellationToken);
-
-
-            _logger.LogAndThrowErrorIfNull(bannedUser, new BannedUserNotFoundException("Banned User not found"));
-
-            var userModel = _mapper.Map<UserModel>(bannedUser);
-            return userModel;
-        }
-       
-
-        public async Task<IEnumerable<UserModel>> FindBannedUserByNameSurname(int bannedUserId, string nameSurname, CancellationToken cancellationToken = default)
-        {
-            var banneduserDb = await _userRepository.GetByIdAsync(bannedUserId, cancellationToken);
-            _logger.LogAndThrowErrorIfNull(banneduserDb, new UserNotFoundException("User not found"));
+            var searchingUser = await _userRepository.GetByIdAsync(searchingUserId, cancellationToken);
+            _logger.LogAndThrowErrorIfNull(searchingUser, new UserNotFoundException("User not found"));
 
             string[] parts = nameSurname.Split();
 
@@ -125,12 +105,10 @@ namespace SocialNetwork.BL.Services
             if (parts.Length == 1)
             {
                 string name = parts[0].ToLower();
-                matchingUsers = await _blackrepository.GetAllBannedUserByUserId(banneduserDb.Id)
-                    .Where(f => f.User.Profile.Name.ToLower().StartsWith(name)
-                              ||  f.User.Profile.Surname.ToLower().StartsWith(name)
-                              || f.BannedUser.Profile.Name.ToLower().StartsWith(name)
+                matchingUsers = await _blackrepository.GetAllBannedUserByUserId(searchingUser.Id)
+                    .Where(f => f.BannedUser.Profile.Name.ToLower().StartsWith(name)
                               || f.BannedUser.Profile.Surname.ToLower().StartsWith(name))
-                    .Select(f => f.UserId == banneduserDb.Id ? f.BannedUser : f.User)
+                    .Select(f => f.BannedUser)
                     .ToListAsync(cancellationToken);
             }
             else if (parts.Length == 2)
@@ -138,17 +116,12 @@ namespace SocialNetwork.BL.Services
                 string firstName = parts[0].ToLower();
                 string lastName = parts[1].ToLower();
 
-                matchingUsers = await _blackrepository.GetAllBannedUserByUserId(banneduserDb.Id)
-                    .Where(f => ((f.User.Profile.Name.ToLower().StartsWith(firstName)
-                                  && f.User.Profile.Surname.ToLower().StartsWith(lastName))
-                               || f.User.Profile.Name.ToLower().StartsWith(lastName)
-                                 && f.User.Profile.Surname.ToLower().StartsWith(firstName))
-                                 ||
-                                (f.BannedUser.Profile.Name.ToLower().StartsWith(firstName)
-                                 && f.BannedUser.Profile.Surname.ToLower().StartsWith(lastName))
-                             || f.BannedUser.Profile.Name.ToLower().StartsWith(lastName)
-                                && f.BannedUser.Profile.Surname.ToLower().StartsWith(firstName))
-                    .Select(f => f.UserId == banneduserDb.Id ? f.BannedUser : f.User)
+                matchingUsers = await _blackrepository.GetAllBannedUserByUserId(searchingUser.Id)
+                    .Where(f => (f.BannedUser.Profile.Name.ToLower().StartsWith(firstName)
+                                  && f.BannedUser.Profile.Surname.ToLower().StartsWith(lastName))
+                               || (f.BannedUser.Profile.Name.ToLower().StartsWith(lastName)
+                                  && f.BannedUser.Profile.Surname.ToLower().StartsWith(firstName)))
+                    .Select(f => f.BannedUser)
                     .ToListAsync(cancellationToken);
             }
 
@@ -156,28 +129,18 @@ namespace SocialNetwork.BL.Services
             return blacklist;
         }
 
+
         public async Task<IEnumerable<UserModel>> GetAllBannedUser(int userId, CancellationToken cancellationToken = default)
         {
             var bannedUser = await _userRepository.GetByIdAsync(userId, cancellationToken);
             _logger.LogAndThrowErrorIfNull(bannedUser, new BannedUserNotFoundException("Banned user not found"));
 
-var users = await _blackrepository
+                 var users = await _blackrepository
                 .GetAllBannedUserByUserId(bannedUser.Id)
                 .Select(f => f.UserId == bannedUser.Id ? f.BannedUser : f.User)
                 .ToListAsync(cancellationToken);
             var userModels = _mapper.Map<IEnumerable<UserModel>>(users);
             return userModels;
-        }
-        public async Task<int> GetTotalBannedUsersCount(int userId, CancellationToken cancellationToken = default)
-        {
-            var bannedUser = await _userRepository.GetByIdAsync(userId, cancellationToken);
-            _logger.LogAndThrowErrorIfNull(bannedUser, new BannedUserNotFoundException("Banned user not found"));
-
-            var totalItems = await _blackrepository
-                .GetAllBannedUserByUserId(bannedUser.Id)
-                .CountAsync(cancellationToken);
-
-            return totalItems;
         }
 
 

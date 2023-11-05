@@ -35,7 +35,6 @@ namespace SocialNetwork.DAL.Repository
         public async Task AddUserAsync(User needToBanUser, BlackList blackList, CancellationToken cancellationToken = default)
         {
             blackList.BannedUserId = needToBanUser.Id;
-            blackList.BannedUser = needToBanUser;
             _socialNetworkDbContext.BlackLists.Add(blackList);
             await _socialNetworkDbContext.SaveChangesAsync(cancellationToken);
         }
