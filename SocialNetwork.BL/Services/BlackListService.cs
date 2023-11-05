@@ -135,13 +135,11 @@ namespace SocialNetwork.BL.Services
             var bannedUser = await _userRepository.GetByIdAsync(userId, cancellationToken);
             _logger.LogAndThrowErrorIfNull(bannedUser, new BannedUserNotFoundException("Banned user not found"));
 
-                 var users = await _blackrepository
-                .GetAllBannedUserByUserId(bannedUser.Id)
-                .Select(f => f.UserId == bannedUser.Id ? f.BannedUser : f.User)
-                .ToListAsync(cancellationToken);
-            var userModels = _mapper.Map<IEnumerable<UserModel>>(users);
+            var blackLists = await _blackrepository.GetAllBannedUserByUserId(bannedUser.Id).Select(f => f.BannedUser).ToListAsync(cancellationToken);
+            var userModels = _mapper.Map<IEnumerable<UserModel>>(blackLists);
             return userModels;
         }
+
 
 
         public async Task<bool> IsBannedUser(int userId, int bannedUserId, CancellationToken cancellationToken = default)
