@@ -37,10 +37,10 @@ public class FriendshipService : IFriendshipService
         return friendModel;
     }
 
-    public async Task AddFriendshipAsync(int userId, int firendId, CancellationToken cancellationToken = default)
+    public async Task AddFriendshipAsync(int userId, int friendId, CancellationToken cancellationToken = default)
     {
         var userModel = await _userService.GetByIdAsync(userId, cancellationToken);
-        var user2Model = await _userService.GetByIdAsync(firendId, cancellationToken);
+        var user2Model = await _userService.GetByIdAsync(friendId, cancellationToken);
         _logger.LogAndThrowErrorIfNull(userModel, new UserNotFoundException("User not found"));
         _logger.LogAndThrowErrorIfNull(user2Model, new UserNotFoundException("User not found"));
         
@@ -60,10 +60,10 @@ public class FriendshipService : IFriendshipService
         }
     }
 
-    public async Task DeleteFriendshipAsync(int userId, int firendId, CancellationToken cancellationToken = default)
+    public async Task DeleteFriendshipAsync(int userId, int friendId, CancellationToken cancellationToken = default)
     {
         var userModel = await _userService.GetByIdAsync(userId, cancellationToken);
-        var user2Model = await _userService.GetByIdAsync(firendId, cancellationToken);
+        var user2Model = await _userService.GetByIdAsync(friendId, cancellationToken);
         _logger.LogAndThrowErrorIfNull(userModel, new UserNotFoundException("User not found"));
         _logger.LogAndThrowErrorIfNull(user2Model, new UserNotFoundException("User not found"));
         var friendship = new Friendship()

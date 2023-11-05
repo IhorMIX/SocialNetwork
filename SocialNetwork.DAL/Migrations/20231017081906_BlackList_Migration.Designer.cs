@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SocialNetwork.DAL;
 
@@ -11,9 +12,11 @@ using SocialNetwork.DAL;
 namespace SocialNetwork.DAL.Migrations
 {
     [DbContext(typeof(SocialNetworkDbContext))]
-    partial class SocialNetworkDbContextModelSnapshot : ModelSnapshot
+    [Migration("20231017081906_BlackList_Migration")]
+    partial class BlackList_Migration
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -131,28 +134,6 @@ namespace SocialNetwork.DAL.Migrations
                     b.ToTable("ChatMembers");
                 });
 
-            modelBuilder.Entity("SocialNetwork.DAL.Entity.FileEntity", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("FilePath")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("MessageId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("MessageId");
-
-                    b.ToTable("Files");
-                });
-
             modelBuilder.Entity("SocialNetwork.DAL.Entity.FriendRequest", b =>
                 {
                     b.Property<int>("Id")
@@ -210,6 +191,10 @@ namespace SocialNetwork.DAL.Migrations
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
+
+                    b.Property<string>("Files")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
@@ -457,17 +442,6 @@ namespace SocialNetwork.DAL.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("SocialNetwork.DAL.Entity.FileEntity", b =>
-                {
-                    b.HasOne("SocialNetwork.DAL.Entity.Message", "Message")
-                        .WithMany("Files")
-                        .HasForeignKey("MessageId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Message");
-                });
-
             modelBuilder.Entity("SocialNetwork.DAL.Entity.FriendRequest", b =>
                 {
                     b.HasOne("SocialNetwork.DAL.Entity.User", "Receiver")
@@ -599,8 +573,6 @@ namespace SocialNetwork.DAL.Migrations
 
             modelBuilder.Entity("SocialNetwork.DAL.Entity.Message", b =>
                 {
-                    b.Navigation("Files");
-
                     b.Navigation("Reactions");
                 });
 
