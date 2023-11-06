@@ -34,4 +34,11 @@ public class UserModel : BaseModel
 
         return data;
     }
+    public IScriptObject ToScriptObject_ResetPass(string linkToFront) {
+
+        IScriptObject data = new ScriptObject();
+        var link = $"{linkToFront}/reset-password/{Id.ToString().ToBase64()}";
+        data.SetValue("link", link, true);
+        return data;
+    }
 }

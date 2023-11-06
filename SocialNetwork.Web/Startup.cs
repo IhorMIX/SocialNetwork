@@ -42,6 +42,7 @@ public class Startup
         //Options
         services.Configure<MailSettingsOptions>(Configuration.GetSection("MailSettings"));
         services.Configure<TemplatePatheOptions>(Configuration.GetSection("TemplatePathes"));
+        services.Configure<ResetPasswordLink>(Configuration.GetSection("ResetPasswordLink"));
         services.Configure<CacheOptions>(Configuration.GetSection("CacheOptions"));
         services.Configure<RoleOption>(Configuration.GetSection("Roles"));
         
@@ -55,6 +56,7 @@ public class Startup
         services.AddValidatorsFromAssemblyContaining<UserUpdateValidator>(); //added update validator in controller
         services.AddValidatorsFromAssemblyContaining<AuthorizeValidator>();
         services.AddValidatorsFromAssemblyContaining<ChatValidator>();
+        services.AddValidatorsFromAssemblyContaining<ResetPasswordEmailValidator>();
         services.AddSingleton(typeof(CacheService<>));
         
         services.AddJwtAuth();

@@ -22,14 +22,16 @@ public class UserService : IUserService
     private readonly IMapper _mapper;
     private readonly IMailService _mailService;
     private readonly TemplatePatheOptions _templatePatheOptions;
+    private readonly ResetPasswordLink _resetPasswordLink;
 
     public UserService(IUserRepository userRepository, ILogger<UserService> logger, IMapper mapper,
-        IMailService mailService, IOptions<TemplatePatheOptions> templatePatheOptions)
+        IMailService mailService, IOptions<TemplatePatheOptions> templatePatheOptions, IOptions<ResetPasswordLink> resetPasswordLink)
     {
         _userRepository = userRepository;
         _logger = logger;
         _mapper = mapper;
         _mailService = mailService;
+        _resetPasswordLink = resetPasswordLink.Value;
         _templatePatheOptions = templatePatheOptions.Value;
     }
 
@@ -223,5 +225,34 @@ public class UserService : IUserService
 
         var userModel = _mapper.Map<UserModel>(userDb);
         return userModel;
+    }
+    
+    public async Task ResetPasswordConfirmationAsync(string userEmail, CancellationToken cancellationToken = default)
+    {
+        var userDb = await _userRepository.GetAll()
+            .FirstOrDefaultAsync(i => i.Profile.Email == userEmail && i.IsEnabled, cancellationToken);
+        if (userDb is not null)
+        {
+            var user = _mapper.Map<UserModel>(userDb);
+            await _mailService.SendHtmlEmailAsync(new MailModel()
+            {
+                Subject = "Reset password confirmation",
+                Data = user.ToScriptObject_ResetPass(_resetPasswordLink.Link),
+                EmailTo = user.Profile.Email,
+                FilePath = _templatePatheOptions.ResetPassword
+            });
+        }
+        
+    }
+
+    public async Task ChangePasswordAsync(int userId, string newPassword, CancellationToken cancellationToken = default)
+    {
+        var userDb = await _userRepository.GetByIdAsync(userId, cancellationToken);
+        _logger.LogAndThrowErrorIfNull(userDb, new UserNotFoundException($"User with this Id {userId} not found"));
+        
+        userDb!.Password = string.IsNullOrEmpty(newPassword)
+            ? userDb.Password
+            : PasswordHelper.HashPassword(newPassword);
+        await _userRepository.UpdateUserAsync(userDb, cancellationToken);
     }
 }

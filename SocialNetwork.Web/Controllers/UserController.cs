@@ -141,6 +141,22 @@ public class UserController : ControllerBase
 
         return Content("<h1>Account activated</h1>", "text/html");
     }
-    
+
+    [AllowAnonymous]
+    [HttpPost("reset-password")]
+    public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordEmail resetPasswordEmail, CancellationToken cancellationToken)
+    {
+        await _userService.ResetPasswordConfirmationAsync(resetPasswordEmail.Email, cancellationToken);
+        return Ok();
+    }
+
+    [AllowAnonymous]
+    [HttpPost("change-password")]
+    public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordModel changePasswordModel,
+        CancellationToken cancellationToken)
+    {
+        await _userService.ChangePasswordAsync(changePasswordModel.Id, changePasswordModel.NewPassword, cancellationToken);
+        return Ok();
+    }
 }
 

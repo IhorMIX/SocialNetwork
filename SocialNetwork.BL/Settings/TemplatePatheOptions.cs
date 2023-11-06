@@ -9,5 +9,6 @@ namespace SocialNetwork.BL.Settings
     public class TemplatePatheOptions
     {
         public string MailActivation { get; set; }
+        public string ResetPassword { get; set; }
     }
 }
