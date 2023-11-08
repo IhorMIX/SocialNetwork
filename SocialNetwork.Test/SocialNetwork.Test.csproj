@@ -23,7 +23,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\SocialNetwork.BL\SocialNetwork.BL.csproj" />
+      <ProjectReference Include="..\SocialNetwork.BLL\SocialNetwork.BLL.csproj" />
       <ProjectReference Include="..\SocialNetwork.DAL\SocialNetwork.DAL.csproj" />
       <ProjectReference Include="..\SocialNetwork.Web\SocialNetwork.Web.csproj" />
     </ItemGroup>

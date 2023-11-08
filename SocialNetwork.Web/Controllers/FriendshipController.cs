@@ -1,8 +1,8 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using SocialNetwork.BL.Models;
-using SocialNetwork.BL.Services.Interfaces;
+using SocialNetwork.BLL.Models;
+using SocialNetwork.BLL.Services.Interfaces;
 using SocialNetwork.DAL.Entity;
 using SocialNetwork.Web.Extensions;
 using SocialNetwork.Web.Helpers;

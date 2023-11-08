@@ -7,7 +7,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SocialNetwork.Web", "Social
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SocialNetwork.DAL", "SocialNetwork.DAL\SocialNetwork.DAL.csproj", "{0639D02F-66B4-4CC6-9167-963D46A0AF3C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SocialNetwork.BL", "SocialNetwork.BL\SocialNetwork.BL.csproj", "{B403C7B4-4252-43EF-A672-5A4D4661F8EC}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SocialNetwork.BLL", "SocialNetwork.BLL\SocialNetwork.BLL.csproj", "{B403C7B4-4252-43EF-A672-5A4D4661F8EC}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SocialNetwork.Test", "SocialNetwork.Test\SocialNetwork.Test.csproj", "{3517DAA8-23B6-4C4F-A591-21DED6FDF733}"
 EndProject

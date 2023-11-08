@@ -1,8 +1,8 @@
 ﻿using System.Text;
-using SocialNetwork.BL.Models;
-using SocialNetwork.BL.Models.Enums;
-using SocialNetwork.BL.Services;
-using SocialNetwork.BL.Services.Interfaces;
+using SocialNetwork.BLL.Models;
+using SocialNetwork.BLL.Models.Enums;
+using SocialNetwork.BLL.Services;
+using SocialNetwork.BLL.Services.Interfaces;
 using SocialNetwork.DAL.Entity;
 
 namespace SocialNetwork.Test.Helpers;

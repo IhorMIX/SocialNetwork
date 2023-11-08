@@ -1,4 +1,4 @@
-﻿using SocialNetwork.BL.Models.Enums;
+﻿using SocialNetwork.BLL.Models.Enums;
 
 namespace SocialNetwork.Web.Models;
 

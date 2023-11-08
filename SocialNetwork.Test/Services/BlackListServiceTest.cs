@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using SocialNetwork.BL.Models;
-using SocialNetwork.BL.Services;
-using SocialNetwork.BL.Services.Interfaces;
+using SocialNetwork.BLL.Models;
+using SocialNetwork.BLL.Services;
+using SocialNetwork.BLL.Services.Interfaces;
 using SocialNetwork.DAL.Repository.Interfaces;
 using SocialNetwork.DAL.Repository;
 using SocialNetwork.Test.Helpers;

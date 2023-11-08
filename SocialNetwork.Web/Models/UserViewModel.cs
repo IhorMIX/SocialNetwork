@@ -1,4 +1,4 @@
-﻿using SocialNetwork.BL.Models;
+﻿using SocialNetwork.BLL.Models;
 
 namespace SocialNetwork.Web.Models
 {

@@ -1,5 +1,5 @@
 ﻿using Newtonsoft.Json;
-using SocialNetwork.BL.Exceptions;
+using SocialNetwork.BLL.Exceptions;
 using SocialNetwork.Web.Models;
 using System.Net;
 

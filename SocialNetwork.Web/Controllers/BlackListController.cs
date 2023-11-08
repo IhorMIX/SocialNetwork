@@ -2,9 +2,9 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore.Metadata;
-using SocialNetwork.BL.Models;
-using SocialNetwork.BL.Services;
-using SocialNetwork.BL.Services.Interfaces;
+using SocialNetwork.BLL.Models;
+using SocialNetwork.BLL.Services;
+using SocialNetwork.BLL.Services.Interfaces;
 using SocialNetwork.DAL.Entity;
 using SocialNetwork.Web.Extensions;
 using SocialNetwork.Web.Helpers;
