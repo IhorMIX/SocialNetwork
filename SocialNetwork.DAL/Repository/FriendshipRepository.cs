@@ -1,19 +1,16 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SocialNetwork.DAL.Entity;
 using SocialNetwork.DAL.Repository.Interfaces;
-using SocialNetwork.DAL.Services;
 
 namespace SocialNetwork.DAL.Repository;
 
 public class FriendshipRepository : IFriendshipRepository
 {
     private readonly SocialNetworkDbContext _socialNetworkDbContext;
-    private readonly CacheService<Friendship?> _cacheService;
 
-    public FriendshipRepository(SocialNetworkDbContext socialNetworkDbContext, CacheService<Friendship?> cacheService)
+    public FriendshipRepository(SocialNetworkDbContext socialNetworkDbContext)
     {
         _socialNetworkDbContext = socialNetworkDbContext;
-        _cacheService = cacheService;
     }
 
     public IQueryable<Friendship> GetAll()
@@ -26,19 +23,16 @@ public class FriendshipRepository : IFriendshipRepository
 
     public async Task<Friendship?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
     {
-        return await _cacheService.GetOrSetAsync($"Friend-{id}", async (token) =>
-            await _socialNetworkDbContext.Friends
-                .Include(i => i.FriendUser)
-                .Include(i => i.User)
-                .FirstOrDefaultAsync(i => i.Id == id, token), cancellationToken, _socialNetworkDbContext);
+        return await _socialNetworkDbContext.Friends
+            .Include(i => i.FriendUser)
+            .Include(i => i.User)
+            .FirstOrDefaultAsync(i => i.Id == id, cancellationToken);
     }
 
     public async Task CreateFriendshipAsync(Friendship friendship, CancellationToken cancellationToken = default)
     {
         await _socialNetworkDbContext.Friends.AddAsync(friendship, cancellationToken);
         await _socialNetworkDbContext.SaveChangesAsync(cancellationToken);
-
-        await _cacheService.GetOrSetAsync($"Friend-{friendship.Id}", (_) => Task.FromResult(friendship)!, cancellationToken, _socialNetworkDbContext);
     }
 
     public async Task<bool> DeleteFriendsAsync(Friendship friendship, CancellationToken cancellationToken = default)
@@ -53,8 +47,7 @@ public class FriendshipRepository : IFriendshipRepository
         {
             _socialNetworkDbContext.Friends.Remove(friendToRemove);
             await _socialNetworkDbContext.SaveChangesAsync(cancellationToken);
-            await _cacheService.RemoveFromCacheAsync($"Friend-{friendToRemove.Id}", cancellationToken);
-            
+
             return true;
         }
 
@@ -72,11 +65,6 @@ public class FriendshipRepository : IFriendshipRepository
             _socialNetworkDbContext.Friends.RemoveRange(friendsToRemove);
             await _socialNetworkDbContext.SaveChangesAsync(cancellationToken);
 
-            foreach (var friendship in friendsToRemove)
-            {
-                await _cacheService.RemoveFromCacheAsync($"Friend-{friendship.Id}", cancellationToken);
-            }
-            
             return true;
         }
 
