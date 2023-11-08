@@ -1,5 +1,5 @@
-﻿using SocialNetwork.BL.Models;
-using SocialNetwork.BL.Services.Interfaces;
+﻿using SocialNetwork.BLL.Models;
+using SocialNetwork.BLL.Services.Interfaces;
 
 namespace SocialNetwork.Test.Services;
 

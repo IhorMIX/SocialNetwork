@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore.SqlServer.Design.Internal;
-using SocialNetwork.BL.Models;
+using SocialNetwork.BLL.Models;
 using SocialNetwork.DAL.Entity;
 using SocialNetwork.DAL.Entity.Enums;
 using SocialNetwork.Web.Models;

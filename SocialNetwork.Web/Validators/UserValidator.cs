@@ -1,5 +1,5 @@
 ﻿using FluentValidation;
-using SocialNetwork.BL.Models;
+using SocialNetwork.BLL.Models;
 using SocialNetwork.Web.Models;
 
 namespace SocialNetwork.Web.Validators;
