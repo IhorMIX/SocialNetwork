@@ -4,7 +4,7 @@ namespace SocialNetwork.DAL.Entity;
 
 public class Message : BaseEntity
 {
-    public string Text { get; set; }
+    public string Text { get; set; } = null!;
     public ICollection<FileEntity>? Files { get; set; }
 
     public DateTime CreatedAt { get; set; }
@@ -18,7 +18,7 @@ public class Message : BaseEntity
     public int? ToReplyMessageId { get; set; }
     
     public ChatMember? Author { get; set; }
-    public Chat Chat { get; set; }
+    public Chat Chat { get; set; } = null!;
     public Message? ToReplyMessage { get; set; }
     
     public ICollection<Reaction>? Reactions { get; set; }
