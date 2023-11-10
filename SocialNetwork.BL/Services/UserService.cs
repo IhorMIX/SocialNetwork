@@ -23,14 +23,16 @@ public class UserService : IUserService
     private readonly IMailService _mailService;
     private readonly TemplatePatheOptions _templatePatheOptions;
     private readonly ResetPasswordLink _resetPasswordLink;
+    private readonly HexKey _hexKey;
 
     public UserService(IUserRepository userRepository, ILogger<UserService> logger, IMapper mapper,
-        IMailService mailService, IOptions<TemplatePatheOptions> templatePatheOptions, IOptions<ResetPasswordLink> resetPasswordLink)
+        IMailService mailService, IOptions<TemplatePatheOptions> templatePatheOptions, IOptions<ResetPasswordLink> resetPasswordLink, IOptions<HexKey> hexKey)
     {
         _userRepository = userRepository;
         _logger = logger;
         _mapper = mapper;
         _mailService = mailService;
+        _hexKey = hexKey.Value;
         _resetPasswordLink = resetPasswordLink.Value;
         _templatePatheOptions = templatePatheOptions.Value;
     }
@@ -237,7 +239,7 @@ public class UserService : IUserService
             await _mailService.SendHtmlEmailAsync(new MailModel()
             {
                 Subject = "Reset password confirmation",
-                Data = user.ToScriptObject_ResetPass(_resetPasswordLink.Link),
+                Data = user.ToScriptObject_ResetPass(_resetPasswordLink.Link, _hexKey.Key, _hexKey.Iv),
                 EmailTo = user.Profile.Email,
                 FilePath = _templatePatheOptions.ResetPassword
             });

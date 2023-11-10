@@ -45,6 +45,7 @@ public class Startup
         services.Configure<ResetPasswordLink>(Configuration.GetSection("ResetPasswordLink"));
         services.Configure<CacheOptions>(Configuration.GetSection("CacheOptions"));
         services.Configure<RoleOption>(Configuration.GetSection("Roles"));
+        services.Configure<HexKey>(Configuration.GetSection("HexKey"));
         
         //automapper
         services.AddAutoMapper(typeof(Startup));
