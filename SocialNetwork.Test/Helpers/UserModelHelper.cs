@@ -10,12 +10,12 @@ namespace SocialNetwork.Test.Helpers;
 public static class UserModelHelper
 {
     
-    private static readonly Random _random = new();
+    private static readonly Random Random = new();
 
-    public static async Task<UserModel> CreateUserDateAsync()
+    public static Task<UserModel> CreateUserDateAsync()
     {
         Random random = new Random();
-        return new UserModel()
+        return Task.FromResult(new UserModel()
         {
 
             Login = GenerateRandomLogin(8, 60),
@@ -30,20 +30,20 @@ public static class UserModelHelper
                 Surname = "Test",
                 AvatarImage = "Image"
             }
-        };
+        });
     }
     
    
 
     public static string GenerateRandomLogin(int minLength, int maxLength)
     {
-        int loginLength = _random.Next(minLength, maxLength + 1);
+        int loginLength = Random.Next(minLength, maxLength + 1);
         const string chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
         StringBuilder loginBuilder = new StringBuilder();
 
         for (int i = 0; i < loginLength; i++)
         {
-            int randomIndex = _random.Next(chars.Length);
+            int randomIndex = Random.Next(chars.Length);
             loginBuilder.Append(chars[randomIndex]);
         }
 

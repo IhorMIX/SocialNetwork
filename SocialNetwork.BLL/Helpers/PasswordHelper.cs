@@ -12,7 +12,9 @@ namespace SocialNetwork.BLL.Helpers;
             {
                 throw new ArgumentNullException("password");
             }
+#pragma warning disable SYSLIB0041
             using (Rfc2898DeriveBytes bytes = new Rfc2898DeriveBytes(password, 0x10, 0x3e8))
+#pragma warning restore SYSLIB0041
             {
                 salt = bytes.Salt;
                 buffer2 = bytes.GetBytes(0x20);
@@ -26,10 +28,6 @@ namespace SocialNetwork.BLL.Helpers;
         public static bool VerifyHashedPassword(string hashedPassword, string password)
         {
             byte[] buffer4;
-            if (hashedPassword == null)
-            {
-                return false;
-            }
             if (password == null)
             {
                 throw new ArgumentNullException("password");
@@ -43,7 +41,9 @@ namespace SocialNetwork.BLL.Helpers;
             Buffer.BlockCopy(src, 1, dst, 0, 0x10);
             byte[] buffer3 = new byte[0x20];
             Buffer.BlockCopy(src, 0x11, buffer3, 0, 0x20);
+#pragma warning disable SYSLIB0041
             using (Rfc2898DeriveBytes bytes = new Rfc2898DeriveBytes(password, dst, 0x3e8))
+#pragma warning restore SYSLIB0041
             {
                 buffer4 = bytes.GetBytes(0x20);
             }

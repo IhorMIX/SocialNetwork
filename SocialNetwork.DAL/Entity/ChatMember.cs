@@ -2,12 +2,12 @@
 
 public class ChatMember : BaseEntity
 {
-    public Chat Chat { get; set; }
-    public User User { get; set; }
-    public ICollection<Role> Role { get; set; }
+    public Chat Chat { get; set; } = null!;
+    public User User { get; set; } = null!;
+    public ICollection<Role> Role { get; set; } = null!;
     
-    public ICollection<Message>? MessagesSent { get; set; }
+    public ICollection<Message> MessagesSent { get; set; } = null!;
     
-    public ICollection<Reaction>? Reactions { get; set; }
+    public ICollection<Reaction> Reactions { get; set; } = null!;
 
 }

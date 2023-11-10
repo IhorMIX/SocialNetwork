@@ -3,5 +3,5 @@
 public class AddUserInChatModel
 {
     public int ChatId { get; set; }
-    public List<int> NewMeberIds { get; set; }
+    public List<int> NewMeberIds { get; set; } = null!;
 }

@@ -36,8 +36,10 @@ public class Startup
         //Options
         services.Configure<MailSettingsOptions>(Configuration.GetSection("MailSettings"));
         services.Configure<TemplatePatheOptions>(Configuration.GetSection("TemplatePathes"));
+        services.Configure<LinkConfig>(Configuration.GetSection("LinkConfig"));
         services.Configure<CacheOptions>(Configuration.GetSection("CacheOptions"));
         services.Configure<RoleOption>(Configuration.GetSection("Roles"));
+        services.Configure<HexKeyConfig>(Configuration.GetSection("HexKeyConfig"));
         
         //automapper
         services.AddAutoMapper(typeof(Startup));
@@ -49,6 +51,7 @@ public class Startup
         services.AddValidatorsFromAssemblyContaining<UserUpdateValidator>(); //added update validator in controller
         services.AddValidatorsFromAssemblyContaining<AuthorizeValidator>();
         services.AddValidatorsFromAssemblyContaining<ChatValidator>();
+        services.AddValidatorsFromAssemblyContaining<ResetPasswordEmailValidator>();
         
         services.AddJwtAuth();
 

@@ -6,19 +6,19 @@ namespace SocialNetwork.BLL.Models;
 
 public class UserModel : BaseModel
 {
-    public string Login { get; set; }
+    public string Login { get; set; } = null!;
 
-    public string Password { get; set; }
+    public string Password { get; set; } = null!;
 
     public OnlineStatus OnlineStatus { get; set; }
 
     public bool IsEnabled { get; set; }
 
-    public ProfileModel Profile { get; set; }
+    public ProfileModel Profile { get; set; } = null!;
 
-    public AuthorizationInfoModel AuthorizationInfo { get; set; }
+    public AuthorizationInfoModel AuthorizationInfo { get; set; } = null!;
 
-    public IEnumerable<BlackListModel> BlackList { get; set; }
+    public IEnumerable<BlackListModel> BlackList { get; set; } = null!;
     
 
     public IScriptObject ToScriptObject() {
@@ -32,6 +32,13 @@ public class UserModel : BaseModel
         data.SetValue("link", link, true);
         
 
+        return data;
+    }
+    public IScriptObject ToScriptObject_ResetPass(string linkToFront, string key, string iv) {
+
+        IScriptObject data = new ScriptObject();
+        var link = $"{linkToFront}/reset-password/{Id.ToString().Encrypt(key, iv)}";
+        data.SetValue("link", link, true);
         return data;
     }
 }

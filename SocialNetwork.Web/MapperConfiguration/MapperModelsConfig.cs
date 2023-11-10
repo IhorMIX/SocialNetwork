@@ -26,26 +26,26 @@ namespace SocialNetwork.Web.MapperConfiguration
                 .ForMember(dest =>dest.Description, opt=> opt.Ignore())
                 .ReverseMap();
             CreateMap<FriendViewModel, UserModel>()
-                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.id))
+                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
                 .ForMember(dest =>dest.Login, opt=> opt.Ignore())
                 .ForMember(dest =>dest.Password, opt=> opt.Ignore())
                 .ForMember(dest =>dest.IsEnabled, opt=> opt.Ignore())
                 .ForMember(dest =>dest.AuthorizationInfo, opt=> opt.Ignore())
                 .ReverseMap()
-                .ForMember(dest => dest.id, opt => opt.MapFrom(src => src.Id));
+                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id));
 
             CreateMap<ProfileBannedUserModel, ProfileModel>()
                  .ForMember(dest => dest.Birthday, opt => opt.Ignore())
                  .ForMember(dest => dest.Description, opt => opt.Ignore())
                  .ReverseMap();
             CreateMap<BannedUserViewModel, UserModel>()
-                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.id))
+                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
                 .ForMember(dest => dest.Login, opt => opt.Ignore())
                 .ForMember(dest => dest.Password, opt => opt.Ignore())
                 .ForMember(dest => dest.IsEnabled, opt => opt.Ignore())
                 .ForMember(dest => dest.AuthorizationInfo, opt => opt.Ignore())
                 .ReverseMap()
-                .ForMember(dest => dest.id, opt => opt.MapFrom(src => src.Id));
+                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id));
 
             CreateMap<ProfileCreateViewModel, ProfileModel>();  
 

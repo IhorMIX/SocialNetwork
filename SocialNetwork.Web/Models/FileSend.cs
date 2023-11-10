@@ -2,5 +2,5 @@
 
 public class FileSend
 {
-    public string FilePath { get; set; }
+    public string FilePath { get; set; } = null!;
 }

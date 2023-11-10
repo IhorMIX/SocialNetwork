@@ -83,7 +83,7 @@ public class ReactionService : IReactionService
         var chatMemberDb = await _chatMemberRepository.GetByUserIdAndChatId(userId, messageDb!.ChatId, cancellationToken);
         _logger.LogAndThrowErrorIfNull(chatMemberDb, new UserNotFoundException($"Chat member with id-{userId} not found"));
 
-        var reactionsDb = await _reactionRepository.GetAll().Where(r => r.MessageId == messageDb.Id && r.AuthorId == chatMemberDb.Id)
+        var reactionsDb = await _reactionRepository.GetAll().Where(r => r.MessageId == messageDb.Id && r.AuthorId == chatMemberDb!.Id)
             .ToListAsync(cancellationToken);
 
         return _mapper.Map<List<ReactionModel>>(reactionsDb);

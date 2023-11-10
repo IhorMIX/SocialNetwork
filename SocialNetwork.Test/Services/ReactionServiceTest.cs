@@ -33,7 +33,7 @@ public class ReactionServiceTest : BaseMessageTestService<IReactionService, Reac
         {
             Name = "Chat2",
             Logo = "null",
-            isGroup = true,
+            IsGroup = true,
         });
 
         var chatList = await chatService.FindChatByName(user1.Id, "Chat2");

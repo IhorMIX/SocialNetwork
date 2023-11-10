@@ -2,7 +2,7 @@
 
 public class RoleUpdateModel
 {
-    public int chatId { get; set; }
-    public int roleId { get; set; }
-    public RoleEditModel rolemodel { get; set; }
+    public int ChatId { get; set; }
+    public int RoleId { get; set; }
+    public RoleEditModel RoleModel { get; set; } = null!;
 }

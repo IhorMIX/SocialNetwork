@@ -28,7 +28,7 @@ public class MessageServiceTest : BaseMessageTestService<IMessageService, Messag
         {
             Name = "Chat1",
             Logo = "null",
-            isGroup = true,
+            IsGroup = true,
         });
 
         var chatList = await chatService.FindChatByName(user1.Id, "Chat1");
@@ -49,7 +49,7 @@ public class MessageServiceTest : BaseMessageTestService<IMessageService, Messag
 
         Assert.That(createdMessage, Is.Not.EqualTo(null));
         Assert.That(createdMessage.Text, Is.EqualTo("Test message"));
-        Assert.That(createdMessage.FileModels.Any(f => f.FilePath == "test.png"));
+        Assert.That(createdMessage.FileModels!.Any(f => f.FilePath == "test.png"));
 
     }
 
@@ -77,7 +77,7 @@ public class MessageServiceTest : BaseMessageTestService<IMessageService, Messag
         {
             Name = "Chat2",
             Logo = "null",
-            isGroup = true,
+            IsGroup = true,
         });
 
         var chatList = await chatService.FindChatByName(user1.Id, "Chat2");
@@ -155,7 +155,7 @@ public class MessageServiceTest : BaseMessageTestService<IMessageService, Messag
         {
             Name = "Chat2",
             Logo = "null",
-            isGroup = true,
+            IsGroup = true,
         });
 
         var chatList = await chatService.FindChatByName(user1.Id, "Chat2");
@@ -218,7 +218,7 @@ public class MessageServiceTest : BaseMessageTestService<IMessageService, Messag
         replyMessage = messages.FirstOrDefault(c => c.Id == replyMessage.Id);
 
         Assert.That(messages.Any(c => c.Text == "editedMessage" && c.Text == "editedMessage"));
-        Assert.That(replyMessage.ChatId == chat.Id && replyMessage.Text == "editedMessage" && replyMessage.ToReplyMessageId == messageToReply.Id);
+        Assert.That(replyMessage!.ChatId == chat.Id && replyMessage.Text == "editedMessage" && replyMessage.ToReplyMessageId == messageToReply.Id);
         
         await Service.DeleteMessageAsync(user1.Id, chat.Id, messageToReply.Id, false);
         messages = await Service.GetMessagesAsync(user2.Id, chat.Id);
@@ -253,7 +253,7 @@ public class MessageServiceTest : BaseMessageTestService<IMessageService, Messag
         {
             Name = "Chat2",
             Logo = "null",
-            isGroup = true,
+            IsGroup = true,
         });
 
         var chatList = await chatService.FindChatByName(user1.Id, "Chat2");

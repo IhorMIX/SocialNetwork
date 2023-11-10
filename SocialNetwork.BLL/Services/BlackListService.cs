@@ -105,7 +105,7 @@ namespace SocialNetwork.BLL.Services
             if (parts.Length == 1)
             {
                 string name = parts[0].ToLower();
-                matchingUsers = await _blackrepository.GetAllBannedUserByUserId(searchingUser.Id)
+                matchingUsers = await _blackrepository.GetAllBannedUserByUserId(searchingUser!.Id)
                     .Where(f => f.BannedUser.Profile.Name.ToLower().StartsWith(name)
                               || f.BannedUser.Profile.Surname.ToLower().StartsWith(name))
                     .Select(f => f.BannedUser)
@@ -116,7 +116,7 @@ namespace SocialNetwork.BLL.Services
                 string firstName = parts[0].ToLower();
                 string lastName = parts[1].ToLower();
 
-                matchingUsers = await _blackrepository.GetAllBannedUserByUserId(searchingUser.Id)
+                matchingUsers = await _blackrepository.GetAllBannedUserByUserId(searchingUser!.Id)
                     .Where(f => (f.BannedUser.Profile.Name.ToLower().StartsWith(firstName)
                                   && f.BannedUser.Profile.Surname.ToLower().StartsWith(lastName))
                                || (f.BannedUser.Profile.Name.ToLower().StartsWith(lastName)
@@ -135,7 +135,7 @@ namespace SocialNetwork.BLL.Services
             var bannedUser = await _userRepository.GetByIdAsync(userId, cancellationToken);
             _logger.LogAndThrowErrorIfNull(bannedUser, new BannedUserNotFoundException("Banned user not found"));
 
-            var blackLists = await _blackrepository.GetAllBannedUserByUserId(bannedUser.Id).Select(f => f.BannedUser).ToListAsync(cancellationToken);
+            var blackLists = await _blackrepository.GetAllBannedUserByUserId(bannedUser!.Id).Select(f => f.BannedUser).ToListAsync(cancellationToken);
             var userModels = _mapper.Map<IEnumerable<UserModel>>(blackLists);
             return userModels;
         }

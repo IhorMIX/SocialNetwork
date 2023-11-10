@@ -5,6 +5,7 @@ using Microsoft.Extensions.Options;
 using SocialNetwork.DAL.Entity;
 using SocialNetwork.DAL.Repository.Interfaces;
 using SocialNetwork.BLL.Exceptions;
+using SocialNetwork.BLL.Extensions;
 using SocialNetwork.BLL.Helpers;
 using SocialNetwork.BLL.Models;
 using SocialNetwork.BLL.Models.Enums;
@@ -22,14 +23,18 @@ public class UserService : IUserService
     private readonly IMapper _mapper;
     private readonly IMailService _mailService;
     private readonly TemplatePatheOptions _templatePatheOptions;
+    private readonly LinkConfig _linkConfig;
+    private readonly HexKeyConfig _hexKeyConfig;
 
     public UserService(IUserRepository userRepository, ILogger<UserService> logger, IMapper mapper,
-        IMailService mailService, IOptions<TemplatePatheOptions> templatePatheOptions)
+        IMailService mailService, IOptions<TemplatePatheOptions> templatePatheOptions, IOptions<LinkConfig> resetPasswordLink, IOptions<HexKeyConfig> hexKey)
     {
         _userRepository = userRepository;
         _logger = logger;
         _mapper = mapper;
         _mailService = mailService;
+        _hexKeyConfig = hexKey.Value;
+        _linkConfig = resetPasswordLink.Value;
         _templatePatheOptions = templatePatheOptions.Value;
     }
 
@@ -90,7 +95,7 @@ public class UserService : IUserService
             var userSourceValue = userProperty.GetValue(user.Profile);
             var userTargetValue = userDbProperty.GetValue(userDb.Profile);
 
-            if (userSourceValue != null && userSourceValue != "" && !userSourceValue.Equals(userTargetValue))
+            if (userSourceValue != null && !ReferenceEquals(userSourceValue, "") && !userSourceValue.Equals(userTargetValue))
             {
                 userDbProperty.SetValue(userDb.Profile, userSourceValue);
             }
@@ -117,7 +122,7 @@ public class UserService : IUserService
         var userDb = await _userRepository.GetByIdAsync(user.Id, cancellationToken);
         _logger.LogAndThrowErrorIfNull(userDb, new UserNotFoundException($"User with this Id {user.Id} not found"));
 
-        if (userDb.AuthorizationInfo is not null && userDb.AuthorizationInfo.ExpiredDate <= DateTime.Now.AddDays(-1))
+        if (userDb!.AuthorizationInfo is not null && userDb.AuthorizationInfo.ExpiredDate <= DateTime.Now.AddDays(-1))
             await LogOutAsync(user.Id, cancellationToken);
 
         userDb.AuthorizationInfo = new AuthorizationInfo
@@ -135,7 +140,7 @@ public class UserService : IUserService
 
         _logger.LogAndThrowErrorIfNull(userDb, new UserNotFoundException($"User with this Id {userId} not found"));
 
-        if (userDb.AuthorizationInfo is not null)
+        if (userDb!.AuthorizationInfo is not null)
         {
             userDb.AuthorizationInfo = null;
             await _userRepository.UpdateUserAsync(userDb, cancellationToken);
@@ -174,7 +179,7 @@ public class UserService : IUserService
 
         _logger.LogAndThrowErrorIfNull(userDb, new UserNotFoundException($"User with this login {login} not found"));
 
-        if (!PasswordHelper.VerifyHashedPassword(userDb.Password, password))
+        if (!PasswordHelper.VerifyHashedPassword(userDb!.Password, password))
         {
             throw new WrongLoginOrPasswordException("Wrong login or password");
         }
@@ -196,7 +201,7 @@ public class UserService : IUserService
         _logger.LogAndThrowErrorIfNull(userDb,
             new UserNotFoundException($"User with this refresh token {refreshToken} not found"));
 
-        if (userDb.AuthorizationInfo is not null && userDb.AuthorizationInfo.ExpiredDate <= DateTime.Now.AddDays(-1))
+        if (userDb!.AuthorizationInfo is not null && userDb.AuthorizationInfo.ExpiredDate <= DateTime.Now.AddDays(-1))
             throw new TimeoutException();
 
         var userModel = _mapper.Map<UserModel>(userDb);
@@ -223,5 +228,35 @@ public class UserService : IUserService
 
         var userModel = _mapper.Map<UserModel>(userDb);
         return userModel;
+    }
+    
+    public async Task ResetPasswordConfirmationAsync(string userEmail, CancellationToken cancellationToken = default)
+    {
+        var userDb = await _userRepository.GetAll()
+            .FirstOrDefaultAsync(i => i.Profile.Email == userEmail && i.IsEnabled, cancellationToken);
+        if (userDb is not null)
+        {
+            var user = _mapper.Map<UserModel>(userDb);
+            await _mailService.SendHtmlEmailAsync(new MailModel()
+            {
+                Subject = "Reset password confirmation",
+                Data = user.ToScriptObject_ResetPass(_linkConfig.FrontUrl, _hexKeyConfig.Key, _hexKeyConfig.Iv),
+                EmailTo = user.Profile.Email,
+                FilePath = _templatePatheOptions.ResetPassword
+            });
+        }
+        
+    }
+
+    public async Task ChangePasswordAsync(string userId, string newPassword, CancellationToken cancellationToken = default)
+    {
+        
+        var decryptedId = userId.Decrypt(_hexKeyConfig.Key, _hexKeyConfig.Iv);
+        var userDb = await _userRepository.GetByIdAsync(int.Parse(decryptedId), cancellationToken);
+        _logger.LogAndThrowErrorIfNull(userDb, new UserNotFoundException($"User with this Id {userId} not found"));
+        userDb!.Password = string.IsNullOrEmpty(newPassword)
+            ? throw new EmptyPasswordException("Empty password exception")
+            : PasswordHelper.HashPassword(newPassword);
+        await _userRepository.UpdateUserAsync(userDb, cancellationToken);
     }
 }
