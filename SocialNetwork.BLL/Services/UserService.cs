@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using SocialNetwork.BL.Settings;
 using SocialNetwork.DAL.Entity;
 using SocialNetwork.DAL.Repository.Interfaces;
 using SocialNetwork.BLL.Exceptions;
