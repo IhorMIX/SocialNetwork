@@ -1,20 +1,16 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SocialNetwork.DAL.Entity;
 using SocialNetwork.DAL.Repository.Interfaces;
-using SocialNetwork.DAL.Services;
 
 namespace SocialNetwork.DAL.Repository;
 
 public class FriendRequestRepository : IFriendRequestRepository
 {
     private readonly SocialNetworkDbContext _socialNetworkDbContext;
-    private readonly CacheService<FriendRequest?> _cacheService;
 
-    public FriendRequestRepository(SocialNetworkDbContext socialNetworkDbContext,
-        CacheService<FriendRequest?> cacheService)
+    public FriendRequestRepository(SocialNetworkDbContext socialNetworkDbContext)
     {
         _socialNetworkDbContext = socialNetworkDbContext;
-        _cacheService = cacheService;
     }
 
     public IQueryable<FriendRequest> GetAll()
@@ -27,12 +23,6 @@ public class FriendRequestRepository : IFriendRequestRepository
 
     public async Task<FriendRequest?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
     {
-        // return await _cacheService.GetOrSetAsync($"FriendRequest-{id}", async (token) => 
-        //     await _socialNetworkDbContext
-        //     .FriendRequests
-        //     .Include(i => i.Sender)
-        //     .Include(i => i.Receiver)
-        //     .FirstOrDefaultAsync(i => i.Id == id, token), cancellationToken, _socialNetworkDbContext);
         return await _socialNetworkDbContext.FriendRequests
             .Include(i => i.Sender)
             .Include(i => i.Receiver)
@@ -51,7 +41,6 @@ public class FriendRequestRepository : IFriendRequestRepository
         {
             _socialNetworkDbContext.FriendRequests.Remove(friendRequestToRemove);
             await _socialNetworkDbContext.SaveChangesAsync(cancellationToken);
-            await _cacheService.RemoveFromCacheAsync($"FriendRequest-{friendRequestToRemove.Id}", cancellationToken);
             
             return true;
         }
@@ -69,10 +58,6 @@ public class FriendRequestRepository : IFriendRequestRepository
         {
             _socialNetworkDbContext.FriendRequests.RemoveRange(friendsRequestToRemove);
             await _socialNetworkDbContext.SaveChangesAsync(cancellationToken);
-            foreach (var friendRequest in friendsRequestToRemove)
-            {
-                await _cacheService.RemoveFromCacheAsync($"FriendRequest-{friendRequest.Id}", cancellationToken);
-            }
             
             return true;
         }
@@ -85,9 +70,6 @@ public class FriendRequestRepository : IFriendRequestRepository
     {
         await _socialNetworkDbContext.FriendRequests.AddAsync(friendRequest, cancellationToken);
         await _socialNetworkDbContext.SaveChangesAsync(cancellationToken);
-
-        await _cacheService.GetOrSetAsync($"FriendRequest-{friendRequest.Id}", (_) => Task.FromResult(friendRequest)!,
-            cancellationToken, _socialNetworkDbContext);
     }
 
     public IQueryable<FriendRequest> GetAllFriendRequests(int id)

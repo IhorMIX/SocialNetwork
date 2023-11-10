@@ -3,12 +3,9 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
-using SocialNetwork.BL.Services;
-using SocialNetwork.BL.Services.Interfaces;
+using SocialNetwork.BLL.Services.Interfaces;
 using SocialNetwork.DAL;
 using SocialNetwork.DAL.Options;
-using SocialNetwork.DAL.Services;
-using SocialNetwork.Test.Extensions;
 using SocialNetwork.Web;
 
 namespace SocialNetwork.Test.Services
@@ -27,7 +24,6 @@ namespace SocialNetwork.Test.Services
             services.AddScoped<TService>();
             services.AddScoped<ILogger<TService>, NullLogger<TService>>();
             services.AddAutoMapper(typeof(Startup));
-            services.AddSingleton(typeof(CacheService<>));
             services.Configure<CacheOptions>(Configuration.GetSection("CacheOptions"));
             services.Configure<RoleOption>(Configuration.GetSection("Roles"));
             services.AddScoped<IMailService, FakeMailService>();

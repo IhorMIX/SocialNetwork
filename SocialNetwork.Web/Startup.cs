@@ -1,24 +1,19 @@
-﻿using System.Text.Json.Serialization;
-using FluentValidation;
+﻿using FluentValidation;
 using FluentValidation.AspNetCore;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http.Connections;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi.Models;
 using Newtonsoft.Json.Converters;
-using SocialNetwork.BL.Services;
-using SocialNetwork.BL.Services.Interfaces;
 using SocialNetwork.BL.Settings;
+using SocialNetwork.BLL.Services;
+using SocialNetwork.BLL.Services.Interfaces;
+using SocialNetwork.BLL.Settings;
 using SocialNetwork.DAL;
 using SocialNetwork.DAL.Options;
 using SocialNetwork.DAL.Repository;
 using SocialNetwork.DAL.Repository.Interfaces;
-using SocialNetwork.DAL.Services;
 using SocialNetwork.Web.Extensions;
 using SocialNetwork.Web.Helpers;
 using SocialNetwork.Web.Hubs;
-using SocialNetwork.Web.Options;
 using SocialNetwork.Web.Validators;
 using Swashbuckle.AspNetCore.SwaggerUI;
 
@@ -58,7 +53,6 @@ public class Startup
         services.AddValidatorsFromAssemblyContaining<AuthorizeValidator>();
         services.AddValidatorsFromAssemblyContaining<ChatValidator>();
         services.AddValidatorsFromAssemblyContaining<ResetPasswordEmailValidator>();
-        services.AddSingleton(typeof(CacheService<>));
         
         services.AddJwtAuth();
 

@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using SocialNetwork.BL.Exceptions;
-using SocialNetwork.BL.Services;
-using SocialNetwork.BL.Services.Interfaces;
+using SocialNetwork.BLL.Exceptions;
+using SocialNetwork.BLL.Services;
+using SocialNetwork.BLL.Services.Interfaces;
 using SocialNetwork.DAL.Repository;
 using SocialNetwork.DAL.Repository.Interfaces;
 using SocialNetwork.Test.Helpers;
@@ -25,6 +25,8 @@ public class FriendRequestTest : DefaultServiceTest<IFriendRequestService, Frien
         services.AddScoped<IRoleRepository, RoleRepository>();
         services.AddScoped<IChatRepository, ChatRepository>();
         services.AddScoped<IChatMemberRepository, ChatMemberRepository>();
+        services.AddScoped<IBlackListService, BlackListService>();
+        services.AddScoped<IBlackListRepository, BlackListRepository>();
         base.SetUpAdditionalDependencies(services);
     }
 
