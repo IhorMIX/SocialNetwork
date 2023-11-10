@@ -5,9 +5,9 @@ namespace SocialNetwork.DAL.Entity;
 
 public class User : BaseEntity
 {
-    public string Login { get; set; }
+    public string Login { get; set; } = null!;
 
-    public string Password { get; set; }
+    public string Password { get; set; } = null!;
 
     public OnlineStatus OnlineStatus { get; set; }
 
@@ -17,7 +17,7 @@ public class User : BaseEntity
 
     public int AuthorizationInfoId { get; set; }
 
-    public Profile Profile { get; set; }
+    public Profile Profile { get; set; } = null!;
 
     public AuthorizationInfo? AuthorizationInfo { get; set; }
 
