@@ -22,7 +22,13 @@ jobs:
         dotnet-version: 6.0.x
     - name: Restore dependencies
       run: dotnet restore
+      
     - name: Build
       run: dotnet build --no-restore
+      
+    - name: Build with warnings
+      run: dotnet build /p:TreatWarningsAsErrors=true /consoleloggerparameters:NoSummary
+      
     - name: Test
       run: dotnet test --no-build --verbosity normal
+    
