@@ -6,6 +6,6 @@ namespace SocialNetwork.Web.Models
     {
         public string? Password { get; set; }
 
-        public ProfileUpdateViewModel Profile { get; set; }
+        public ProfileUpdateViewModel Profile { get; set; } = null!;
     }
 }

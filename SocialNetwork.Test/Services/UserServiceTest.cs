@@ -95,10 +95,11 @@ public class UserServiceTest : DefaultServiceTest<IUserService, UserService>
     }
 
     [Test]
-    public async Task DeleteUser_UserNotFound_ThrowsUserNotFoundException()
+    public Task DeleteUser_UserNotFound_ThrowsUserNotFoundException()
     {
         Assert.ThrowsAsync<UserNotFoundException>(async () =>
             await Service.DeleteUserAsync(1));
+        return Task.CompletedTask;
     }
 
     [Test]

@@ -3,7 +3,7 @@
 public class ChatMemberRoleViewModel
 {
     public int Id { get; set; }
-    public string RoleName { get; set; }
-    public string RoleColor { get; set; }
+    public string RoleName { get; set; } = null!;
+    public string RoleColor { get; set; } = null!;
     
 }

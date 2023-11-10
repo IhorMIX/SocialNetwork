@@ -90,7 +90,7 @@ public class FriendServiceTest : DefaultServiceTest<IFriendshipService, Friendsh
         var createdUser3 = await userService.GetUserByLogin(user3.Login);
         Assert.That(user3, Is.Not.EqualTo(null));
         
-        await Service.AddFriendshipAsync(createdUser1.Id,createdUser2!.Id);
+        await Service.AddFriendshipAsync(createdUser1!.Id,createdUser2!.Id);
         
         await Service.AddFriendshipAsync(createdUser1!.Id,createdUser3!.Id);
         
@@ -152,7 +152,7 @@ public class FriendServiceTest : DefaultServiceTest<IFriendshipService, Friendsh
             await Service.AddFriendshipAsync(createdUser!.Id, 
                 (await userService.GetUserByLogin(userList[i].Login))!.Id);
         
-        Assert.That(Service.GetAllFriends(createdUser.Id), Is.Not.EqualTo(null));
+        Assert.That(Service.GetAllFriends(createdUser!.Id), Is.Not.EqualTo(null));
         var friendList = await Service.GetAllFriends(createdUser.Id);
         Assert.That(friendList.Count() == 6);
         friendList = await Service.FindFriendByNameSurname(createdUser.Id, "Test ");

@@ -3,7 +3,6 @@ using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Http.Connections;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json.Converters;
-using SocialNetwork.BL.Settings;
 using SocialNetwork.BLL.Services;
 using SocialNetwork.BLL.Services.Interfaces;
 using SocialNetwork.BLL.Settings;

@@ -2,7 +2,7 @@
 
 public class MessageModel : BaseModel
 {
-    public string Text { get; set; }
+    public string Text { get; set; } = null!;
     public ICollection<FileModel>? FileModels { get; set; }
 
     public DateTime CreatedAt { get; set; }
@@ -17,8 +17,8 @@ public class MessageModel : BaseModel
     public int? ToReplyMessageId { get; set; }
     
     public ChatMemberModel? Author { get; set; }
-    public ChatModel ChatModel { get; set; }
+    public ChatModel ChatModel { get; set; } = null!;
     public MessageModel? ToReplyMessage { get; set; }
     
-    public ICollection<ReactionModel> Reactions { get; set; }
+    public ICollection<ReactionModel> Reactions { get; set; } = null!;
 }

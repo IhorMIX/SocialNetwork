@@ -80,7 +80,7 @@ public class FriendshipService : IFriendshipService
         _logger.LogAndThrowErrorIfNull(userDb, new UserNotFoundException("User not found"));
 
         var users = await _friendshipRepository
-            .GetAllFriendsByUserId(userDb.Id)
+            .GetAllFriendsByUserId(userDb!.Id)
             .Select(f => f.UserId == userDb.Id ? f.FriendUser : f.User)
             .ToListAsync(cancellationToken);
         var userModels = _mapper.Map<IEnumerable<UserModel>>(users);
@@ -100,7 +100,7 @@ public class FriendshipService : IFriendshipService
         if (parts.Length == 1)
         {
             string name = parts[0].ToLower();
-            matchingUsers = await _friendshipRepository.GetAllFriendsByUserId(userDb.Id)
+            matchingUsers = await _friendshipRepository.GetAllFriendsByUserId(userDb!.Id)
                 .Where(f => f.User.Profile.Name.ToLower().StartsWith(name)
                             || f.User.Profile.Surname.ToLower().StartsWith(name)
                             || f.FriendUser.Profile.Name.ToLower().StartsWith(name)
@@ -113,7 +113,7 @@ public class FriendshipService : IFriendshipService
             string firstName = parts[0].ToLower();
             string lastName = parts[1].ToLower();
 
-            matchingUsers = await _friendshipRepository.GetAllFriendsByUserId(userDb.Id)
+            matchingUsers = await _friendshipRepository.GetAllFriendsByUserId(userDb!.Id)
                 .Where(f => ((f.User.Profile.Name.ToLower().StartsWith(firstName)
                               && f.User.Profile.Surname.ToLower().StartsWith(lastName))
                              || f.User.Profile.Name.ToLower().StartsWith(lastName)
@@ -140,10 +140,10 @@ public class FriendshipService : IFriendshipService
         _logger.LogAndThrowErrorIfNull(user2Model, new UserNotFoundException("User not found"));
         _logger.LogAndThrowErrorIfNull(userDb, new UserNotFoundException("User not found"));
         var friend = await _friendshipRepository.GetAll()
-            .Where(f => f.UserId == userDb.Id && f.FriendUser.Profile.Email == friendEmail)
+            .Where(f => f.UserId == userDb!.Id && f.FriendUser.Profile.Email == friendEmail)
             .Select(f => f.FriendUser)
             .Union(_friendshipRepository.GetAll()
-                .Where(f => f.FriendId == userDb.Id && f.User.Profile.Email == friendEmail)
+                .Where(f => f.FriendId == userDb!.Id && f.User.Profile.Email == friendEmail)
                 .Select(f => f.User))
             .SingleOrDefaultAsync(cancellationToken);
 

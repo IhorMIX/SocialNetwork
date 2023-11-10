@@ -72,7 +72,7 @@ public class ChatService : IChatService
         if (await _friendshipService.IsFriends(userDb!.Id, user2Db!.Id, cancellationToken) is false)
             return;
 
-        chatModel.isGroup = false;
+        chatModel.IsGroup = false;
         var chatId = await _chatRepository.CreateChat(_mapper.Map<Chat>(chatModel), cancellationToken);
         var chatDb = await _chatRepository.GetByIdAsync(chatId, cancellationToken);
         _logger.LogAndThrowErrorIfNull(chatDb, new ChatNotFoundException($"Chat with this Id {chatId} not found"));
@@ -101,7 +101,7 @@ public class ChatService : IChatService
         var userDb = await _userRepository.GetByIdAsync(userId, cancellationToken);
         _logger.LogAndThrowErrorIfNull(userDb, new UserNotFoundException($"User with this Id {userId} not found"));
 
-        chatModel.isGroup = true;
+        chatModel.IsGroup = true;
         var chatId = await _chatRepository.CreateChat(_mapper.Map<Chat>(chatModel), cancellationToken);
         var chatDb = await _chatRepository.GetByIdAsync(chatId, cancellationToken);
         _logger.LogAndThrowErrorIfNull(chatDb, new ChatNotFoundException($"Chat with this Id {chatId} not found"));
@@ -253,7 +253,7 @@ public class ChatService : IChatService
             var roleSourceValue = roleProperty.GetValue(chatModel);
             var roleTargetValue = roleDbProperty.GetValue(chatDb);
 
-            if (roleSourceValue != null && roleSourceValue != "" && !roleSourceValue.Equals(roleTargetValue))
+            if (roleSourceValue != null && !ReferenceEquals(roleSourceValue, "") && !roleSourceValue.Equals(roleTargetValue))
             {
                 roleDbProperty.SetValue(chatDb, roleSourceValue);
             }
@@ -385,7 +385,7 @@ public class ChatService : IChatService
             var roleSourceValue = roleProperty.GetValue(roleModel);
             var roleTargetValue = roleDbProperty.GetValue(roleDb);
 
-            if (roleSourceValue != null && roleSourceValue != "" && !roleSourceValue.Equals(roleTargetValue) && roleSourceValue.GetType() == roleTargetValue!.GetType())
+            if (roleSourceValue != null && !ReferenceEquals(roleSourceValue, "") && !roleSourceValue.Equals(roleTargetValue) && roleSourceValue.GetType() == roleTargetValue!.GetType())
             {
                 roleDbProperty.SetValue(roleDb, roleSourceValue);
             }
@@ -540,7 +540,7 @@ public class ChatService : IChatService
          _logger.LogAndThrowErrorIfNull(userInChat, new NoRightException($"You have no rights for it"));
         
         var roleIds = roleModels.Select(rm => rm.Id).ToList();
-        var rolesDb = await _roleRepository.GetAll().Where(r => r.Chat.Id == chatDb.Id && roleIds.Contains(r.Id))
+        var rolesDb = await _roleRepository.GetAll().Where(r => r.Chat!.Id == chatDb!.Id && roleIds.Contains(r.Id))
             .ToListAsync(cancellationToken);
 
         if (rolesDb.Any(r => r.Rank <= userInChat!.Role.Min(i => i.Rank)))

@@ -2,6 +2,6 @@
 
 public class ChangePasswordModel
 {
-    public string Id { get; set; }
-    public string NewPassword { get; set; }
+    public string Id { get; set; } = null!;
+    public string NewPassword { get; set; } = null!;
 }

@@ -28,12 +28,12 @@ public class ChatServiceTest : BaseMessageTestService<IChatService, ChatService>
         {
             Name = "Chat1",
             Logo = "null",
-            isGroup = true,
+            IsGroup = true,
         });
 
         var chatList = await Service.FindChatByName(user1.Id, "Chat1");
         var chat = chatList.First();
-        foreach (var chatMember in chat.ChatMembers)
+        foreach (var chatMember in chat.ChatMembers!)
         {
             Assert.That(chatMember.Role.Count == 1);
         }
@@ -60,7 +60,7 @@ public class ChatServiceTest : BaseMessageTestService<IChatService, ChatService>
         {
             Name = "Chat2",
             Logo = "null",
-            isGroup = true,
+            IsGroup = true,
         });
        
         var chat = await Service.FindChatByName(user1.Id, "Chat2");
@@ -85,11 +85,11 @@ public class ChatServiceTest : BaseMessageTestService<IChatService, ChatService>
         var user2 = await UserModelHelper.CreateTestDataAsync(userService);
         user1 = await userService.GetUserByLogin(user1.Login);
         user2 = await userService.GetUserByLogin(user2.Login);
-        await Service.CreateGroupChat(user1.Id, new ChatModel
+        await Service.CreateGroupChat(user1!.Id, new ChatModel
         {
             Name = "Chat2",
             Logo = "null",
-            isGroup = true,
+            IsGroup = true,
         });
         var chat = await Service.FindChatByName(user1.Id, "Chat2");
         Assert.ThrowsAsync<UserNotFoundException>( async () => await Service.AddUsers(user1.Id, chat.First().Id, new List<int>{5000, 6000, 7000}));
@@ -108,19 +108,19 @@ public class ChatServiceTest : BaseMessageTestService<IChatService, ChatService>
         {
             Name = "Chats1",
             Logo = "null",
-            isGroup = true,
+            IsGroup = true,
         });
         await Service.CreateGroupChat(user1.Id, new ChatModel
         {
             Name = "Chats2",
             Logo = "null",
-            isGroup = true,
+            IsGroup = true,
         });
         await Service.CreateGroupChat(user1.Id, new ChatModel
         {
             Name = "Chats3",
             Logo = "null",
-            isGroup = true,
+            IsGroup = true,
         });
        
         var chat = await Service.GetAllChats(user1.Id);
@@ -150,13 +150,13 @@ public class ChatServiceTest : BaseMessageTestService<IChatService, ChatService>
         {
             Name = "Chat3",
             Logo = "null",
-            isGroup = true,
+            IsGroup = true,
         });
         
         var chat = (await Service.FindChatByName(user1.Id, "Chat3")).First();
         Assert.That(chat is not null);
         
-        await Service.AddUsers(user1.Id, chat.Id, new List<int>{user2!.Id, user3!.Id});
+        await Service.AddUsers(user1.Id, chat!.Id, new List<int>{user2!.Id, user3!.Id});
         
         chat = (await Service.FindChatByName(user1.Id, "Chat3")).First();
         Assert.That(chat.ChatMembers!.Count == 3);
@@ -170,11 +170,11 @@ public class ChatServiceTest : BaseMessageTestService<IChatService, ChatService>
         var role = (await Service.GetAllChatRoles(user1.Id, chat.Id)).First();
         Assert.That(role is not null);
 
-        await Service.SetRole(user1.Id, chat.Id, role.Id, new List<int>(){user2.Id, user3.Id});
+        await Service.SetRole(user1.Id, chat.Id, role!.Id, new List<int>(){user2.Id, user3.Id});
         
         role = (await Service.GetAllChatRoles(user1.Id, chat.Id)).First();
         chat = (await Service.FindChatByName(user1.Id, "Chat3")).First();
-        Assert.That(chat.ChatMembers.Any(m => m.Role.Any(r => r.RoleName == role.RoleName) && m.User.Login == user2.Login));
+        Assert.That(chat.ChatMembers!.Any(m => m.Role.Any(r => r.RoleName == role.RoleName) && m.User.Login == user2.Login));
         
         role.RoleAccesses.Clear();
         await Service.EditRole(user1.Id, chat.Id, role.Id, role);
@@ -190,7 +190,7 @@ public class ChatServiceTest : BaseMessageTestService<IChatService, ChatService>
         role = (await Service.GetAllChatRoles(user1.Id, chat.Id)).First();
         chat = (await Service.FindChatByName(user1.Id, "Chat3")).First();
         Assert.That(role.RoleName != "Role2" &&
-                    chat.ChatMembers.Any(c => c.Role.Any(r => r.RoleName != "Role2")));
+                    chat.ChatMembers!.Any(c => c.Role.Any(r => r.RoleName != "Role2")));
         Assert.That(role.RoleAccesses.Contains(ChatAccess.DelMembers) && role.RoleAccesses.Contains(ChatAccess.DelMembers));
     }
     
@@ -208,18 +208,18 @@ public class ChatServiceTest : BaseMessageTestService<IChatService, ChatService>
         Assert.That(user2, Is.Not.EqualTo(null));
         Assert.That(user3, Is.Not.EqualTo(null));
         
-        await Service.CreateGroupChat(user1.Id, new ChatModel
+        await Service.CreateGroupChat(user1!.Id, new ChatModel
         {
             Name = "Chat4",
             Logo = "null",
-            isGroup = true,
+            IsGroup = true,
         });
         
         var chat = (await Service.FindChatByName(user1.Id, "Chat4")).First();
         
         Assert.That(chat is not null);
         
-        await Service.AddUsers(user1.Id, chat.Id, new List<int>{user2!.Id, user3!.Id});
+        await Service.AddUsers(user1.Id, chat!.Id, new List<int>{user2!.Id, user3!.Id});
         chat = (await Service.FindChatByName(user1.Id, "Chat4")).First();
         Assert.That(chat.ChatMembers!.Count == 3);
         
@@ -232,14 +232,14 @@ public class ChatServiceTest : BaseMessageTestService<IChatService, ChatService>
         var role = (await Service.GetAllChatRoles(user1.Id, chat.Id)).FirstOrDefault(r => r.RoleName == "Role2");
         Assert.That(role is not null);
 
-        await Service.SetRole(user1.Id, chat.Id, role.Id, new List<int>(){user2.Id, user3.Id});
+        await Service.SetRole(user1.Id, chat.Id, role!.Id, new List<int>(){user2.Id, user3.Id});
         chat = (await Service.FindChatByName(user1.Id, "Chat4")).First();
-        Assert.That(chat.ChatMembers
+        Assert.That(chat.ChatMembers!
             .Any(m => m.Role
                 .Any(r => r.RoleName == role.RoleName) && 
                       m.User.Id == user2.Id));
         
-        Assert.That(chat.ChatMembers
+        Assert.That(chat.ChatMembers!
             .Any(m => m.Role
                           .Any(r => r.RoleName == role.RoleName) && 
                       m.User.Id == user3.Id));
@@ -247,11 +247,11 @@ public class ChatServiceTest : BaseMessageTestService<IChatService, ChatService>
         await Service.UnSetRole(user1.Id, chat.Id, role.Id, new List<int>(){user2.Id, user3.Id});
         chat = (await Service.FindChatByName(user1.Id, "Chat4")).First();
         
-        Assert.That(chat.ChatMembers
+        Assert.That(chat.ChatMembers!
             .Any(m => m.Role.Any(r => r.RoleName == role.RoleName&& 
                                                               m.User.Id == user2.Id)) == false);
         
-        Assert.That(chat.ChatMembers
+        Assert.That(chat.ChatMembers!
             .Any(m => m.Role.Any(r => r.RoleName == role.RoleName&& 
                                       m.User.Id == user3.Id)) == false);
         

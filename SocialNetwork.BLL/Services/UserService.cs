@@ -2,7 +2,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using SocialNetwork.BL.Settings;
 using SocialNetwork.DAL.Entity;
 using SocialNetwork.DAL.Repository.Interfaces;
 using SocialNetwork.BLL.Exceptions;
@@ -96,7 +95,7 @@ public class UserService : IUserService
             var userSourceValue = userProperty.GetValue(user.Profile);
             var userTargetValue = userDbProperty.GetValue(userDb.Profile);
 
-            if (userSourceValue != null && userSourceValue != "" && !userSourceValue.Equals(userTargetValue))
+            if (userSourceValue != null && !ReferenceEquals(userSourceValue, "") && !userSourceValue.Equals(userTargetValue))
             {
                 userDbProperty.SetValue(userDb.Profile, userSourceValue);
             }
@@ -123,7 +122,7 @@ public class UserService : IUserService
         var userDb = await _userRepository.GetByIdAsync(user.Id, cancellationToken);
         _logger.LogAndThrowErrorIfNull(userDb, new UserNotFoundException($"User with this Id {user.Id} not found"));
 
-        if (userDb.AuthorizationInfo is not null && userDb.AuthorizationInfo.ExpiredDate <= DateTime.Now.AddDays(-1))
+        if (userDb!.AuthorizationInfo is not null && userDb.AuthorizationInfo.ExpiredDate <= DateTime.Now.AddDays(-1))
             await LogOutAsync(user.Id, cancellationToken);
 
         userDb.AuthorizationInfo = new AuthorizationInfo
@@ -141,7 +140,7 @@ public class UserService : IUserService
 
         _logger.LogAndThrowErrorIfNull(userDb, new UserNotFoundException($"User with this Id {userId} not found"));
 
-        if (userDb.AuthorizationInfo is not null)
+        if (userDb!.AuthorizationInfo is not null)
         {
             userDb.AuthorizationInfo = null;
             await _userRepository.UpdateUserAsync(userDb, cancellationToken);
@@ -180,7 +179,7 @@ public class UserService : IUserService
 
         _logger.LogAndThrowErrorIfNull(userDb, new UserNotFoundException($"User with this login {login} not found"));
 
-        if (!PasswordHelper.VerifyHashedPassword(userDb.Password, password))
+        if (!PasswordHelper.VerifyHashedPassword(userDb!.Password, password))
         {
             throw new WrongLoginOrPasswordException("Wrong login or password");
         }
@@ -202,7 +201,7 @@ public class UserService : IUserService
         _logger.LogAndThrowErrorIfNull(userDb,
             new UserNotFoundException($"User with this refresh token {refreshToken} not found"));
 
-        if (userDb.AuthorizationInfo is not null && userDb.AuthorizationInfo.ExpiredDate <= DateTime.Now.AddDays(-1))
+        if (userDb!.AuthorizationInfo is not null && userDb.AuthorizationInfo.ExpiredDate <= DateTime.Now.AddDays(-1))
             throw new TimeoutException();
 
         var userModel = _mapper.Map<UserModel>(userDb);

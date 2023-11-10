@@ -3,5 +3,5 @@
 public class RoleRankUpdateModel
 {
     public int ChatId { get; set; }
-    public List<RoleRankModel> RoleRanksModel { get; set; }
+    public List<RoleRankModel> RoleRanksModel { get; set; } = null!;
 }

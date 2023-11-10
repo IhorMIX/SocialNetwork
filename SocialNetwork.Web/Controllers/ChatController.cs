@@ -51,7 +51,7 @@ public class ChatController : ControllerBase
     {
         _logger.LogInformation("Start to delete user in chat");
         var userId = User.GetUserId();
-        await _chatService.DelMember(userId, delChatMembersModel.ChatId, delChatMembersModel.MeberIds , cancellationToken);
+        await _chatService.DelMember(userId, delChatMembersModel.ChatId, delChatMembersModel.MemberIds , cancellationToken);
         _logger.LogInformation("User was deleted in chat");
         return Ok();
     }
@@ -141,8 +141,8 @@ public class ChatController : ControllerBase
     public async Task<IActionResult> EditRole([FromBody] RoleUpdateModel roleUpdateModel, CancellationToken cancellationToken)
     {
         var userId = User.GetUserId();
-        var role = await _chatService.EditRole(userId, roleUpdateModel.chatId, roleUpdateModel.roleId, 
-            _mapper.Map<RoleModel>(roleUpdateModel.rolemodel), cancellationToken);
+        var role = await _chatService.EditRole(userId, roleUpdateModel.ChatId, roleUpdateModel.RoleId, 
+            _mapper.Map<RoleModel>(roleUpdateModel.RoleModel), cancellationToken);
         return Ok(_mapper.Map<RoleViewModel>(role));
     }
 

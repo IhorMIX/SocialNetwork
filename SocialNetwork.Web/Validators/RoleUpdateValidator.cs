@@ -7,7 +7,7 @@ public class RoleUpdateValidator : AbstractValidator<RoleUpdateModel>
 {
     public RoleUpdateValidator()
     {
-        RuleFor(x => x.rolemodel)
+        RuleFor(x => x.RoleModel)
             .NotNull()
             .SetValidator(new RoleEditValidator());
     }

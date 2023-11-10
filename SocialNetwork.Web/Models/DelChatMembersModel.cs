@@ -3,5 +3,5 @@
 public class DelChatMembersModel
 {
     public int ChatId { get; set; }
-    public List<int> MeberIds { get; set; }
+    public List<int> MemberIds { get; set; } = null!;
 }

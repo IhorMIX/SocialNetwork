@@ -5,7 +5,7 @@ namespace SocialNetwork.Web.Models;
 public class MessageViewModel
 {
     public int Id { get; set; }
-    public string Text { get; set; }
+    public string Text { get; set; } = null!;
     public ICollection<FileViewModel>? FileModels { get; set; }
 
     public DateTime CreatedAt { get; set; }
@@ -18,5 +18,5 @@ public class MessageViewModel
     public int ChatId { get; set; }
     public int ToReplyMessageId { get; set; }
     
-    public ICollection<ReactionViewModel> Reactions { get; set; }
+    public ICollection<ReactionViewModel> Reactions { get; set; } = null!;
 }

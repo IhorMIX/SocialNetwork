@@ -140,7 +140,7 @@ public class MessageService : IMessageService
             var messageSourceValue = messageProperty.GetValue(messageModel);
             var messageTargetValue = messageDbProperty.GetValue(messageDb);
 
-            if (messageSourceValue != null && !messageSourceValue.Equals(0) && messageSourceValue != "" && !messageSourceValue.Equals(messageTargetValue))
+            if (messageSourceValue != null && !messageSourceValue.Equals(0) && !ReferenceEquals(messageSourceValue, "") && !messageSourceValue.Equals(messageTargetValue))
             {
                 messageDbProperty.SetValue(messageDb, messageSourceValue);
             }
@@ -205,7 +205,7 @@ public class MessageService : IMessageService
         _logger.LogAndThrowErrorIfNull(chatDb, new UserNotFoundException($"Chat with id-{chatId} not found"));
         
         return _mapper.Map<List<MessageModel>>(await _messageRepository.GetAll()
-            .Where(m => m.ChatId == chatId && (!m.IsDeleted || m.AuthorId != chatMemberDb.Id))
+            .Where(m => m.ChatId == chatId && (!m.IsDeleted || m.AuthorId != chatMemberDb!.Id))
             .ToListAsync(cancellationToken));
     }
 
