@@ -37,7 +37,6 @@ public class UserModel : BaseModel
     public IScriptObject ToScriptObject_ResetPass(string linkToFront, string key, string iv) {
 
         IScriptObject data = new ScriptObject();
-        //var link = $"{linkToFront}/reset-password/{Id.ToString().ToBase64()}";
         var link = $"{linkToFront}/reset-password/{Id.ToString().Encrypt(key, iv)}";
         data.SetValue("link", link, true);
         return data;
