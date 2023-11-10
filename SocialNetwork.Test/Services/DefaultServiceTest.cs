@@ -3,6 +3,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
+using SocialNetwork.BL.Settings;
 using SocialNetwork.BLL.Services.Interfaces;
 using SocialNetwork.DAL;
 using SocialNetwork.DAL.Options;
@@ -26,6 +27,8 @@ namespace SocialNetwork.Test.Services
             services.AddAutoMapper(typeof(Startup));
             services.Configure<CacheOptions>(Configuration.GetSection("CacheOptions"));
             services.Configure<RoleOption>(Configuration.GetSection("Roles"));
+            services.Configure<HexKeyConfig>(Configuration.GetSection("HexKeyConfig"));
+            services.Configure<LinkConfig>(Configuration.GetSection("HexKeyConfig"));
             services.AddScoped<IMailService, FakeMailService>();
         }
 
@@ -36,7 +39,10 @@ namespace SocialNetwork.Test.Services
                 {
                     {"CacheOptions:CacheTime", "00:10:00"},
                     {"Roles:RoleAdminId", "1"},
-                    {"Roles:RoleP2PAdminId", "2"}
+                    {"Roles:RoleP2PAdminId", "2"},
+                    {"HexKeyConfig:Key", "5caa56bd57b99d03e5ed256a0efdcec6348f447b5d5429bcc56980956e57c252"},
+                    {"HexKeyConfig:Iv", "19eee43699e956394d904bb88e91f58b"},
+                    {"LinkConfig:FrontUrl", "http//localhost:8080"}
                 }!)
                 .Build();
         }

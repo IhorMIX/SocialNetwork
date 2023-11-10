@@ -6,6 +6,7 @@ using SocialNetwork.BL.Settings;
 using SocialNetwork.DAL.Entity;
 using SocialNetwork.DAL.Repository.Interfaces;
 using SocialNetwork.BLL.Exceptions;
+using SocialNetwork.BLL.Extensions;
 using SocialNetwork.BLL.Helpers;
 using SocialNetwork.BLL.Models;
 using SocialNetwork.BLL.Models.Enums;
@@ -23,18 +24,18 @@ public class UserService : IUserService
     private readonly IMapper _mapper;
     private readonly IMailService _mailService;
     private readonly TemplatePatheOptions _templatePatheOptions;
-    private readonly ResetPasswordLink _resetPasswordLink;
-    private readonly HexKey _hexKey;
+    private readonly LinkConfig _linkConfig;
+    private readonly HexKeyConfig _hexKeyConfig;
 
     public UserService(IUserRepository userRepository, ILogger<UserService> logger, IMapper mapper,
-        IMailService mailService, IOptions<TemplatePatheOptions> templatePatheOptions, IOptions<ResetPasswordLink> resetPasswordLink, IOptions<HexKey> hexKey)
+        IMailService mailService, IOptions<TemplatePatheOptions> templatePatheOptions, IOptions<LinkConfig> resetPasswordLink, IOptions<HexKeyConfig> hexKey)
     {
         _userRepository = userRepository;
         _logger = logger;
         _mapper = mapper;
         _mailService = mailService;
-        _hexKey = hexKey.Value;
-        _resetPasswordLink = resetPasswordLink.Value;
+        _hexKeyConfig = hexKey.Value;
+        _linkConfig = resetPasswordLink.Value;
         _templatePatheOptions = templatePatheOptions.Value;
     }
 
@@ -240,7 +241,7 @@ public class UserService : IUserService
             await _mailService.SendHtmlEmailAsync(new MailModel()
             {
                 Subject = "Reset password confirmation",
-                Data = user.ToScriptObject_ResetPass(_resetPasswordLink.Link, _hexKey.Key, _hexKey.Iv),
+                Data = user.ToScriptObject_ResetPass(_linkConfig.FrontUrl, _hexKeyConfig.Key, _hexKeyConfig.Iv),
                 EmailTo = user.Profile.Email,
                 FilePath = _templatePatheOptions.ResetPassword
             });
@@ -248,13 +249,14 @@ public class UserService : IUserService
         
     }
 
-    public async Task ChangePasswordAsync(int userId, string newPassword, CancellationToken cancellationToken = default)
+    public async Task ChangePasswordAsync(string userId, string newPassword, CancellationToken cancellationToken = default)
     {
-        var userDb = await _userRepository.GetByIdAsync(userId, cancellationToken);
-        _logger.LogAndThrowErrorIfNull(userDb, new UserNotFoundException($"User with this Id {userId} not found"));
         
+        var decryptedId = userId.Decrypt(_hexKeyConfig.Key, _hexKeyConfig.Iv);
+        var userDb = await _userRepository.GetByIdAsync(int.Parse(decryptedId), cancellationToken);
+        _logger.LogAndThrowErrorIfNull(userDb, new UserNotFoundException($"User with this Id {userId} not found"));
         userDb!.Password = string.IsNullOrEmpty(newPassword)
-            ? userDb.Password
+            ? throw new EmptyPasswordException("Empty password exception")
             : PasswordHelper.HashPassword(newPassword);
         await _userRepository.UpdateUserAsync(userDb, cancellationToken);
     }

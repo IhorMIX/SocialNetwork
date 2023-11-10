@@ -28,6 +28,6 @@ public interface IUserService : IBaseService<UserModel>
 
     Task ChangeOnlineStatus(int userId, CancellationToken cancellationToken = default);
     Task ResetPasswordConfirmationAsync(string userEmail, CancellationToken cancellationToken = default);
-    Task ChangePasswordAsync(int userId, string newPassword, CancellationToken cancellationToken = default);
+    Task ChangePasswordAsync(string userId, string newPassword, CancellationToken cancellationToken = default);
 
 }

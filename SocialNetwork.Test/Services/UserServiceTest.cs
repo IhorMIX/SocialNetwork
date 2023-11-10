@@ -1,5 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using SocialNetwork.BLL.Exceptions;
+using SocialNetwork.BLL.Extensions;
+using SocialNetwork.BLL.Helpers;
 using SocialNetwork.BLL.Models;
 using SocialNetwork.BLL.Models.Enums;
 using SocialNetwork.BLL.Services;
@@ -255,4 +257,34 @@ public class UserServiceTest : DefaultServiceTest<IUserService, UserService>
         Assert.ThrowsAsync<NullReferenceException>(async ()
             => await Service.LogOutAsync(createdUser!.Id));
     }
+
+    [Test]
+    public async Task SendResetPasswordConfirmation_GetNewPassword_ChangeIt()
+    {
+        var user = await UserModelHelper.CreateTestDataAsync(Service);
+        var createdUser = await Service.GetByIdAsync(user.Id);
+        await Service.ResetPasswordConfirmationAsync(createdUser!.Profile.Email);
+        string key = "5caa56bd57b99d03e5ed256a0efdcec6348f447b5d5429bcc56980956e57c252";
+        string iv = "19eee43699e956394d904bb88e91f58b";
+        var encryptedId =  user.Id.ToString().Encrypt(key, iv);
+        string newPass = "qwertyui";
+        await Service.ChangePasswordAsync(encryptedId, newPass);
+        createdUser = await Service.GetByIdAsync(user.Id);
+        Assert.That(PasswordHelper.VerifyHashedPassword(createdUser!.Password, newPass));
+    }
+    
+    [Test]
+    public async Task SendResetPasswordConfirmation_GetEmptyPassword_ChangeIt()
+    {
+        var user = await UserModelHelper.CreateTestDataAsync(Service);
+        var createdUser = await Service.GetByIdAsync(user.Id);
+        await Service.ResetPasswordConfirmationAsync(createdUser!.Profile.Email);
+        string key = "5caa56bd57b99d03e5ed256a0efdcec6348f447b5d5429bcc56980956e57c252";
+        string iv = "19eee43699e956394d904bb88e91f58b";
+        var encryptedId =  user.Id.ToString().Encrypt(key, iv);
+        string newPass = "";
+        Assert.ThrowsAsync<EmptyPasswordException>(async ()
+            =>  await Service.ChangePasswordAsync(encryptedId, newPass));
+    }
+    
 }
