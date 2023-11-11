@@ -4,6 +4,7 @@ using SocialNetwork.BLL.Models;
 using SocialNetwork.BLL.Services;
 using SocialNetwork.BLL.Services.Interfaces;
 using SocialNetwork.DAL.Entity.Enums;
+using SocialNetwork.DAL.Repository.Interfaces;
 using SocialNetwork.Test.Helpers;
 
 namespace SocialNetwork.Test.Services;
@@ -56,7 +57,7 @@ public class ChatServiceTest : BaseMessageTestService<IChatService, ChatService>
         Assert.That(user3, Is.Not.EqualTo(null));
         Assert.That(user4, Is.Not.EqualTo(null));
         
-        await Service.CreateGroupChat(user1.Id, new ChatModel
+        await Service.CreateGroupChat(user1!.Id, new ChatModel
         {
             Name = "Chat2",
             Logo = "null",
@@ -66,7 +67,7 @@ public class ChatServiceTest : BaseMessageTestService<IChatService, ChatService>
         var chat = await Service.FindChatByName(user1.Id, "Chat2");
         Assert.That(chat.Count == 1);
         
-        await Service.AddUsers(user1.Id, chat.First().Id, new List<int>{user2!.Id, user3!.Id, user4.Id});
+        await Service.AddUsers(user1.Id, chat.First().Id, new List<int>{user2!.Id, user3!.Id, user4!.Id});
         chat = await Service.FindChatByName(user1.Id, "Chat2");
         Assert.That(chat.First().ChatMembers!.Count == 4);
         
@@ -74,7 +75,7 @@ public class ChatServiceTest : BaseMessageTestService<IChatService, ChatService>
         chat = await Service.FindChatByName(user1.Id, "Chat2");
         Assert.That(chat.First().ChatMembers!.Count == 3);
         
-        Assert.ThrowsAsync<UserNotFoundException>( async () => await Service.AddUsers(user1.Id, chat.First().Id, new List<int>{user2!.Id, user3!.Id, user4.Id, 50000}));
+        Assert.ThrowsAsync<UserNotFoundException>( async () => await Service.AddUsers(user1.Id, chat.First().Id, new List<int>{user2.Id, user3.Id, user4.Id, 50000}));
     }
 
     [Test]
@@ -104,7 +105,7 @@ public class ChatServiceTest : BaseMessageTestService<IChatService, ChatService>
         user1 = await userService.GetUserByLogin(user1.Login);
         Assert.That(user1, Is.Not.EqualTo(null));
         
-        await Service.CreateGroupChat(user1.Id, new ChatModel
+        await Service.CreateGroupChat(user1!.Id, new ChatModel
         {
             Name = "Chats1",
             Logo = "null",
@@ -146,7 +147,7 @@ public class ChatServiceTest : BaseMessageTestService<IChatService, ChatService>
         Assert.That(user3, Is.Not.EqualTo(null));
         Assert.That(user4, Is.Not.EqualTo(null));
         
-        await Service.CreateGroupChat(user1.Id, new ChatModel
+        await Service.CreateGroupChat(user1!.Id, new ChatModel
         {
             Name = "Chat3",
             Logo = "null",
@@ -258,4 +259,35 @@ public class ChatServiceTest : BaseMessageTestService<IChatService, ChatService>
         await Service.DelRole(user1.Id, chat.Id, role.Id);
         Assert.That((await Service.GetAllChatRoles(user1.Id, chat.Id)).Count == 1);
     }
+    [Test]
+    public async Task TryToLeave_MakeHost_Leave()
+    {
+        var userService = ServiceProvider.GetRequiredService<IUserService>();
+        var user1 = await UserModelHelper.CreateTestDataAsync(userService);
+        var user2 = await UserModelHelper.CreateTestDataAsync(userService);
+        user1 = await userService.GetUserByLogin(user1.Login);
+        user2 = await userService.GetUserByLogin(user2.Login);
+        Assert.That(user1, Is.Not.EqualTo(null));
+        Assert.That(user2, Is.Not.EqualTo(null));
+        
+        await Service.CreateGroupChat(user1!.Id, new ChatModel
+        {
+            Name = "ChatLeave",
+            Logo = "null",
+            IsGroup = true,
+        });
+        
+        var chat = (await Service.FindChatByName(user1.Id, "ChatLeave")).First();
+        await Service.AddUsers(user1.Id, chat.Id, new List<int>{user2!.Id});
+        chat = (await Service.FindChatByName(user1.Id, "ChatLeave")).First();
+        
+        Assert.ThrowsAsync<CreatorCantLeaveException>( async () => await Service.LeaveChat(user1.Id, chat.Id));
+        await Service.MakeHost(user1.Id, chat.Id, user2.Id);
+        chat = (await Service.FindChatByName(user1.Id, "ChatLeave")).First();
+        var chatService = ServiceProvider.GetRequiredService<IChatMemberRepository>();
+        var chatMember2 = await chatService.GetByUserIdAndChatId(user2.Id, chat.Id);
+        Assert.That(chatMember2!.Role.Any(r => r.Rank == 0));
+        
+    }
+    
 }
