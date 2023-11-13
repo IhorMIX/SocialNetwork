@@ -250,13 +250,18 @@ public class UserService : IUserService
 
     public async Task ChangePasswordAsync(string userId, string newPassword, CancellationToken cancellationToken = default)
     {
-        
         var decryptedId = userId.Decrypt(_hexKeyConfig.Key, _hexKeyConfig.Iv);
-        var userDb = await _userRepository.GetByIdAsync(int.Parse(decryptedId), cancellationToken);
-        _logger.LogAndThrowErrorIfNull(userDb, new UserNotFoundException($"User with this Id {userId} not found"));
-        userDb!.Password = string.IsNullOrEmpty(newPassword)
-            ? throw new EmptyPasswordException("Empty password exception")
-            : PasswordHelper.HashPassword(newPassword);
-        await _userRepository.UpdateUserAsync(userDb, cancellationToken);
+        
+        if (int.TryParse(decryptedId, out var id))
+        {
+            var userDb = await _userRepository.GetByIdAsync(id, cancellationToken);
+            _logger.LogAndThrowErrorIfNull(userDb, new UserNotFoundException($"User with this Id {userId} not found"));
+            
+            userDb!.Password = string.IsNullOrEmpty(newPassword)
+                ? throw new EmptyPasswordException("Empty password exception")
+                : PasswordHelper.HashPassword(newPassword);
+            
+            await _userRepository.UpdateUserAsync(userDb, cancellationToken);
+        }
     }
 }

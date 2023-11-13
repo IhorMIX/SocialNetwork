@@ -282,10 +282,13 @@ public class ChatServiceTest : BaseMessageTestService<IChatService, ChatService>
         chat = (await Service.FindChatByName(user1.Id, "ChatLeave")).First();
         
         Assert.ThrowsAsync<CreatorCantLeaveException>( async () => await Service.LeaveChat(user1.Id, chat.Id));
+        
         await Service.MakeHost(user1.Id, chat.Id, user2.Id);
         chat = (await Service.FindChatByName(user1.Id, "ChatLeave")).First();
+        
         var chatService = ServiceProvider.GetRequiredService<IChatMemberRepository>();
         var chatMember2 = await chatService.GetByUserIdAndChatId(user2.Id, chat.Id);
+        
         Assert.That(chatMember2!.Role.Any(r => r.Rank == 0));
         
     }
