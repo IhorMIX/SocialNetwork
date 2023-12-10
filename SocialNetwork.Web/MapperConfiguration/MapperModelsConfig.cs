@@ -170,7 +170,11 @@ namespace SocialNetwork.Web.MapperConfiguration
                 .ForMember(dest => dest.Chat, opt => opt.Ignore())
                 .ForMember(dest => dest.Role, opt => opt.Ignore())
                 .ReverseMap();
-
+            
+            CreateMap<BaseNotificationEntity, NotificationModel>();
+            CreateMap<FriendRequestNotification, FriendRequestNotificationModel>()
+                .ForMember(dest => dest.FriendRequestModelId, opt => opt.MapFrom(d => d.FriendRequestId))
+                .IncludeBase<BaseNotificationEntity, NotificationModel>();
         }
     }
 }

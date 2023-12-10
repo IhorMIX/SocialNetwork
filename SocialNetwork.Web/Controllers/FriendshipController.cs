@@ -18,14 +18,12 @@ namespace SocialNetwork.Web.Controllers;
 public class FriendshipController : ControllerBase
 {
     private readonly ILogger<FriendshipController> _logger;
-    private readonly TokenHelper _tokenHelper;
     private readonly IMapper _mapper;
     private readonly IFriendshipService _friendshipService;
 
-    public FriendshipController(IFriendshipService friendshipService, TokenHelper tokenHelper, ILogger<FriendshipController> logger, IMapper mapper)
+    public FriendshipController(IFriendshipService friendshipService, ILogger<FriendshipController> logger, IMapper mapper)
     {
         _friendshipService = friendshipService;
-        _tokenHelper = tokenHelper;
         _logger = logger;
         _mapper = mapper;
     }

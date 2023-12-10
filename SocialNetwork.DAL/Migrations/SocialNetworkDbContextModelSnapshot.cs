@@ -66,6 +66,40 @@ namespace SocialNetwork.DAL.Migrations
                     b.ToTable("AuthorizationInfo");
                 });
 
+            modelBuilder.Entity("SocialNetwork.DAL.Entity.BaseNotificationEntity", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Discriminator")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsRead")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Notifications");
+
+                    b.HasDiscriminator<string>("Discriminator").HasValue("BaseNotificationEntity");
+
+                    b.UseTphMappingStrategy();
+                });
+
             modelBuilder.Entity("SocialNetwork.DAL.Entity.BlackList", b =>
                 {
                     b.Property<int>("UserId")
@@ -393,6 +427,18 @@ namespace SocialNetwork.DAL.Migrations
                     b.ToTable("Users");
                 });
 
+            modelBuilder.Entity("SocialNetwork.DAL.Entity.FriendRequestNotification", b =>
+                {
+                    b.HasBaseType("SocialNetwork.DAL.Entity.BaseNotificationEntity");
+
+                    b.Property<int>("FriendRequestId")
+                        .HasColumnType("int");
+
+                    b.HasIndex("UserId");
+
+                    b.HasDiscriminator().HasValue("FriendRequestNotification");
+                });
+
             modelBuilder.Entity("ChatMemberRole", b =>
                 {
                     b.HasOne("SocialNetwork.DAL.Entity.ChatMember", null)
@@ -581,6 +627,15 @@ namespace SocialNetwork.DAL.Migrations
                     b.Navigation("Role");
                 });
 
+            modelBuilder.Entity("SocialNetwork.DAL.Entity.FriendRequestNotification", b =>
+                {
+                    b.HasOne("SocialNetwork.DAL.Entity.User", null)
+                        .WithMany("FriendRequestNotifications")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("SocialNetwork.DAL.Entity.Chat", b =>
                 {
                     b.Navigation("ChatMembers");
@@ -616,6 +671,8 @@ namespace SocialNetwork.DAL.Migrations
                     b.Navigation("BlackLists");
 
                     b.Navigation("ChatMembers");
+
+                    b.Navigation("FriendRequestNotifications");
 
                     b.Navigation("Friends");
 

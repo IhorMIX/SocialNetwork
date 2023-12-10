@@ -19,6 +19,7 @@ public class UserModel : BaseModel
     public AuthorizationInfoModel AuthorizationInfo { get; set; } = null!;
 
     public IEnumerable<BlackListModel> BlackList { get; set; } = null!;
+    public IEnumerable<FriendRequestNotificationModel> FriendRequestNotificationModels { get; set; } = null!;
     
 
     public IScriptObject ToScriptObject() {

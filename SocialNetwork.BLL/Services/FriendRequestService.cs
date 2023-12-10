@@ -6,6 +6,7 @@ using SocialNetwork.BLL.Exceptions;
 using SocialNetwork.BLL.Models;
 using SocialNetwork.BLL.Services.Interfaces;
 using SocialNetwork.DAL.Entity;
+using SocialNetwork.DAL.Entity.Enums;
 using SocialNetwork.DAL.Repository.Interfaces;
 
 namespace SocialNetwork.BLL.Services;
@@ -18,8 +19,10 @@ public class FriendRequestService : IFriendRequestService
     private readonly ILogger<FriendRequestService> _logger;
     private readonly IMapper _mapper;
     private readonly IBlackListService _blackListService;
+    private readonly INotificationRepository _notificationRepository;
+    private readonly INotificationService _notificationService;
     
-    public FriendRequestService(IFriendRequestRepository friendRequestRepository, ILogger<FriendRequestService> logger, IMapper mapper, IUserService userService, IFriendshipRepository friendshipRepository, IBlackListService blackListService)
+    public FriendRequestService(IFriendRequestRepository friendRequestRepository, ILogger<FriendRequestService> logger, IMapper mapper, IUserService userService, IFriendshipRepository friendshipRepository, IBlackListService blackListService, INotificationRepository notificationRepository, INotificationService notificationService)
     {
         _friendRequestRepository = friendRequestRepository;
         _logger = logger;
@@ -27,6 +30,8 @@ public class FriendRequestService : IFriendRequestService
         _userService = userService;
         _friendshipRepository = friendshipRepository;
         _blackListService = blackListService;
+        _notificationRepository = notificationRepository;
+        _notificationService = notificationService;
     }
     
     public async Task<FriendRequestModel?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
@@ -76,10 +81,19 @@ public class FriendRequestService : IFriendRequestService
 
             else
             {
-                await _friendRequestRepository.CreateFriendRequestAsync(new FriendRequest()
+                var friendRequestId = await _friendRequestRepository.CreateFriendRequestAsync(new FriendRequest()
                 {
                     SenderId = senderModel.Id,
                     ReceiverId = receiverModel.Id
+                }, cancellationToken);
+
+                await _notificationRepository.CreateNotification(new FriendRequestNotification()
+                {
+                    Description = "FriendRequest",
+                    CreatedAt = DateTime.Now,
+                    IsRead = false,
+                    UserId = receiverModel.Id,
+                    FriendRequestId = friendRequestId
                 }, cancellationToken);
             }
         }
@@ -118,7 +132,7 @@ public class FriendRequestService : IFriendRequestService
                 UserId = userModel!.Id,
                 FriendId = friendRequest!.Sender.Id,   
             }, cancellationToken);
-
+            
             await _friendRequestRepository.DeleteFriendRequestAsync(new FriendRequest()
             {
                 SenderId = friendRequest!.Sender.Id,
