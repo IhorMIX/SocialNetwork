@@ -53,7 +53,7 @@ public class NotificationService : INotificationService
         CancellationToken cancellationToken = default)
     {
         var friendRequestNotificationId = await _notificationRepository.CreateNotification(
-            _mapper.Map<FriendRequestNotification>(notificationModel), cancellationToken);
+            _mapper.Map<DAL.Entity.FriendRequestNotification>(notificationModel), cancellationToken);
         return _mapper.Map<FriendRequestNotificationModel>(await _notificationRepository.GetByIdAsync(friendRequestNotificationId, cancellationToken));
     }
    
@@ -78,7 +78,7 @@ public class NotificationService : INotificationService
             new NotificationNotFoundException($"Notification with this Id {notificationId} not found"));
         if (notification!.UserId == userId)
         {
-            notification!.IsRead = true;
+            notification.IsRead = true;
             await _notificationRepository.UpdateNotification(notification, cancellationToken);
         }
         else
@@ -94,6 +94,7 @@ public class NotificationService : INotificationService
         var userDb = await _userService.GetByIdAsync(userId, cancellationToken);
         _logger.LogAndThrowErrorIfNull(userDb, new UserNotFoundException($"User with this Id {userId} not found"));
         var notification = await _notificationRepository.GetAll().Where(r => r.UserId == userId).ToListAsync(cancellationToken);
+        
         _logger.LogAndThrowErrorIfNull(notification,
             new NotificationNotFoundException($"Notifications with this user id {userId} not found"));
         return _mapper.Map<List<NotificationModel>>(notification);

@@ -51,7 +51,7 @@ public class ChatController : ControllerBase
     {
         _logger.LogInformation("Start to delete user in chat");
         var userId = User.GetUserId();
-        await _chatService.DelMember(userId, delChatMembersModel.ChatId, delChatMembersModel.MemberIds , cancellationToken);
+        await _chatService.DelMembers(userId, delChatMembersModel.ChatId, delChatMembersModel.MemberIds , cancellationToken);
         _logger.LogInformation("User was deleted in chat");
         return Ok();
     }

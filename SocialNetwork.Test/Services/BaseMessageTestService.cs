@@ -28,6 +28,10 @@ public class BaseMessageTestService<T, V> : DefaultServiceTest<T, V>
         services.AddScoped<IMessageRepository, MessageRepository>();
         services.AddScoped<IReactionRepository, ReactionRepository>();
         services.AddScoped<IReactionService, ReactionService>();
+        
+        services.AddScoped<INotificationRepository, NotificationRepository>();
+        services.AddScoped<INotificationService, NotificationService>();
+        
         base.SetUpAdditionalDependencies(services);
     }
     

@@ -71,7 +71,7 @@ public class ChatServiceTest : BaseMessageTestService<IChatService, ChatService>
         chat = await Service.FindChatByName(user1.Id, "Chat2");
         Assert.That(chat.First().ChatMembers!.Count == 4);
         
-        await Service.DelMember(user1.Id, chat.First().Id, new List<int>(){user2.Id});
+        await Service.DelMembers(user1.Id, chat.First().Id, new List<int>(){user2.Id});
         chat = await Service.FindChatByName(user1.Id, "Chat2");
         Assert.That(chat.First().ChatMembers!.Count == 3);
         

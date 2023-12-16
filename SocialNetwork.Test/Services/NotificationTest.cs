@@ -10,7 +10,7 @@ using SocialNetwork.Test.Helpers;
 
 namespace SocialNetwork.Test.Services;
 
-public class FriendRequestNotificationServiceTest : DefaultServiceTest<INotificationService, NotificationService>
+public class NotificationTest : BaseMessageTestService<INotificationService, NotificationService>
 {
     protected override void SetUpAdditionalDependencies(IServiceCollection services)
     {
@@ -22,6 +22,10 @@ public class FriendRequestNotificationServiceTest : DefaultServiceTest<INotifica
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<IFriendRequestService, FriendRequestService>();
+        services.AddScoped<IChatService, ChatService>();
+        services.AddScoped<IChatRepository, ChatRepository>();
+        services.AddScoped<IRoleRepository, RoleRepository>();
+        services.AddScoped<IChatMemberRepository, ChatMemberRepository>();
         
         services.AddScoped<INotificationRepository, NotificationRepository>();
         services.AddScoped<INotificationService, NotificationService>();
@@ -29,7 +33,7 @@ public class FriendRequestNotificationServiceTest : DefaultServiceTest<INotifica
     }
 
     [Test]
-    public async Task CreateNewFriendRequest_CheckNotificationEntity_OK()
+    public async Task CreateNewFriendRequest_CheckFriendRequestNotificationEntity_OK()
     {
         var userService = ServiceProvider.GetRequiredService<IUserService>();
         var user1 = await UserModelHelper.CreateTestDataAsync(userService);
@@ -46,7 +50,7 @@ public class FriendRequestNotificationServiceTest : DefaultServiceTest<INotifica
     }
 
     [Test]
-    public async Task CreateNotification_ChangeReadProp_DeleteNotification()
+    public async Task CreateFriendRequestNotification_ChangeReadProp_DeleteNotification()
     {
         var userService = ServiceProvider.GetRequiredService<IUserService>();
         var user1 = await UserModelHelper.CreateTestDataAsync(userService);
@@ -67,5 +71,33 @@ public class FriendRequestNotificationServiceTest : DefaultServiceTest<INotifica
     
         await Service.RemoveNotification(createdUser2.Id, notification.Id);
         Assert.ThrowsAsync<NotificationNotFoundException>(async () => await Service.GetByIdAsync(notification.Id));
+    }
+
+    [Test]
+    public async Task AddToChat_DeleteFromChat_GetNotifications()
+    {
+        var userService = ServiceProvider.GetRequiredService<IUserService>();
+        var user1 = await UserModelHelper.CreateTestDataAsync(userService);
+        var user2 = await UserModelHelper.CreateTestDataAsync(userService);
+        var createdUser1 = await userService.GetUserByLogin(user1.Login);
+        var createdUser2 = await userService.GetUserByLogin(user2.Login);
+        
+        var chatService = ServiceProvider.GetRequiredService<IChatService>();
+
+        var chat = await chatService.CreateGroupChat(createdUser1!.Id, new ChatModel
+        {
+            Name = "Chat",
+            Logo = "null",
+            IsGroup = false,
+        });
+        await chatService.AddUsers(createdUser1!.Id, chat.Id, new List<int>{ createdUser2!.Id });
+        var notifications = await Service.GetByUserId(createdUser2.Id);
+        Assert.That(notifications.Count() == 1
+            && notifications.First().GetType() == typeof(ChatNotificationModel));
+        
+        await chatService.DelMembers(createdUser1.Id, chat.Id, new List<int> { createdUser2.Id });
+        notifications = await Service.GetByUserId(createdUser2.Id);
+        Assert.That(notifications.Count() == 2 
+                    && notifications.Skip(1).FirstOrDefault().GetType() == typeof(ChatNotificationModel));
     }
 }

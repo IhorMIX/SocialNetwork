@@ -35,6 +35,9 @@ public class NotificationRepository : INotificationRepository
             NotificationType.FriendRequest => await _socialNetworkDbContext.Notifications.OfType<FriendRequestNotification>()
                 .FirstOrDefaultAsync(i => i.Id == id, cancellationToken),
             
+            NotificationType.Chat => await _socialNetworkDbContext.Notifications.OfType<ChatNotification>()
+                .FirstOrDefaultAsync(i => i.Id == id, cancellationToken),
+            
             _ => throw new ArgumentOutOfRangeException(nameof(notificationType), notificationType, null)
         };
     }
@@ -45,6 +48,12 @@ public class NotificationRepository : INotificationRepository
         var entityEntry = await _socialNetworkDbContext.Notifications.AddAsync(baseNotificationEntity, cancellationToken);
         await _socialNetworkDbContext.SaveChangesAsync(cancellationToken);
         return entityEntry.Entity.Id;
+    }
+
+    public async Task CreateNotifications(List<BaseNotificationEntity> baseNotificationEntities, CancellationToken cancellationToken = default)
+    {
+        await _socialNetworkDbContext.Notifications.AddRangeAsync(baseNotificationEntities, cancellationToken);
+        await _socialNetworkDbContext.SaveChangesAsync(cancellationToken);
     }
 
     public async Task RemoveNotification(BaseNotificationEntity baseNotificationEntity,

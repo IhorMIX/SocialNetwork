@@ -86,14 +86,19 @@ public class FriendRequestService : IFriendRequestService
                     SenderId = senderModel.Id,
                     ReceiverId = receiverModel.Id
                 }, cancellationToken);
-
-                await _notificationRepository.CreateNotification(new FriendRequestNotification()
+                
+                // in notification box
+                await _notificationRepository.CreateNotification(new DAL.Entity.FriendRequestNotification()
                 {
-                    Description = "FriendRequest",
+                    Description = $"Friend request from {senderModel.Profile.Name} {senderModel.Profile.Surname}",
                     CreatedAt = DateTime.Now,
                     IsRead = false,
                     UserId = receiverModel.Id,
-                    FriendRequestId = friendRequestId
+                    FriendRequestId = friendRequestId,
+                    FromUserId = senderModel.Id,
+                    Name = senderModel.Profile.Name,
+                    Surname = senderModel.Profile.Surname,
+                    AvatarImage = senderModel.Profile.AvatarImage
                 }, cancellationToken);
             }
         }
@@ -138,6 +143,20 @@ public class FriendRequestService : IFriendRequestService
                 SenderId = friendRequest!.Sender.Id,
                 ReceiverId = userModel.Id
             }, cancellationToken);
+            
+            // in notification box
+            await _notificationRepository.CreateNotification(new DAL.Entity.FriendRequestNotification()
+            {
+                Description = $"Friend request to {friendRequest.Receiver.Profile.Name} {friendRequest.Receiver.Profile.Surname} was accepted",
+                CreatedAt = DateTime.Now,
+                IsRead = false,
+                UserId = friendRequest!.Sender.Id,
+                FromUserId = friendRequest.Receiver.Id,
+                Name = friendRequest.Receiver.Profile.Name,
+                Surname = friendRequest.Receiver.Profile.Surname,
+                AvatarImage = friendRequest.Receiver.Profile.AvatarImage
+            }, cancellationToken);
+            
         }
         else
         {
