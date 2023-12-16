@@ -18,6 +18,8 @@ public class BaseMessageTestService<T, V> : DefaultServiceTest<T, V>
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<IFriendshipService, FriendshipService>();
         services.AddScoped<IFriendshipRepository, FriendshipRepository>();
+        services.AddScoped<IBlackListService, BlackListService>();
+        services.AddScoped<IBlackListRepository, BlackListRepository>();
 
         services.AddScoped<IChatService, ChatService>();
         services.AddScoped<IRoleRepository, RoleRepository>();
