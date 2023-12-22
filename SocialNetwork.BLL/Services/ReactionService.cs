@@ -15,12 +15,12 @@ public class ReactionService : IReactionService
 {
     private readonly IReactionRepository _reactionRepository;
     private readonly IMessageRepository _messageRepository;
-    private readonly ILogger<FriendshipService> _logger;
+    private readonly ILogger<ReactionService> _logger;
     private readonly IMapper _mapper;
     private readonly IChatMemberRepository _chatMemberRepository;
 
 
-    public ReactionService(IReactionRepository reactionRepository, ILogger<FriendshipService> logger, IMapper mapper, IChatMemberRepository chatMemberRepository, IMessageRepository messageRepository)
+    public ReactionService(IReactionRepository reactionRepository, ILogger<ReactionService> logger, IMapper mapper, IChatMemberRepository chatMemberRepository, IMessageRepository messageRepository)
     {
         _reactionRepository = reactionRepository;
         _logger = logger;

@@ -15,10 +15,10 @@ public class NotificationService : INotificationService
 {
     private readonly IUserService _userService;
     private readonly INotificationRepository _notificationRepository;
-    private readonly ILogger<ChatService> _logger;
+    private readonly ILogger<NotificationService> _logger;
     private readonly IMapper _mapper;
 
-    public NotificationService(INotificationRepository notificationRepository, ILogger<ChatService> logger, IMapper mapper, IUserService userService)
+    public NotificationService(INotificationRepository notificationRepository, ILogger<NotificationService> logger, IMapper mapper, IUserService userService)
     {
         _notificationRepository = notificationRepository;
         _logger = logger;

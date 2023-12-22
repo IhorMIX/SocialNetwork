@@ -14,12 +14,12 @@ namespace SocialNetwork.BLL.Services;
 public class MessageService : IMessageService
 {
     private readonly IMessageRepository _messageRepository;
-    private readonly ILogger<FriendshipService> _logger;
+    private readonly ILogger<MessageService> _logger;
     private readonly IMapper _mapper;
     private readonly IChatRepository _chatRepository;
     private readonly IChatMemberRepository _chatMemberRepository;
 
-    public MessageService(ILogger<FriendshipService> logger, IMapper mapper, IMessageRepository messageRepository, IChatRepository chatRepository, IChatMemberRepository chatMemberRepository)
+    public MessageService(ILogger<MessageService> logger, IMapper mapper, IMessageRepository messageRepository, IChatRepository chatRepository, IChatMemberRepository chatMemberRepository)
     {
         _logger = logger;
         _mapper = mapper;
