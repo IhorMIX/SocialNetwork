@@ -182,10 +182,10 @@ public class ChatService : IChatService
         var BannedUsers = await _blackListRepository.GetAll().Where(i => i.UserId == userId && idsToAdd.Contains(i.BannedUserId)
         || idsToAdd.Contains(i.UserId) && i.BannedUserId == userId).ToListAsync(cancellationToken);
 
-        var banedUsers = BannedUsers.Where(r => r.BannedUserId != userDb!.Id).Select(r => r.BannedUser)
+        var bannedUserInChat = BannedUsers.Where(r => r.BannedUserId != userDb!.Id).Select(r => r.BannedUser)
             .Union(BannedUsers.Where(r => r.UserId != userDb!.Id).Select(r => r.User)).ToList();
 
-        foreach (var us in banedUsers)
+        foreach (var us in bannedUserInChat)
         {
             usersToAdd.Remove(us);
         }
@@ -199,9 +199,9 @@ public class ChatService : IChatService
 
         await _chatRepository.AddChatMemberAsync(chatMembers, chatDb, cancellationToken);
 
-        if (banedUsers.Any())
+        if (bannedUserInChat.Any())
         {
-            var banedUs = banedUsers.Select(r => r.Id).ToList();
+            var banedUs = bannedUserInChat.Select(r => r.Id).ToList();
             var excludedUsersMessage = string.Join(", ", banedUs);
             throw new BannedUserException($"Users {excludedUsersMessage} were not added to the chat.");
         }
