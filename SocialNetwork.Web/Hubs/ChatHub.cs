@@ -71,7 +71,6 @@ public class ChatHub : Hub
     public override async Task OnConnectedAsync()
     {
         var userId = Context.GetHttpContext()!.User.GetUserId();
-        await _userService.ChangeOnlineStatus(userId, CancellationToken.None);
         var userChats = await _chatService.GetAllChats(userId, CancellationToken.None);
         
         foreach (var chat in userChats)
@@ -83,13 +82,12 @@ public class ChatHub : Hub
     public override async Task OnDisconnectedAsync(Exception? exception)
     {
         var userId = Context.GetHttpContext()!.User.GetUserId();
-        await _userService.ChangeOnlineStatus(userId, CancellationToken.None);
         var userChats = await _chatService.GetAllChats(userId, CancellationToken.None);
         foreach (var chat in userChats)
         {
             await Groups.RemoveFromGroupAsync(Context.ConnectionId, chat.Id.ToString());
         }
-        await base.OnConnectedAsync();
+        await base.OnDisconnectedAsync(exception);
     }
     
     //need pagination

@@ -2,7 +2,9 @@
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Http.Connections;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Newtonsoft.Json.Converters;
+using SocialNetwork.BLL.Helpers;
 using SocialNetwork.BLL.Services;
 using SocialNetwork.BLL.Services.Interfaces;
 using SocialNetwork.BLL.Settings;
@@ -83,6 +85,8 @@ public class Startup
         services.AddScoped<INotificationRepository, NotificationRepository>();
         services.AddScoped<INotificationService, NotificationService>();
         
+        services.AddSingleton<IDbReadySignal, DbContextReadySignal>();
+        services.AddSingleton<DelayedWriter>();
         
         var connectionString = Environment.GetEnvironmentVariable("SQLSERVER_CONNECTION_STRING") ?? Configuration.GetConnectionString("ConnectionString");
 
@@ -117,6 +121,10 @@ public class Startup
         {
             endpoints.MapDefaultControllerRoute();
             endpoints.MapHub<ChatHub>("/chatHub", options =>
+            {
+                options.Transports = HttpTransportType.LongPolling | HttpTransportType.WebSockets;
+            });
+            endpoints.MapHub<OnlineStatusHub>("/connection", options =>
             {
                 options.Transports = HttpTransportType.LongPolling | HttpTransportType.WebSockets;
             });

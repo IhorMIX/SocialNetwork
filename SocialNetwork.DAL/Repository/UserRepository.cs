@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SocialNetwork.DAL.Entity;
+using SocialNetwork.DAL.Entity.Enums;
 using SocialNetwork.DAL.Repository.Interfaces;
 
 namespace SocialNetwork.DAL.Repository;
@@ -69,5 +70,13 @@ public class UserRepository : IUserRepository
     public Task<User?> GetByIdDisabledUser(int id, CancellationToken cancellationToken = default)
     {
         return _socialNetworkDbContext.Users.FirstOrDefaultAsync(i => i.Id == id && !i.IsEnabled, cancellationToken);
+    }
+
+    public async Task ChangeOnlineStatus(int userId, CancellationToken cancellationToken = default)
+    {
+        await _socialNetworkDbContext.Users.Where(u => u.Id == userId).ExecuteUpdateAsync(r => r.SetProperty(b => b.OnlineStatus, 
+                b => b.OnlineStatus == OnlineStatus.Online ? OnlineStatus.Offline : OnlineStatus.Online), 
+            cancellationToken);
+        await _socialNetworkDbContext.SaveChangesAsync(cancellationToken);
     }
 }

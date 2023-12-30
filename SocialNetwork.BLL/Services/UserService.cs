@@ -161,15 +161,12 @@ public class UserService : IUserService
 
         _logger.LogInformation("User activated");
     }
-
+    
     public async Task ChangeOnlineStatus(int userId, CancellationToken cancellationToken = default)
     {
         var userDb = await _userRepository.GetByIdAsync(userId, cancellationToken);
         _logger.LogAndThrowErrorIfNull(userDb, new UserNotFoundException($"User with this Id {userId} not found"));
-
-        userDb!.OnlineStatus = userDb.OnlineStatus == OnlineStatus.Online ? OnlineStatus.Offline : OnlineStatus.Online;
-
-        await _userRepository.UpdateUserAsync(userDb, cancellationToken);
+        await _userRepository.ChangeOnlineStatus(userId, cancellationToken);
     }
 
     public async Task<UserModel?> GetUserByLoginAndPasswordAsync(string login, string password,
