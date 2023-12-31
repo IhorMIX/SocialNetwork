@@ -26,6 +26,7 @@ public class ChatService : IChatService
     private readonly IChatMemberRepository _chatMemberRepository;
     private readonly IMapper _mapper;
     private readonly RoleOption _roleOptions;
+    private readonly INotificationRepository _notificationRepository;
 
     public ChatService(
         IChatRepository chatRepository,
