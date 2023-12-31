@@ -50,25 +50,32 @@ public class FriendRequestService : IFriendRequestService
         _logger.LogAndThrowErrorIfNull(friendRequest, new FriendRequestException("Friend request not found"));
         return _mapper.Map<FriendRequestModel>(friendRequest);
     }
-    
+
     public async Task SendRequest(int userId, int receiverId, CancellationToken cancellationToken = default)
     {
         var senderModel = await _userService.GetByIdAsync(userId, cancellationToken);
         var receiverModel = await _userService.GetByIdAsync(receiverId, cancellationToken);
-        
+
         _logger.LogAndThrowErrorIfNull(senderModel, new UserNotFoundException($"User with ID {userId} not found."));
         _logger.LogAndThrowErrorIfNull(receiverModel, new UserNotFoundException($"User with ID {receiverId} not found."));
-        
+
         var friends = await _friendshipRepository
             .GetAllFriendsByUserId(userId)
             .Where(f => f.UserId == userId && f.FriendId == receiverId || f.UserId == receiverId && f.FriendId == userId)
             .Select(f => f.UserId == userId ? f.FriendUser : f.User)
             .FirstOrDefaultAsync(cancellationToken);
-        
+
         if (friends is not null)
         {
             _logger.LogError("You cant send a friend request to friend");
             throw new FriendRequestException("Friendship is already created");
+        }
+
+        var requestExists = await _friendRequestRepository.RequestExists(userId, receiverId, cancellationToken);
+        if (requestExists is true)
+        {
+            _logger.LogError("Friend request already exists");
+            throw new FriendRequestException("Friend request already exists");
         }
 
         if (senderModel!.Id != receiverModel!.Id)
@@ -78,7 +85,11 @@ public class FriendRequestService : IFriendRequestService
                 _logger.LogError("You can't send a friend request to a banned user");
                 throw new FriendRequestException("Friend request can't be sent to a banned user");
             }
-
+            if (await _blackListService.IsBannedUser(receiverModel.Id, senderModel.Id, cancellationToken))
+            {
+                _logger.LogError("You can't send a friend request to a user who banned you");
+                throw new FriendRequestException("Friend request can't be sent to a user who banned you");
+            }
             else
             {
                 var friendRequestId = await _friendRequestRepository.CreateFriendRequestAsync(new FriendRequest()
@@ -109,6 +120,7 @@ public class FriendRequestService : IFriendRequestService
         }
 
     }
+
 
     public async Task AcceptRequest(int userId, int requestId, CancellationToken cancellationToken = default)
     {
