@@ -6,6 +6,7 @@ using SocialNetwork.DAL.Repository.Interfaces;
 using SocialNetwork.DAL.Repository;
 using SocialNetwork.Test.Helpers;
 using System;
+using SocialNetwork.BLL.Exceptions;
 
 namespace SocialNetwork.Test.Services;
 
@@ -19,9 +20,11 @@ public class BlackListServiceTest : BaseMessageTestService<IBlackListService, Bl
         services.AddScoped<IFriendshipRepository, FriendshipRepository>();
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IUserService, UserService>();
+        services.AddScoped<IChatService, ChatService>();
         services.AddScoped<INotificationRepository, NotificationRepository>();
         services.AddScoped<INotificationService, NotificationService>();
         base.SetUpAdditionalDependencies(services);
+
     }
     [Test]
     public async Task AddUserToBlackList_UserFound_AddedToBlackList()
@@ -93,5 +96,61 @@ public class BlackListServiceTest : BaseMessageTestService<IBlackListService, Bl
             Assert.That(await Service.IsBannedUser(user1!.Id, user2!.Id), Is.True);
             Assert.That(await friendshipService.IsFriends(user1!.Id, user2!.Id), Is.False);
         });
+    }
+
+    [Test]
+    public async Task CreateGroupChat_AddBannedMember_ChatDontCreatedWith2Members()
+    {
+        var userService = ServiceProvider.GetRequiredService<IUserService>();
+        var chatService = ServiceProvider.GetRequiredService<IChatService>();
+
+        var user1 = await UserModelHelper.CreateTestDataAsync(userService);
+        user1 = await userService.GetUserByLogin(user1.Login);
+
+        Assert.That(user1, Is.Not.EqualTo(null));
+
+        await chatService.CreateGroupChat(user1!.Id, new ChatModel
+        {
+            Name = "Chat2",
+            Logo = "null",
+            IsGroup = true,
+        });
+
+        var chat = await chatService.FindChatByName(user1.Id, "Chat2");
+        Assert.That(chat.Count == 1);
+
+        var banneduser = await UserModelHelper.CreateTestDataAsync(userService);
+        await Service.AddUserToBlackListAsync(user1!.Id, banneduser.Id);
+
+        Assert.ThrowsAsync<BannedUserException>(async () =>
+         await chatService.AddUsers(user1.Id, chat.First().Id, new List<int> { banneduser!.Id }));
+    }
+
+    [Test]
+    public async Task CreateGroupChat_YouAreBannedMember_ChatDontCreatedWith2Members()
+    {
+        var userService = ServiceProvider.GetRequiredService<IUserService>();
+        var chatService = ServiceProvider.GetRequiredService<IChatService>();
+
+        var user1 = await UserModelHelper.CreateTestDataAsync(userService);
+        user1 = await userService.GetUserByLogin(user1.Login);
+
+        Assert.That(user1, Is.Not.EqualTo(null));
+
+        await chatService.CreateGroupChat(user1!.Id, new ChatModel
+        {
+            Name = "Chat2",
+            Logo = "null",
+            IsGroup = true,
+        });
+
+        var chat = await chatService.FindChatByName(user1.Id, "Chat2");
+        Assert.That(chat.Count == 1);
+
+        var banneduser = await UserModelHelper.CreateTestDataAsync(userService);
+        await Service.AddUserToBlackListAsync(banneduser!.Id, user1.Id);
+
+        Assert.ThrowsAsync<BannedUserException>(async () =>
+         await chatService.AddUsers(user1.Id, chat.First().Id, new List<int> { banneduser!.Id }));
     }
 }
