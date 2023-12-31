@@ -9,6 +9,7 @@ using SocialNetwork.BLL.Services.Interfaces;
 using SocialNetwork.DAL.Entity;
 using SocialNetwork.DAL.Entity.Enums;
 using SocialNetwork.DAL.Options;
+using SocialNetwork.DAL.Repository;
 using SocialNetwork.DAL.Repository.Interfaces;
 
 namespace SocialNetwork.BLL.Services;
@@ -19,6 +20,8 @@ public class ChatService : IChatService
     private readonly IUserRepository _userRepository;
     private readonly IFriendshipService _friendshipService;
     private readonly IRoleRepository _roleRepository;
+    private readonly IBlackListRepository _blackListRepository;
+    private readonly IBlackListService _blackListService;
     private readonly ILogger<ChatService> _logger;
     private readonly IChatMemberRepository _chatMemberRepository;
     private readonly IMapper _mapper;
@@ -32,7 +35,9 @@ public class ChatService : IChatService
         IFriendshipService friendshipService,
         IRoleRepository roleRepository,
         IChatMemberRepository chatMemberRepository,
-        IOptions<RoleOption> roleOptions)
+        IOptions<RoleOption> roleOptions,
+        IBlackListRepository blackListRepository,
+        IBlackListService blackListService)
     {
         _chatRepository = chatRepository;
         _logger = logger;
@@ -42,6 +47,8 @@ public class ChatService : IChatService
         _roleRepository = roleRepository;
         _chatMemberRepository = chatMemberRepository;
         _roleOptions = roleOptions.Value;
+        _blackListRepository = blackListRepository;
+        _blackListService = blackListService;
     }
 
     private async Task<ChatMember?> GetUserInChatAsync(int userId, int chatId, ChatAccess access,
@@ -153,7 +160,7 @@ public class ChatService : IChatService
         {
             throw new UserNotFoundException($"Users with ids {string.Join(", ", notFoundUsers)} not found");
         }
-        
+
         var userInChat = await GetUserInChatAsync(userId, chatId, ChatAccess.AddMembers, cancellationToken);
         _logger.LogAndThrowErrorIfNull(userInChat, new NoRightException($"You have no rights for it"));
 
@@ -163,26 +170,41 @@ public class ChatService : IChatService
         var idsToAdd = userIds.Except(alreadyIn);
 
         var roleList = new List<Role>()
-        {
-            (await _roleRepository.GetAll().Where(r => r.Chat == chatDb)
-                .FirstOrDefaultAsync(r => r.RoleName == "everyone", cancellationToken))!
-        };
+    {
+        (await _roleRepository.GetAll().Where(r => r.Chat == chatDb)
+            .FirstOrDefaultAsync(r => r.RoleName == "everyone", cancellationToken))!
+    };
+
         var usersToAdd = await _userRepository.GetAll().Where(i => idsToAdd.Contains(i.Id))
-            .ToListAsync(cancellationToken);
+        .ToListAsync(cancellationToken);
         _logger.LogAndThrowErrorIfNull(usersToAdd, new ChatNotFoundException($"Chat with this Id {chatId} not found"));
 
-        List<ChatMember> chatMembers = new List<ChatMember>();
-        foreach (var userToAdd in usersToAdd)
+        var BannedUsers = await _blackListRepository.GetAll().Where(i => i.UserId == userId && idsToAdd.Contains(i.BannedUserId)
+        || idsToAdd.Contains(i.UserId) && i.BannedUserId == userId).ToListAsync(cancellationToken);
+
+        var bannedUserInChat = BannedUsers.Where(r => r.BannedUserId != userDb!.Id).Select(r => r.BannedUser)
+            .Union(BannedUsers.Where(r => r.UserId != userDb!.Id).Select(r => r.User)).ToList();
+
+        foreach (var us in bannedUserInChat)
         {
-            chatMembers.Add(new ChatMember
-            {
-                Chat = chatDb,
-                User = userToAdd,
-                Role = new List<Role>(roleList)
-            });
+            usersToAdd.Remove(us);
         }
 
+        var chatMembers = usersToAdd.Select(user => new ChatMember
+        {
+            Chat = chatDb,
+            User = user,
+            Role = new List<Role>(roleList)
+        }).ToList();
+
         await _chatRepository.AddChatMemberAsync(chatMembers, chatDb, cancellationToken);
+
+        if (bannedUserInChat.Any())
+        {
+            var banedUs = bannedUserInChat.Select(r => r.Id).ToList();
+            var excludedUsersMessage = string.Join(", ", banedUs);
+            throw new BannedUserException($"Users {excludedUsersMessage} were not added to the chat.");
+        }
     }
 
     public async Task DelMember(int userId, int chatId, List<int> userIds,

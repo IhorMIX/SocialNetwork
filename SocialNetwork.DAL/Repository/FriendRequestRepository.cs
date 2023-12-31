@@ -72,6 +72,15 @@ public class FriendRequestRepository : IFriendRequestRepository
         await _socialNetworkDbContext.SaveChangesAsync(cancellationToken);
     }
 
+    public async Task<bool> RequestExists(int senderId, int receiverId, CancellationToken cancellationToken = default)
+    {
+        var result = await _socialNetworkDbContext.FriendRequests
+            .SingleOrDefaultAsync(fr => (fr.SenderId == senderId && fr.ReceiverId == receiverId) ||
+                                        (fr.SenderId == receiverId && fr.ReceiverId == senderId),
+                                        cancellationToken);
+        return result != null;
+    }
+
     public IQueryable<FriendRequest> GetAllFriendRequests(int id)
     {
         return _socialNetworkDbContext.FriendRequests

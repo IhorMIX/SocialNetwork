@@ -23,7 +23,9 @@ public class UserServiceTest : DefaultServiceTest<IUserService, UserService>
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<IFriendshipService, FriendshipService>();
         services.AddScoped<IFriendshipRepository, FriendshipRepository>();
-        
+        services.AddScoped<IBlackListService, BlackListService>();
+        services.AddScoped<IBlackListRepository, BlackListRepository>();
+
         services.AddScoped<IChatService, ChatService>();
         services.AddScoped<IRoleRepository, RoleRepository>();
         services.AddScoped<IChatRepository, ChatRepository>();

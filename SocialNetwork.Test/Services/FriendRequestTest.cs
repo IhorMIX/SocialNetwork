@@ -113,5 +113,53 @@ public class FriendRequestTest : DefaultServiceTest<IFriendRequestService, Frien
         var request = await Service.GetAllIncomeRequest(createdUser1.Id);
         Assert.That(request.Count() == 2);
     }
-    
+
+    [Test]
+    public async Task CreateFriendRequest_RequestAlreadyExists_FailedRequest()
+    {
+        var userService = ServiceProvider.GetRequiredService<IUserService>();
+        var friendService = ServiceProvider.GetRequiredService<IFriendshipService>();
+
+        var user1 = await UserModelHelper.CreateTestDataAsync(userService);
+        var user2 = await UserModelHelper.CreateTestDataAsync(userService);
+
+        Assert.That(user1, Is.Not.EqualTo(null));
+        Assert.That(user2, Is.Not.EqualTo(null));
+
+        await Service.SendRequest(user1.Id, user2.Id);
+        Assert.ThrowsAsync<FriendRequestException>(async () => await Service.SendRequest(user1!.Id, user2!.Id));
+    }
+
+    [Test]
+    public async Task CreateFriendRequest_MirrorRequestAlreadyExists_FailedRequest()
+    {
+        var userService = ServiceProvider.GetRequiredService<IUserService>();
+        var friendService = ServiceProvider.GetRequiredService<IFriendshipService>();
+
+        var user1 = await UserModelHelper.CreateTestDataAsync(userService);
+        var user2 = await UserModelHelper.CreateTestDataAsync(userService);
+
+        Assert.That(user1, Is.Not.EqualTo(null));
+        Assert.That(user2, Is.Not.EqualTo(null));
+
+        await Service.SendRequest(user1.Id, user2.Id);
+        Assert.ThrowsAsync<FriendRequestException>(async () => await Service.SendRequest(user2!.Id, user1!.Id));
+    }
+
+    [Test]
+    public async Task CreateFriendRequest_RequestToBannedUser_FailedRequest()
+    {
+        var userService = ServiceProvider.GetRequiredService<IUserService>();
+        var friendService = ServiceProvider.GetRequiredService<IFriendshipService>();
+        var blacklistService = ServiceProvider.GetRequiredService<IBlackListService>();
+
+        var user1 = await UserModelHelper.CreateTestDataAsync(userService);
+        var banneduser = await UserModelHelper.CreateTestDataAsync(userService);
+
+        Assert.That(user1, Is.Not.EqualTo(null));
+        Assert.That(banneduser, Is.Not.EqualTo(null));
+
+        await blacklistService.AddUserToBlackListAsync(user1.Id, banneduser.Id);
+        Assert.ThrowsAsync<FriendRequestException>(async () => await Service.SendRequest(user1!.Id, banneduser!.Id));
+    }
 }
