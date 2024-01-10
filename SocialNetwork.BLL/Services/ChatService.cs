@@ -212,13 +212,13 @@ public class ChatService : IChatService
         // in notification box
         var chatNotifications = usersToAdd.Select(userToAdd => new ChatNotification
         {
-            Description = "You have been added to the chat",
+            Message = "You have been added to the chat",
             CreatedAt = DateTime.Now,
-            IsRead = false,
             UserId = userToAdd.Id,
             ChatId = chatDb.Id,
             ChatName = chatDb.Name,
-            Logo = chatDb.Logo
+            Logo = chatDb.Logo,
+            UserInitiatorId = userId
         }).Cast<BaseNotificationEntity>().ToList();
         
         await _notificationRepository.CreateNotifications(chatNotifications, cancellationToken);
@@ -257,13 +257,13 @@ public class ChatService : IChatService
         // notification box
         var chatNotifications = membersToDel.Select(userToDel => new ChatNotification
         {
-            Description = $"You have been kicked out of the chat '{chatDb!.Name}'",
+            Message = $"You have been kicked out of the chat '{chatDb!.Name}'",
             CreatedAt = DateTime.Now,
-            IsRead = false,
             UserId = userToDel.User.Id,
             ChatId = chatDb.Id,
             ChatName = chatDb.Name,
-            Logo = chatDb.Logo
+            Logo = chatDb.Logo,
+            UserInitiatorId = userId
         }).Cast<BaseNotificationEntity>().ToList();
         await _notificationRepository.CreateNotifications(chatNotifications, cancellationToken);
         

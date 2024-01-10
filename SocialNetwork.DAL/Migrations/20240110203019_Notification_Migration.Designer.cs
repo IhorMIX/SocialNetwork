@@ -12,7 +12,7 @@ using SocialNetwork.DAL;
 namespace SocialNetwork.DAL.Migrations
 {
     [DbContext(typeof(SocialNetworkDbContext))]
-    [Migration("20231216201439_Notification_Migration")]
+    [Migration("20240110203019_Notification_Migration")]
     partial class Notification_Migration
     {
         /// <inheritdoc />
@@ -80,16 +80,16 @@ namespace SocialNetwork.DAL.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("Discriminator")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("IsRead")
                         .HasColumnType("bit");
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("UserId")
                         .HasColumnType("int");
@@ -446,6 +446,9 @@ namespace SocialNetwork.DAL.Migrations
                     b.Property<string>("Logo")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("UserInitiatorId")
+                        .HasColumnType("int");
 
                     b.HasDiscriminator().HasValue("ChatNotification");
                 });

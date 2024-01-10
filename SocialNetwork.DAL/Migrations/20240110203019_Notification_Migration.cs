@@ -11,13 +11,37 @@ namespace SocialNetwork.DAL.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropColumn(
+                name: "Files",
+                table: "Messages");
+
+            migrationBuilder.CreateTable(
+                name: "Files",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    FilePath = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    MessageId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Files", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Files_Messages_MessageId",
+                        column: x => x.MessageId,
+                        principalTable: "Messages",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
             migrationBuilder.CreateTable(
                 name: "Notifications",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Message = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     IsRead = table.Column<bool>(type: "bit", nullable: false),
                     UserId = table.Column<int>(type: "int", nullable: false),
@@ -25,6 +49,7 @@ namespace SocialNetwork.DAL.Migrations
                     ChatId = table.Column<int>(type: "int", nullable: true),
                     ChatName = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Logo = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    UserInitiatorId = table.Column<int>(type: "int", nullable: true),
                     FriendRequestId = table.Column<int>(type: "int", nullable: true),
                     FromUserId = table.Column<int>(type: "int", nullable: true),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
@@ -41,7 +66,12 @@ namespace SocialNetwork.DAL.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
-            
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Files_MessageId",
+                table: "Files",
+                column: "MessageId");
+
             migrationBuilder.CreateIndex(
                 name: "IX_Notifications_UserId",
                 table: "Notifications",

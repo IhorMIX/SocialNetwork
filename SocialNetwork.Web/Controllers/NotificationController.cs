@@ -33,7 +33,7 @@ public class NotificationController : ControllerBase
         return Ok(notification);
     }
     
-    [HttpPost("notification")]
+    [HttpPut("notification")]
     public async Task<IActionResult> ReadNotifications([FromQuery] int notificationId,  CancellationToken cancellationToken)
     {
         var userId = User.GetUserId();

@@ -101,7 +101,7 @@ public class FriendRequestService : IFriendRequestService
                 // in notification box
                 await _notificationRepository.CreateNotification(new DAL.Entity.FriendRequestNotification()
                 {
-                    Description = $"Friend request from {senderModel.Profile.Name} {senderModel.Profile.Surname}",
+                    Message = $"Friend request from {senderModel.Profile.Name} {senderModel.Profile.Surname}",
                     CreatedAt = DateTime.Now,
                     IsRead = false,
                     UserId = receiverModel.Id,
@@ -159,7 +159,7 @@ public class FriendRequestService : IFriendRequestService
             // in notification box
             await _notificationRepository.CreateNotification(new DAL.Entity.FriendRequestNotification()
             {
-                Description = $"Friend request to {friendRequest.Receiver.Profile.Name} {friendRequest.Receiver.Profile.Surname} was accepted",
+                Message = $"Friend request to {friendRequest.Receiver.Profile.Name} {friendRequest.Receiver.Profile.Surname} was accepted",
                 CreatedAt = DateTime.Now,
                 IsRead = false,
                 UserId = friendRequest!.Sender.Id,

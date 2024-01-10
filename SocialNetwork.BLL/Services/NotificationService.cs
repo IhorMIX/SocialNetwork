@@ -31,11 +31,11 @@ public class NotificationService : INotificationService
         var friendRequestNotification = await _notificationRepository.GetByIdAsync(id, cancellationToken);
         _logger.LogAndThrowErrorIfNull(friendRequestNotification,
             new NotificationNotFoundException($"Notification with this Id {id} not found"));
-        return _mapper.Map<FriendRequestNotificationModel>(friendRequestNotification);
+        return _mapper.Map<NotificationModel>(friendRequestNotification);
     }
     public async Task<NotificationModel?> GetByIdAsync(int id, NotificationType notificationType, CancellationToken cancellationToken = default)
     {
-        var notification = await _notificationRepository.GetByIdAsync(id, notificationType, cancellationToken);
+        var notification = await _notificationRepository.GetByIdAsync(id, cancellationToken);
         _logger.LogAndThrowErrorIfNull(notification,
             new NotificationNotFoundException($"Notification with this Id {id} not found"));
         
@@ -43,18 +43,20 @@ public class NotificationService : INotificationService
         {
             case NotificationType.FriendRequest:
                     return _mapper.Map<FriendRequestNotificationModel>(notification);
+            case NotificationType.Chat:
+                return _mapper.Map<ChatNotificationModel>(notification);
+            
             default:
                 throw new ArgumentOutOfRangeException(nameof(notificationType), notificationType, null);
         }
-        
     }
 
    public async Task<NotificationModel> CreateNotification(NotificationModel notificationModel,
         CancellationToken cancellationToken = default)
     {
         var friendRequestNotificationId = await _notificationRepository.CreateNotification(
-            _mapper.Map<DAL.Entity.FriendRequestNotification>(notificationModel), cancellationToken);
-        return _mapper.Map<FriendRequestNotificationModel>(await _notificationRepository.GetByIdAsync(friendRequestNotificationId, cancellationToken));
+            _mapper.Map<BaseNotificationEntity>(notificationModel), cancellationToken);
+        return _mapper.Map<NotificationModel>(await _notificationRepository.GetByIdAsync(friendRequestNotificationId, cancellationToken));
     }
    
    public async Task RemoveNotification(int userId, int notificationId,
@@ -73,20 +75,11 @@ public class NotificationService : INotificationService
     {
         var userDb = await _userService.GetByIdAsync(userId, cancellationToken);
         _logger.LogAndThrowErrorIfNull(userDb, new UserNotFoundException($"User with this Id {userId} not found"));
-        var notification = await _notificationRepository.GetByIdAsync(notificationId, cancellationToken);
+        var notification = await _notificationRepository.GetAll().FirstOrDefaultAsync(i => i.Id == notificationId && i.UserId == userDb!.Id, cancellationToken);
         _logger.LogAndThrowErrorIfNull(notification,
-            new NotificationNotFoundException($"Notification with this Id {notificationId} not found"));
-        if (notification!.UserId == userId)
-        {
-            notification.IsRead = true;
-            await _notificationRepository.UpdateNotification(notification, cancellationToken);
-        }
-        else
-        {
-            _logger.LogAndThrowErrorIfNull(notification,
-                new NotificationNotFoundException($"Notification with this user id {notificationId} not found"));
-        }
-         
+            new NotificationNotFoundException($"Notification with this Id {notificationId} and user {userDb!.Id} not found"));
+        notification!.IsRead = true;
+        await _notificationRepository.UpdateNotification(notification, cancellationToken);
     }
 
     public async Task<IEnumerable<NotificationModel>> GetByUserId(int userId, CancellationToken cancellationToken = default)

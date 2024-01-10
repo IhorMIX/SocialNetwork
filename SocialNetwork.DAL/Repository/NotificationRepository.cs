@@ -26,22 +26,7 @@ public class NotificationRepository : INotificationRepository
     {
         return await _socialNetworkDbContext.Notifications.SingleOrDefaultAsync(i => i.Id == id, cancellationToken);
     }
-
-
-    public async Task<BaseNotificationEntity?> GetByIdAsync(int id, NotificationType notificationType, CancellationToken cancellationToken = default)
-    {
-        return notificationType switch
-        {
-            NotificationType.FriendRequest => await _socialNetworkDbContext.Notifications.OfType<FriendRequestNotification>()
-                .FirstOrDefaultAsync(i => i.Id == id, cancellationToken),
-            
-            NotificationType.Chat => await _socialNetworkDbContext.Notifications.OfType<ChatNotification>()
-                .FirstOrDefaultAsync(i => i.Id == id, cancellationToken),
-            
-            _ => throw new ArgumentOutOfRangeException(nameof(notificationType), notificationType, null)
-        };
-    }
-
+    
     public async Task<int> CreateNotification(BaseNotificationEntity baseNotificationEntity,
         CancellationToken cancellationToken = default)
     {

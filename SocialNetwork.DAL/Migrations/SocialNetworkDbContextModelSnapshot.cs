@@ -77,16 +77,16 @@ namespace SocialNetwork.DAL.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("Discriminator")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("IsRead")
                         .HasColumnType("bit");
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("UserId")
                         .HasColumnType("int");
@@ -443,6 +443,9 @@ namespace SocialNetwork.DAL.Migrations
                     b.Property<string>("Logo")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("UserInitiatorId")
+                        .HasColumnType("int");
 
                     b.HasDiscriminator().HasValue("ChatNotification");
                 });
