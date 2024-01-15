@@ -9,7 +9,6 @@ using SocialNetwork.BLL.Services.Interfaces;
 using SocialNetwork.DAL.Entity;
 using SocialNetwork.DAL.Entity.Enums;
 using SocialNetwork.DAL.Options;
-using SocialNetwork.DAL.Repository;
 using SocialNetwork.DAL.Repository.Interfaces;
 
 namespace SocialNetwork.BLL.Services;
@@ -219,7 +218,7 @@ public class ChatService : IChatService
             ChatName = chatDb.Name,
             Logo = chatDb.Logo,
             UserInitiatorId = userId
-        }).Cast<BaseNotificationEntity>().ToList();
+        }).ToList();
         
         await _notificationRepository.CreateNotifications(chatNotifications, cancellationToken);
         
@@ -264,7 +263,7 @@ public class ChatService : IChatService
             ChatName = chatDb.Name,
             Logo = chatDb.Logo,
             UserInitiatorId = userId
-        }).Cast<BaseNotificationEntity>().ToList();
+        }).ToList();
         await _notificationRepository.CreateNotifications(chatNotifications, cancellationToken);
         
     }

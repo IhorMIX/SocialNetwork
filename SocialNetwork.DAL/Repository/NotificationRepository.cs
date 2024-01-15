@@ -35,7 +35,7 @@ public class NotificationRepository : INotificationRepository
         return entityEntry.Entity.Id;
     }
 
-    public async Task CreateNotifications(List<BaseNotificationEntity> baseNotificationEntities, CancellationToken cancellationToken = default)
+    public async Task CreateNotifications(IEnumerable<BaseNotificationEntity> baseNotificationEntities, CancellationToken cancellationToken = default)
     {
         await _socialNetworkDbContext.Notifications.AddRangeAsync(baseNotificationEntities, cancellationToken);
         await _socialNetworkDbContext.SaveChangesAsync(cancellationToken);

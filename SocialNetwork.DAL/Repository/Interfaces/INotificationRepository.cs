@@ -8,7 +8,7 @@ public interface INotificationRepository : IBasicRepository<BaseNotificationEnti
     
     public Task<int> CreateNotification(BaseNotificationEntity baseNotificationEntity,
         CancellationToken cancellationToken = default);    
-    public Task CreateNotifications(List<BaseNotificationEntity> baseNotificationEntities,
+    public Task CreateNotifications(IEnumerable<BaseNotificationEntity> baseNotificationEntities,
         CancellationToken cancellationToken = default);
 
     public Task RemoveNotification(BaseNotificationEntity baseNotificationEntity, 
