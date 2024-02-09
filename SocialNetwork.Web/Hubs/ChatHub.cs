@@ -74,7 +74,7 @@ public class ChatHub : Hub
         await _userService.ChangeOnlineStatus(userId, CancellationToken.None);
         var userChats = await _chatService.GetAllChats(userId, CancellationToken.None);
         
-        foreach (var chat in userChats)
+        foreach (var chat in userChats.Data)
         {
             await Groups.AddToGroupAsync(Context.ConnectionId, chat.Id.ToString());
         }
@@ -85,7 +85,7 @@ public class ChatHub : Hub
         var userId = Context.GetHttpContext()!.User.GetUserId();
         await _userService.ChangeOnlineStatus(userId, CancellationToken.None);
         var userChats = await _chatService.GetAllChats(userId, CancellationToken.None);
-        foreach (var chat in userChats)
+        foreach (var chat in userChats.Data)
         {
             await Groups.RemoveFromGroupAsync(Context.ConnectionId, chat.Id.ToString());
         }

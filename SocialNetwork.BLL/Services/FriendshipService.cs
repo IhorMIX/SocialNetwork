@@ -74,7 +74,7 @@ public class FriendshipService : IFriendshipService
         await _friendshipRepository.DeleteFriendsAsync(friendship, cancellationToken);
     }
 
-    public async Task<IEnumerable<UserModel>> GetAllFriends(int userId, CancellationToken cancellationToken = default)
+    public async Task<PaginationResultModel<UserModel>> GetAllFriends(int userId, PaginationModel pagination, CancellationToken cancellationToken = default)
     {
         var userDb = await _userRepository.GetByIdAsync(userId, cancellationToken);
         _logger.LogAndThrowErrorIfNull(userDb, new UserNotFoundException("User not found"));
@@ -82,13 +82,23 @@ public class FriendshipService : IFriendshipService
         var users = await _friendshipRepository
             .GetAllFriendsByUserId(userDb!.Id)
             .Select(f => f.UserId == userDb.Id ? f.FriendUser : f.User)
+            .Pagination(pagination.CurrentPage, pagination.PageSize)
             .ToListAsync(cancellationToken);
         var userModels = _mapper.Map<IEnumerable<UserModel>>(users);
-        return userModels;
+
+        var paginationModel = new PaginationResultModel<UserModel>
+        {
+            Data = userModels,
+            CurrentPage = pagination.CurrentPage,
+            PageSize = pagination.PageSize,
+            TotalItems = users.Count,
+        };
+
+        return paginationModel;
     }
 
     //like
-    public async Task<IEnumerable<UserModel>> FindFriendByNameSurname(int userId, string nameSurname,
+    public async Task<PaginationResultModel<UserModel>> FindFriendByNameSurname(int userId,PaginationModel pagination, string nameSurname,
         CancellationToken cancellationToken = default)
     {
         var userDb = await _userRepository.GetByIdAsync(userId, cancellationToken);
@@ -106,6 +116,7 @@ public class FriendshipService : IFriendshipService
                             || f.FriendUser.Profile.Name.ToLower().StartsWith(name)
                             || f.FriendUser.Profile.Surname.ToLower().StartsWith(name))
                 .Select(f => f.UserId == userDb.Id ? f.FriendUser : f.User)
+                .Pagination(pagination.CurrentPage, pagination.PageSize)
                 .ToListAsync(cancellationToken);
         }
         else if (parts.Length == 2)
@@ -124,11 +135,21 @@ public class FriendshipService : IFriendshipService
                             || f.FriendUser.Profile.Name.ToLower().StartsWith(lastName)
                             && f.FriendUser.Profile.Surname.ToLower().StartsWith(firstName))
                 .Select(f => f.UserId == userDb.Id ? f.FriendUser : f.User)
+                .Pagination(pagination.CurrentPage, pagination.PageSize)
                 .ToListAsync(cancellationToken);
         }
 
         var friends = _mapper.Map<IEnumerable<UserModel>>(matchingUsers);
-        return friends;
+
+        var paginationModel = new PaginationResultModel<UserModel>
+        {
+            Data = friends,
+            CurrentPage = pagination.CurrentPage,
+            PageSize = pagination.PageSize,
+            TotalItems = friends.Count(),
+        };
+
+        return paginationModel;
     }
 
     public async Task<UserModel> FindFriendByEmail(int userId, string friendEmail,

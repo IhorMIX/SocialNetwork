@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using SocialNetwork.BLL.Exceptions;
+using SocialNetwork.BLL.Models;
 using SocialNetwork.BLL.Services;
 using SocialNetwork.BLL.Services.Interfaces;
 using SocialNetwork.DAL.Repository;
@@ -58,13 +59,18 @@ public class FriendRequestTest : DefaultServiceTest<IFriendRequestService, Frien
         Assert.That(user1, Is.Not.EqualTo(null));
         Assert.That(user2, Is.Not.EqualTo(null));
 
+        var paginationModel = new PaginationModel
+        {
+            CurrentPage = 1,
+            PageSize = 1
+        };
         await Service.SendRequest(createdUser1!.Id, createdUser2!.Id);
         Assert.That(Service.GetByUsersId(createdUser1.Id, createdUser2.Id), Is.Not.EqualTo(null));
         
         var request = await Service.GetByUsersId(createdUser1.Id, createdUser2.Id);
         await Service.AcceptRequest(request.ReceiverId, request.Id);
-        Assert.That(friendService.FindFriendByNameSurname(createdUser1.Id, "Test"), Is.Not.EqualTo(null));
-        Assert.That(friendService.FindFriendByNameSurname(createdUser2.Id, "Test"), Is.Not.EqualTo(null));
+        Assert.That(friendService.FindFriendByNameSurname(createdUser1.Id, paginationModel, "Test"), Is.Not.EqualTo(null));
+        Assert.That(friendService.FindFriendByNameSurname(createdUser2.Id, paginationModel, "Test"), Is.Not.EqualTo(null));
         Assert.ThrowsAsync<FriendRequestException>(() => Service.GetByUsersId(createdUser1.Id, createdUser2.Id));
     }
     [Test]
@@ -78,14 +84,18 @@ public class FriendRequestTest : DefaultServiceTest<IFriendRequestService, Frien
         var createdUser2 = await userService.GetUserByLogin(user2.Login);
         Assert.That(user1, Is.Not.EqualTo(null));
         Assert.That(user2, Is.Not.EqualTo(null));
-        
+        var paginationModel = new PaginationModel
+        {
+            CurrentPage = 1,
+            PageSize = 1
+        };
         await Service.SendRequest(createdUser1!.Id, createdUser2!.Id);
         Assert.That(Service.GetByUsersId(createdUser1.Id, createdUser2.Id), Is.Not.EqualTo(null));
         
         var request = await Service.GetByUsersId(createdUser1.Id, createdUser2.Id);
         await Service.CancelRequest(request.ReceiverId, request.Id);
-        Assert.That(!(await friendService.FindFriendByNameSurname(createdUser1.Id, "Test")).Any());
-        Assert.That(!(await friendService.FindFriendByNameSurname(createdUser2.Id, "Test")).Any());
+        Assert.That(!(await friendService.FindFriendByNameSurname(createdUser1.Id, paginationModel, "Test")).Data.Any());
+        Assert.That(!(await friendService.FindFriendByNameSurname(createdUser2.Id, paginationModel, "Test")).Data.Any());
         Assert.ThrowsAsync<FriendRequestException>(() => Service.GetByUsersId(createdUser1.Id, createdUser2.Id));
     }
     
@@ -104,14 +114,18 @@ public class FriendRequestTest : DefaultServiceTest<IFriendRequestService, Frien
         Assert.That(user2, Is.Not.EqualTo(null));
         Assert.That(user3, Is.Not.EqualTo(null));
 
-        
+        var paginationModel = new PaginationModel
+        {
+            CurrentPage = 1,
+            PageSize = 10
+        };
         await Service.SendRequest(createdUser2!.Id, createdUser1!.Id);
         await Service.SendRequest(createdUser3!.Id, createdUser1!.Id);
         Assert.That(Service.GetByUsersId(createdUser2.Id, createdUser1.Id), Is.Not.EqualTo(null));
         Assert.That(Service.GetByUsersId(createdUser3.Id, createdUser1.Id), Is.Not.EqualTo(null));
         
-        var request = await Service.GetAllIncomeRequest(createdUser1.Id);
-        Assert.That(request.Count() == 2);
+        var request = await Service.GetAllIncomeRequest(createdUser1.Id, paginationModel);
+        Assert.That(request.Data.Count() == 2);
     }
 
     [Test]
