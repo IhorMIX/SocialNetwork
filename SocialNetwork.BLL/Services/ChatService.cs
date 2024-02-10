@@ -312,13 +312,6 @@ public class ChatService : IChatService
     public async Task<PaginationResultModel<ChatModel>> GetAllChats(int userId, CancellationToken cancellationToken = default)
     {
         return await GetAllChats(userId, new PaginationModel(), cancellationToken);
-        //var userDb = await _userRepository.GetByIdAsync(userId, cancellationToken);
-        //_logger.LogAndThrowErrorIfNull(userDb, new UserNotFoundException($"User with this Id {userId} not found"));
-
-        //var chatList = await _chatRepository.GetAll()
-        //    .Where(chat => chat.ChatMembers!.Any(member => member.User.Id == userId))
-        //    .ToListAsync(cancellationToken);
-        //return _mapper.Map<List<ChatModel>>(chatList);
     }
 
     public async Task<PaginationResultModel<ChatModel>> GetAllChats(int userId, PaginationModel pagination, CancellationToken cancellationToken = default)
