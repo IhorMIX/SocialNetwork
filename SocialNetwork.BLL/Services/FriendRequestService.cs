@@ -21,8 +21,11 @@ public class FriendRequestService : IFriendRequestService
     private readonly IBlackListService _blackListService;
     private readonly INotificationRepository _notificationRepository;
     private readonly INotificationService _notificationService;
-    
-    public FriendRequestService(IFriendRequestRepository friendRequestRepository, ILogger<FriendRequestService> logger, IMapper mapper, IUserService userService, IFriendshipRepository friendshipRepository, IBlackListService blackListService, INotificationRepository notificationRepository, INotificationService notificationService)
+
+    public FriendRequestService(IFriendRequestRepository friendRequestRepository, ILogger<FriendRequestService> logger,
+        IMapper mapper, IUserService userService, IFriendshipRepository friendshipRepository,
+        IBlackListService blackListService, INotificationRepository notificationRepository,
+        INotificationService notificationService)
     {
         _friendRequestRepository = friendRequestRepository;
         _logger = logger;
@@ -33,35 +36,39 @@ public class FriendRequestService : IFriendRequestService
         _notificationRepository = notificationRepository;
         _notificationService = notificationService;
     }
-    
+
     public async Task<FriendRequestModel?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
     {
         var friendRequest = await _friendRequestRepository.GetByIdAsync(id, cancellationToken);
-        _logger.LogAndThrowErrorIfNull(friendRequest, new FriendRequestException($"Friend request by id {id} not found"));
+        _logger.LogAndThrowErrorIfNull(friendRequest,
+            new FriendRequestException($"Friend request by id {id} not found"));
         return _mapper.Map<FriendRequestModel>(friendRequest);
     }
-    
-    public async Task<FriendRequestModel> GetByUsersId(int senderId, int receiverId, CancellationToken cancellationToken = default)
+
+    public async Task<FriendRequestModel> GetByUsersId(int senderId, int receiverId,
+        CancellationToken cancellationToken = default)
     {
         var friendRequest = await _friendRequestRepository.GetAll()
             .Where(i => i.ReceiverId == receiverId && i.SenderId == senderId)
             .FirstOrDefaultAsync(cancellationToken);
-        
+
         _logger.LogAndThrowErrorIfNull(friendRequest, new FriendRequestException("Friend request not found"));
         return _mapper.Map<FriendRequestModel>(friendRequest);
     }
 
-    public async Task SendRequest(int userId, int receiverId, CancellationToken cancellationToken = default)
+    public async Task<int> SendRequest(int userId, int receiverId, CancellationToken cancellationToken = default)
     {
         var senderModel = await _userService.GetByIdAsync(userId, cancellationToken);
         var receiverModel = await _userService.GetByIdAsync(receiverId, cancellationToken);
 
         _logger.LogAndThrowErrorIfNull(senderModel, new UserNotFoundException($"User with ID {userId} not found."));
-        _logger.LogAndThrowErrorIfNull(receiverModel, new UserNotFoundException($"User with ID {receiverId} not found."));
+        _logger.LogAndThrowErrorIfNull(receiverModel,
+            new UserNotFoundException($"User with ID {receiverId} not found."));
 
         var friends = await _friendshipRepository
             .GetAllFriendsByUserId(userId)
-            .Where(f => f.UserId == userId && f.FriendId == receiverId || f.UserId == receiverId && f.FriendId == userId)
+            .Where(f => f.UserId == userId && f.FriendId == receiverId ||
+                        f.UserId == receiverId && f.FriendId == userId)
             .Select(f => f.UserId == userId ? f.FriendUser : f.User)
             .FirstOrDefaultAsync(cancellationToken);
 
@@ -85,107 +92,98 @@ public class FriendRequestService : IFriendRequestService
                 _logger.LogError("You can't send a friend request to a banned user");
                 throw new FriendRequestException("Friend request can't be sent to a banned user");
             }
+
             if (await _blackListService.IsBannedUser(receiverModel.Id, senderModel.Id, cancellationToken))
             {
                 _logger.LogError("You can't send a friend request to a user who banned you");
                 throw new FriendRequestException("Friend request can't be sent to a user who banned you");
             }
-            else
-            {
-                var friendRequestId = await _friendRequestRepository.CreateFriendRequestAsync(new FriendRequest()
-                {
-                    SenderId = senderModel.Id,
-                    ReceiverId = receiverModel.Id
-                }, cancellationToken);
-                
-                // in notification box
-                await _notificationRepository.CreateNotification(new DAL.Entity.FriendRequestNotification()
-                {
-                    Message = $"Friend request from {senderModel.Profile.Name} {senderModel.Profile.Surname}",
-                    CreatedAt = DateTime.Now,
-                    IsRead = false,
-                    UserId = receiverModel.Id,
-                    FriendRequestId = friendRequestId,
-                    FromUserId = senderModel.Id,
-                    Name = senderModel.Profile.Name,
-                    Surname = senderModel.Profile.Surname,
-                    AvatarImage = senderModel.Profile.AvatarImage
-                }, cancellationToken);
-            }
-        }
-        else
-        {
-            _logger.LogError("You can't send a friend request to yourself");
-            throw new FriendRequestException("Friend request can't be sent to yourself");
-        }
 
+            var friendRequestId = await _friendRequestRepository.CreateFriendRequestAsync(new FriendRequest()
+            {
+                SenderId = senderModel.Id,
+                ReceiverId = receiverModel.Id
+            }, cancellationToken);
+
+            // in notification box
+            return await _notificationRepository.CreateNotification(new FriendRequestNotification()
+            {
+                NotificationMessage =
+                    $"Friend request from {senderModel.Profile.Name} {senderModel.Profile.Surname}",
+                CreatedAt = DateTime.Now,
+                IsRead = false,
+                ToUserId = receiverModel.Id,
+                FriendRequestId = friendRequestId,
+                InitiatorId = senderModel.Id,
+            }, cancellationToken);
+        }
+        _logger.LogError("You can't send a friend request to yourself");
+        throw new FriendRequestException("Friend request can't be sent to yourself");
     }
 
 
-    public async Task AcceptRequest(int userId, int requestId, CancellationToken cancellationToken = default)
+    public async Task<int> AcceptRequest(int userId, int requestId, CancellationToken cancellationToken = default)
     {
         var userModel = await _userService.GetByIdAsync(userId, cancellationToken);
         var friendRequest = await _friendRequestRepository.GetByIdAsync(requestId, cancellationToken);
-        
+
         _logger.LogAndThrowErrorIfNull(userModel, new UserNotFoundException($"User with ID {userId} not found."));
-        _logger.LogAndThrowErrorIfNull(friendRequest, new FriendRequestException($"Friend request by id {requestId} not found"));
+        _logger.LogAndThrowErrorIfNull(friendRequest,
+            new FriendRequestException($"Friend request by id {requestId} not found"));
 
         var friends = await _friendshipRepository
             .GetAllFriendsByUserId(userId)
-            .Where(f => f.UserId == userId && f.FriendId == friendRequest!.ReceiverId || f.UserId == friendRequest!.ReceiverId && f.FriendId == userId)
+            .Where(f => f.UserId == userId && f.FriendId == friendRequest!.ReceiverId ||
+                        f.UserId == friendRequest!.ReceiverId && f.FriendId == userId)
             .Select(f => f.UserId == userId ? f.FriendUser : f.User)
             .FirstOrDefaultAsync(cancellationToken);
-        
+
         if (friends is not null)
         {
             _logger.LogError("You cant accept a friend request from friend");
             throw new FriendRequestException("You cant accept a friend request from friend");
         }
-        
+
         if (friendRequest!.ReceiverId == userModel!.Id)
         {
             await _friendshipRepository.CreateFriendshipAsync(new Friendship()
             {
                 UserId = userModel!.Id,
-                FriendId = friendRequest!.Sender.Id,   
+                FriendId = friendRequest!.Sender.Id,
             }, cancellationToken);
-            
+
             await _friendRequestRepository.DeleteFriendRequestAsync(new FriendRequest()
             {
                 SenderId = friendRequest!.Sender.Id,
                 ReceiverId = userModel.Id
             }, cancellationToken);
-            
+
             // in notification box
-            await _notificationRepository.CreateNotification(new DAL.Entity.FriendRequestNotification()
+            return await _notificationRepository.CreateNotification(new FriendRequestNotification()
             {
-                Message = $"Friend request to {friendRequest.Receiver.Profile.Name} {friendRequest.Receiver.Profile.Surname} was accepted",
+                NotificationMessage =
+                    $"Friend request to {friendRequest.Receiver.Profile.Name} {friendRequest.Receiver.Profile.Surname} was accepted",
                 CreatedAt = DateTime.Now,
                 IsRead = false,
-                UserId = friendRequest!.Sender.Id,
-                FromUserId = friendRequest.Receiver.Id,
-                Name = friendRequest.Receiver.Profile.Name,
-                Surname = friendRequest.Receiver.Profile.Surname,
-                AvatarImage = friendRequest.Receiver.Profile.AvatarImage
+                ToUserId = friendRequest!.Sender.Id,
+                InitiatorId = friendRequest.Receiver.Id,
             }, cancellationToken);
-            
         }
-        else
-        {
-            _logger.LogError("User is not receiver");
-            throw new FriendRequestException("User is not receiver");
-        }
-           
+
+        _logger.LogError("User is not receiver");
+        throw new FriendRequestException("User is not receiver");
+        
     }
 
     public async Task CancelRequest(int userId, int requestId, CancellationToken cancellationToken = default)
     {
         var userModel = await _userService.GetByIdAsync(userId, cancellationToken);
         var friendRequest = await _friendRequestRepository.GetByIdAsync(requestId, cancellationToken);
-        
+
         _logger.LogAndThrowErrorIfNull(userModel, new UserNotFoundException($"User with ID {userId} not found."));
-        _logger.LogAndThrowErrorIfNull(friendRequest, new FriendRequestException($"Friend request by id {requestId} not found"));
-        
+        _logger.LogAndThrowErrorIfNull(friendRequest,
+            new FriendRequestException($"Friend request by id {requestId} not found"));
+
         if (friendRequest!.ReceiverId == userModel!.Id)
         {
             await _friendRequestRepository.DeleteFriendRequestAsync(new FriendRequest()
@@ -201,24 +199,26 @@ public class FriendRequestService : IFriendRequestService
         }
     }
 
-    public async Task<IEnumerable<FriendRequestModel>> GetAllIncomeRequest(int userId, CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<FriendRequestModel>> GetAllIncomeRequest(int userId,
+        CancellationToken cancellationToken = default)
     {
         var userRequests = await _friendRequestRepository.GetAll()
-            .Include(u=>u.Sender.Profile)
-            .Include(u=>u.Receiver.Profile)
+            .Include(u => u.Sender.Profile)
+            .Include(u => u.Receiver.Profile)
             .Where(u => u.ReceiverId == userId)
             .ToListAsync(cancellationToken);
         return _mapper.Map<List<FriendRequestModel>>(userRequests);
     }
 
-    public async Task<IEnumerable<FriendRequestModel>> GetAllSentRequest(int userId, CancellationToken cancellationToken)
+    public async Task<IEnumerable<FriendRequestModel>> GetAllSentRequest(int userId,
+        CancellationToken cancellationToken)
     {
         var userRequests = await _friendRequestRepository.GetAll()
-            .Include(u=>u.Sender.Profile)
-            .Include(u=>u.Receiver.Profile)
+            .Include(u => u.Sender.Profile)
+            .Include(u => u.Receiver.Profile)
             .Where(u => u.SenderId == userId)
             .ToListAsync(cancellationToken);
-        
+
         return _mapper.Map<List<FriendRequestModel>>(userRequests);
     }
 }

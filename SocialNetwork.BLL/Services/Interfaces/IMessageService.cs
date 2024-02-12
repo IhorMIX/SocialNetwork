@@ -14,11 +14,16 @@ public interface IMessageService : IBaseService<MessageModel>
     
     public Task<MessageModel> ReplyMessageAsync(int userId, int chatId, int messageId, MessageModel messageModel,
         CancellationToken cancellationToken = default);
-
+    
     public Task<List<MessageModel>> GetMessagesAsync(int userId, int chatId, CancellationToken cancellationToken = default);
     public Task<MessageModel> GetLastMessageAsync(int userId, int chatId, CancellationToken cancellationToken = default);
 
     public Task<MessageModel> GetByIdAsync(int userId, int chatId, int messageId, CancellationToken cancellationToken = default);
     public Task<List<MessageModel>> GetMessagesByTextAsync(int userId, int chatId, string text, CancellationToken cancellationToken = default);
+
+    public Task ReadMessages(int userId, int chatId, IEnumerable<MessageModel> messageModels, CancellationToken cancellationToken = default);
+
+    public Task<List<MessageNotificationModel>> CreateNotifications(MessageModel messageModel,
+        IEnumerable<int> connectedUsersIds, CancellationToken cancellationToken = default);
 
 }

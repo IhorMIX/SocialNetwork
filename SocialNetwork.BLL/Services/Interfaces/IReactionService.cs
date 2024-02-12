@@ -9,4 +9,5 @@ public interface IReactionService : IBaseService<ReactionModel>
 
     public Task<List<ReactionModel>> GetReactionByMessage(int userId, int messageId, ReactionModel reactionModel,
         CancellationToken cancellationToken = default);
+    public Task<ReactionNotificationModel> CreateNotification(ReactionModel reactionModel, CancellationToken cancellationToken = default);
 }

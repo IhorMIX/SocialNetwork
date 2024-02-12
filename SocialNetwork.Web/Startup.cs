@@ -84,10 +84,12 @@ public class Startup
         
         services.AddScoped<INotificationRepository, NotificationRepository>();
         services.AddScoped<INotificationService, NotificationService>();
+        services.AddScoped<IMessageReadStatusRepository, MessageReadStatusRepository>();
         
         services.AddSingleton<IDbReadySignal, DbContextReadySignal>();
         services.AddSingleton<DelayedWriter>();
-        
+        services.AddSingleton<IUserInChatTracker, UserInChatTracker>();
+            
         var connectionString = Environment.GetEnvironmentVariable("SQLSERVER_CONNECTION_STRING") ?? Configuration.GetConnectionString("ConnectionString");
 
         services.AddDbContext<SocialNetworkDbContext>(options =>
@@ -125,6 +127,10 @@ public class Startup
                 options.Transports = HttpTransportType.LongPolling | HttpTransportType.WebSockets;
             });
             endpoints.MapHub<OnlineStatusHub>("/connection", options =>
+            {
+                options.Transports = HttpTransportType.LongPolling | HttpTransportType.WebSockets;
+            });
+            endpoints.MapHub<NotificationHub>("/notification", options =>
             {
                 options.Transports = HttpTransportType.LongPolling | HttpTransportType.WebSockets;
             });

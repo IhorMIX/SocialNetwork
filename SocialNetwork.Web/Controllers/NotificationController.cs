@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using SocialNetwork.BLL.Services.Interfaces;
 using SocialNetwork.DAL.Entity.Enums;
 using SocialNetwork.Web.Extensions;
+using SocialNetwork.Web.Models;
 
 namespace SocialNetwork.Web.Controllers;
 
@@ -30,7 +31,15 @@ public class NotificationController : ControllerBase
     {
         var userId = User.GetUserId();
         var notification = await _notificationService.GetByUserId(userId, cancellationToken);
-        return Ok(notification);
+        return Ok(_mapper.Map<IEnumerable<BaseNotificationViewModel>>(notification));
+    }
+    
+    [HttpGet("box-notifications")]
+    public async Task<IActionResult> GetInBoxNotifications( CancellationToken cancellationToken)
+    {
+        var userId = User.GetUserId();
+        var notification = await _notificationService.GetBoxNotificationsByUserId(userId, cancellationToken);
+        return Ok(_mapper.Map<IEnumerable<BaseNotificationViewModel>>(notification));
     }
     
     [HttpPut("notification")]

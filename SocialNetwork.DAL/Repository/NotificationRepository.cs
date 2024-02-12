@@ -19,12 +19,15 @@ public class NotificationRepository : INotificationRepository
 
     public IQueryable<BaseNotificationEntity> GetAll()
     {
-        return _socialNetworkDbContext.Notifications.AsQueryable();
+        return _socialNetworkDbContext.Notifications.Include(i => i.Initiator).ThenInclude(i => i.Profile)
+            .Include(i => (i as ChatNotification)!.Chat)
+            .Include(i => (i as MessageNotification)!.Message).ThenInclude(i => i.Files)
+            .AsQueryable();
     }
 
     public async Task<BaseNotificationEntity?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
     {
-        return await _socialNetworkDbContext.Notifications.SingleOrDefaultAsync(i => i.Id == id, cancellationToken);
+        return await _socialNetworkDbContext.Notifications.Include(i => i.Initiator).ThenInclude(i => i.Profile).SingleOrDefaultAsync(i => i.Id == id, cancellationToken);
     }
     
     public async Task<int> CreateNotification(BaseNotificationEntity baseNotificationEntity,
@@ -41,6 +44,13 @@ public class NotificationRepository : INotificationRepository
         await _socialNetworkDbContext.SaveChangesAsync(cancellationToken);
     }
 
+    public async Task RemoveNotification(IEnumerable<BaseNotificationEntity> baseNotificationEntity,
+        CancellationToken cancellationToken = default)
+    {
+        _socialNetworkDbContext.Notifications.RemoveRange(baseNotificationEntity);
+        await _socialNetworkDbContext.SaveChangesAsync(cancellationToken);
+    }
+    
     public async Task RemoveNotification(BaseNotificationEntity baseNotificationEntity,
         CancellationToken cancellationToken = default)
     {
