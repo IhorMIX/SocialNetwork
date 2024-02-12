@@ -16,8 +16,8 @@ public class MessageViewModel
     public int AuthorId { get; set; }
     public int ChatId { get; set; }
     public int ToReplyMessageId { get; set; }
-    
-    public ChatMemberViewModel Author { get; set; }
+
+    public ChatMemberViewModel Author { get; set; } = null!;
     
     public ICollection<ReactionViewModel> Reactions { get; set; } = null!;
     public ICollection<MessageReadStatusViewModel> MessageReadStatuses { get; set; } = null!;

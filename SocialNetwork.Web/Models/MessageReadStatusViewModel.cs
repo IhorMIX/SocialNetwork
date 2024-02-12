@@ -9,5 +9,5 @@ public class MessageReadStatusViewModel
 
     public DateTime ReadAt { get; set; }
 
-    public ChatMemberViewModel ChatMember { get; set; }
+    public ChatMemberViewModel ChatMember { get; set; } = null!;
 }
