@@ -168,24 +168,47 @@ public class FriendRequestService : IFriendRequestService
         }
     }
 
-    public async Task<IEnumerable<FriendRequestModel>> GetAllIncomeRequest(int userId, CancellationToken cancellationToken = default)
+    public async Task<PaginationResultModel<FriendRequestModel>> GetAllIncomeRequest(int userId,PaginationModel pagination, CancellationToken cancellationToken = default)
     {
         var userRequests = await _friendRequestRepository.GetAll()
             .Include(u=>u.Sender.Profile)
             .Include(u=>u.Receiver.Profile)
             .Where(u => u.ReceiverId == userId)
+            .Pagination(pagination.CurrentPage, pagination.PageSize)
             .ToListAsync(cancellationToken);
-        return _mapper.Map<List<FriendRequestModel>>(userRequests);
+
+        var userRequestsModels = _mapper.Map<IEnumerable<FriendRequestModel>>(userRequests);
+
+        var paginationModel = new PaginationResultModel<FriendRequestModel>
+        {
+            Data = userRequestsModels,
+            CurrentPage = pagination.CurrentPage,
+            PageSize = pagination.PageSize,
+            TotalItems = userRequests.Count,
+        };
+
+        return paginationModel;
     }
 
-    public async Task<IEnumerable<FriendRequestModel>> GetAllSentRequest(int userId, CancellationToken cancellationToken)
+    public async Task<PaginationResultModel<FriendRequestModel>> GetAllSentRequest(int userId, PaginationModel pagination, CancellationToken cancellationToken)
     {
         var userRequests = await _friendRequestRepository.GetAll()
             .Include(u=>u.Sender.Profile)
             .Include(u=>u.Receiver.Profile)
             .Where(u => u.SenderId == userId)
+            .Pagination(pagination.CurrentPage, pagination.PageSize)
             .ToListAsync(cancellationToken);
-        
-        return _mapper.Map<List<FriendRequestModel>>(userRequests);
+
+        var userRequestsModels = _mapper.Map<IEnumerable<FriendRequestModel>>(userRequests);
+
+        var paginationModel = new PaginationResultModel<FriendRequestModel>
+        {
+            Data = userRequestsModels,
+            CurrentPage = pagination.CurrentPage,
+            PageSize = pagination.PageSize,
+            TotalItems = userRequests.Count,
+        };
+
+        return paginationModel;
     }
 }

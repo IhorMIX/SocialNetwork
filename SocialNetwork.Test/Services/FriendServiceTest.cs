@@ -82,6 +82,11 @@ public class FriendServiceTest : DefaultServiceTest<IFriendshipService, Friendsh
         var userService = ServiceProvider.GetRequiredService<IUserService>();
         var user1 = await UserModelHelper.CreateTestDataAsync(userService);
         var createdUser1 = await userService.GetUserByLogin(user1.Login);
+        var paginationModel = new PaginationModel
+        {
+            CurrentPage = 1,
+            PageSize = 10
+        };
         Assert.That(user1, Is.Not.EqualTo(null));
 
         var user2 = await UserModelHelper.CreateTestDataAsync(userService);
@@ -97,11 +102,11 @@ public class FriendServiceTest : DefaultServiceTest<IFriendshipService, Friendsh
         await Service.AddFriendshipAsync(createdUser1!.Id,createdUser3!.Id);
         
         Assert.That(
-            Service.GetAllFriends(user1.Id), 
+            Service.GetAllFriends(user1.Id, paginationModel), 
             Is.Not.EqualTo(null));
         
-        var friendList =await Service.GetAllFriends(user1.Id);
-        Assert.That(friendList.Count() == 2);
+        var friendList =await Service.GetAllFriends(user1.Id, paginationModel);
+        Assert.That(friendList.Data.Count() == 2);
     }
     
     [Test]
@@ -143,7 +148,11 @@ public class FriendServiceTest : DefaultServiceTest<IFriendshipService, Friendsh
         var user = await UserModelHelper.CreateTestDataAsync(userService);
         var createdUser = await userService.GetUserByLogin(user.Login);
         Assert.That(user, Is.Not.EqualTo(null));
-
+        var paginationModel = new PaginationModel
+        {
+            CurrentPage = 1,
+            PageSize = 10
+        };
         var userList = new List<UserModel>();
         
         for (int i = 0; i < 6; i++)
@@ -154,10 +163,10 @@ public class FriendServiceTest : DefaultServiceTest<IFriendshipService, Friendsh
             await Service.AddFriendshipAsync(createdUser!.Id, 
                 (await userService.GetUserByLogin(userList[i].Login))!.Id);
         
-        Assert.That(Service.GetAllFriends(createdUser!.Id), Is.Not.EqualTo(null));
-        var friendList = await Service.GetAllFriends(createdUser.Id);
-        Assert.That(friendList.Count() == 6);
-        friendList = await Service.FindFriendByNameSurname(createdUser.Id, "Test ");
-        Assert.That(friendList.Count() == 6);
+        Assert.That(Service.GetAllFriends(createdUser!.Id, paginationModel), Is.Not.EqualTo(null));
+        var friendList = await Service.GetAllFriends(createdUser.Id, paginationModel);
+        Assert.That(friendList.Data.Count() == 6);
+        friendList = await Service.FindFriendByNameSurname(createdUser.Id, paginationModel, "Test ");
+        Assert.That(friendList.Data.Count() == 6);
     }
 }

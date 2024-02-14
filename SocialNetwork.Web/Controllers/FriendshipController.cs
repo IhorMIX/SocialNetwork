@@ -39,14 +39,13 @@ public class FriendshipController : ControllerBase
     }
     
     [HttpGet] 
-    public async Task<IActionResult> GetFriendship([FromQuery] string? request, CancellationToken cancellationToken)
+    public async Task<IActionResult> GetFriendship([FromQuery] string? request,[FromQuery] PaginationModel pagination, CancellationToken cancellationToken)
     {
         var userId = User.GetUserId();
         if(string.IsNullOrEmpty(request))
         {
-            var userModelFriends = await _friendshipService.GetAllFriends(userId, cancellationToken);
-            var friend = _mapper.Map<IEnumerable<FriendViewModel>>(userModelFriends);
-            return Ok(friend);
+            var userModelFriends = await _friendshipService.GetAllFriends(userId, pagination, cancellationToken);
+            return Ok(_mapper.Map<PaginationResultViewModel<FriendViewModel>>(userModelFriends));
         }
         if (request.Contains('@'))
         {
@@ -56,8 +55,8 @@ public class FriendshipController : ControllerBase
         }
         else
         {
-            var userModelFriends = await _friendshipService.FindFriendByNameSurname(userId, request, cancellationToken);
-            var friend = _mapper.Map<IEnumerable<FriendViewModel>>(userModelFriends);
+            var userModelFriends = await _friendshipService.FindFriendByNameSurname(userId, pagination, request, cancellationToken);
+            var friend = _mapper.Map<PaginationResultViewModel<FriendViewModel>>(userModelFriends);
             return Ok(friend);
         }
     }

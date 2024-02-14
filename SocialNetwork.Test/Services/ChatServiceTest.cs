@@ -24,7 +24,7 @@ public class ChatServiceTest : BaseMessageTestService<IChatService, ChatService>
 
         var friendService = ServiceProvider.GetRequiredService<IFriendshipService>();
         await friendService.AddFriendshipAsync(user1!.Id, user2!.Id);
-        
+
         await Service.CreateP2PChat(user1.Id, user2.Id, new ChatModel
         {
             Name = "Chat1",
@@ -32,17 +32,23 @@ public class ChatServiceTest : BaseMessageTestService<IChatService, ChatService>
             IsGroup = true,
         });
 
-        var chatList = await Service.FindChatByName(user1.Id, "Chat1");
-        var chat = chatList.First();
+        var paginationModel = new PaginationModel
+        {
+            CurrentPage = 1,
+            PageSize = 10
+        };
+
+        var chatList = await Service.FindChatByName(user1.Id, paginationModel, "Chat1");
+        var chat = chatList.Data.First();
         foreach (var chatMember in chat.ChatMembers!)
         {
             Assert.That(chatMember.Role.Count == 1);
         }
     }
-    
+
     [Test]
     public async Task CreateGroupChat_AddMember_ChatCreatedWith2Members()
-    { 
+    {
         var userService = ServiceProvider.GetRequiredService<IUserService>();
         var user1 = await UserModelHelper.CreateTestDataAsync(userService);
         var user2 = await UserModelHelper.CreateTestDataAsync(userService);
@@ -56,27 +62,28 @@ public class ChatServiceTest : BaseMessageTestService<IChatService, ChatService>
         Assert.That(user2, Is.Not.EqualTo(null));
         Assert.That(user3, Is.Not.EqualTo(null));
         Assert.That(user4, Is.Not.EqualTo(null));
-        
+
         await Service.CreateGroupChat(user1!.Id, new ChatModel
         {
             Name = "Chat2",
             Logo = "null",
             IsGroup = true,
         });
-       
-        var chat = await Service.FindChatByName(user1.Id, "Chat2");
-        Assert.That(chat.Count == 1);
         
-        await Service.AddUsers(user1.Id, chat.First().Id, new List<int>{user2!.Id, user3!.Id, user4!.Id});
-        chat = await Service.FindChatByName(user1.Id, "Chat2");
-        Assert.That(chat.First().ChatMembers!.Count == 4);
-        
-        await Service.DelMember(user1.Id, chat.First().Id, new List<int>(){user2.Id});
-        chat = await Service.FindChatByName(user1.Id, "Chat2");
-        Assert.That(chat.First().ChatMembers!.Count == 3);
-        
-        Assert.ThrowsAsync<UserNotFoundException>( async () => await Service.AddUsers(user1.Id, chat.First().Id, new List<int>{user2.Id, user3.Id, user4.Id, 50000}));
+        var chat = await Service.FindChatByName(user1.Id, new PaginationModel { CurrentPage = 1, PageSize = 10 }, "Chat2");
+        Assert.That(chat.Data.Count() == 1);
+
+        await Service.AddUsers(user1.Id, chat.Data.First().Id, new List<int> { user2!.Id, user3!.Id, user4!.Id });
+        chat = await Service.FindChatByName(user1.Id, new PaginationModel { CurrentPage = 1, PageSize = 10 }, "Chat2");
+        Assert.That(chat.Data.First().ChatMembers!.Count == 4);
+
+        await Service.DelMember(user1.Id, chat.Data.First().Id, new List<int>() { user2.Id });
+        chat = await Service.FindChatByName(user1.Id, new PaginationModel { CurrentPage = 1, PageSize = 10 }, "Chat2");
+        Assert.That(chat.Data.First().ChatMembers!.Count == 3);
+
+        Assert.ThrowsAsync<UserNotFoundException>(async () => await Service.AddUsers(user1.Id, chat.Data.First().Id, new List<int> { user2.Id, user3.Id, user4.Id, 50000 }));
     }
+
 
     [Test]
     public async Task TryToAddUser_UserNotFound_ThrowError()
@@ -92,7 +99,13 @@ public class ChatServiceTest : BaseMessageTestService<IChatService, ChatService>
             Logo = "null",
             IsGroup = true,
         });
-        var chat = await Service.FindChatByName(user1.Id, "Chat2");
+
+        var paginationModel = new PaginationModel
+        {
+            CurrentPage = 1,
+            PageSize = 10
+        };
+        var chat = (await Service.FindChatByName(user1.Id, paginationModel, "Chat2")).Data;
         Assert.ThrowsAsync<UserNotFoundException>( async () => await Service.AddUsers(user1.Id, chat.First().Id, new List<int>{5000, 6000, 7000}));
         Assert.ThrowsAsync<UserNotFoundException>( async () => await Service.AddUsers(user1.Id, chat.First().Id, new List<int>{user2!.Id, 6000, 7000}));
     }
@@ -104,7 +117,12 @@ public class ChatServiceTest : BaseMessageTestService<IChatService, ChatService>
         var user1 = await UserModelHelper.CreateTestDataAsync(userService);
         user1 = await userService.GetUserByLogin(user1.Login);
         Assert.That(user1, Is.Not.EqualTo(null));
-        
+
+        var paginationModel = new PaginationModel
+        {
+            CurrentPage = 1,
+            PageSize = 10
+        };
         await Service.CreateGroupChat(user1!.Id, new ChatModel
         {
             Name = "Chats1",
@@ -124,8 +142,8 @@ public class ChatServiceTest : BaseMessageTestService<IChatService, ChatService>
             IsGroup = true,
         });
        
-        var chat = await Service.GetAllChats(user1.Id);
-        Assert.That(chat.Count == 3);
+        var chat = await Service.GetAllChats(user1.Id, paginationModel);
+        Assert.That(chat.Data.Count() == 3);
     }
     
     
@@ -153,13 +171,19 @@ public class ChatServiceTest : BaseMessageTestService<IChatService, ChatService>
             Logo = "null",
             IsGroup = true,
         });
-        
-        var chat = (await Service.FindChatByName(user1.Id, "Chat3")).First();
+
+        var paginationModel = new PaginationModel
+        {
+            CurrentPage = 1,
+            PageSize = 1
+        };
+
+        var chat = (await Service.FindChatByName(user1.Id, paginationModel, "Chat3")).Data.First();
         Assert.That(chat is not null);
         
         await Service.AddUsers(user1.Id, chat!.Id, new List<int>{user2!.Id, user3!.Id});
         
-        chat = (await Service.FindChatByName(user1.Id, "Chat3")).First();
+        chat = (await Service.FindChatByName(user1.Id, paginationModel, "Chat3")).Data.First();
         Assert.That(chat.ChatMembers!.Count == 3);
         
         await Service.AddRole(user1.Id, chat.Id,new RoleModel
@@ -168,18 +192,18 @@ public class ChatServiceTest : BaseMessageTestService<IChatService, ChatService>
             RoleColor = "black"
         });
         
-        var role = (await Service.GetAllChatRoles(user1.Id, chat.Id)).First();
+        var role = (await Service.GetAllChatRoles(user1.Id, paginationModel, chat.Id)).Data.First();
         Assert.That(role is not null);
 
         await Service.SetRole(user1.Id, chat.Id, role!.Id, new List<int>(){user2.Id, user3.Id});
         
-        role = (await Service.GetAllChatRoles(user1.Id, chat.Id)).First();
-        chat = (await Service.FindChatByName(user1.Id, "Chat3")).First();
+        role = (await Service.GetAllChatRoles(user1.Id, paginationModel, chat.Id)).Data.First();
+        chat = (await Service.FindChatByName(user1.Id, paginationModel, "Chat3")).Data.First();
         Assert.That(chat.ChatMembers!.Any(m => m.Role.Any(r => r.RoleName == role.RoleName) && m.User.Login == user2.Login));
         
         role.RoleAccesses.Clear();
         await Service.EditRole(user1.Id, chat.Id, role.Id, role);
-        role = (await Service.GetAllChatRoles(user1.Id, chat.Id)).First();
+        role = (await Service.GetAllChatRoles(user1.Id,paginationModel, chat.Id)).Data.First();
         Assert.That(!role.RoleAccesses.Contains(ChatAccess.DelMembers) && !role.RoleAccesses.Contains(ChatAccess.DelMembers));
         
         role.RoleName = "Role21";
@@ -188,8 +212,8 @@ public class ChatServiceTest : BaseMessageTestService<IChatService, ChatService>
         role.RoleAccesses.Add(ChatAccess.EditNicknames);
         await Service.EditRole(user1.Id, chat.Id, role.Id, role);
         
-        role = (await Service.GetAllChatRoles(user1.Id, chat.Id)).First();
-        chat = (await Service.FindChatByName(user1.Id, "Chat3")).First();
+        role = (await Service.GetAllChatRoles(user1.Id, paginationModel, chat.Id)).Data.First();
+        chat = (await Service.FindChatByName(user1.Id, paginationModel, "Chat3")).Data.First();
         Assert.That(role.RoleName != "Role2" &&
                     chat.ChatMembers!.Any(c => c.Role.Any(r => r.RoleName != "Role2")));
         Assert.That(role.RoleAccesses.Contains(ChatAccess.DelMembers) && role.RoleAccesses.Contains(ChatAccess.DelMembers));
@@ -215,13 +239,18 @@ public class ChatServiceTest : BaseMessageTestService<IChatService, ChatService>
             Logo = "null",
             IsGroup = true,
         });
-        
-        var chat = (await Service.FindChatByName(user1.Id, "Chat4")).First();
+
+        var paginationModel = new PaginationModel
+        {
+            CurrentPage = 1,
+            PageSize = 10
+        };
+        var chat = (await Service.FindChatByName(user1.Id,paginationModel, "Chat4")).Data.First();
         
         Assert.That(chat is not null);
         
         await Service.AddUsers(user1.Id, chat!.Id, new List<int>{user2!.Id, user3!.Id});
-        chat = (await Service.FindChatByName(user1.Id, "Chat4")).First();
+        chat = (await Service.FindChatByName(user1.Id,paginationModel, "Chat4")).Data.First();
         Assert.That(chat.ChatMembers!.Count == 3);
         
         await Service.AddRole(user1.Id, chat.Id,new RoleModel
@@ -230,11 +259,11 @@ public class ChatServiceTest : BaseMessageTestService<IChatService, ChatService>
             RoleColor = "black",
         });
         
-        var role = (await Service.GetAllChatRoles(user1.Id, chat.Id)).FirstOrDefault(r => r.RoleName == "Role2");
+        var role = (await Service.GetAllChatRoles(user1.Id,paginationModel, chat.Id)).Data.FirstOrDefault(r => r.RoleName == "Role2");
         Assert.That(role is not null);
 
         await Service.SetRole(user1.Id, chat.Id, role!.Id, new List<int>(){user2.Id, user3.Id});
-        chat = (await Service.FindChatByName(user1.Id, "Chat4")).First();
+        chat = (await Service.FindChatByName(user1.Id, paginationModel, "Chat4")).Data.First();
         Assert.That(chat.ChatMembers!
             .Any(m => m.Role
                 .Any(r => r.RoleName == role.RoleName) && 
@@ -246,7 +275,7 @@ public class ChatServiceTest : BaseMessageTestService<IChatService, ChatService>
                       m.User.Id == user3.Id));
         
         await Service.UnSetRole(user1.Id, chat.Id, role.Id, new List<int>(){user2.Id, user3.Id});
-        chat = (await Service.FindChatByName(user1.Id, "Chat4")).First();
+        chat = (await Service.FindChatByName(user1.Id, paginationModel, "Chat4")).Data.First();
         
         Assert.That(chat.ChatMembers!
             .Any(m => m.Role.Any(r => r.RoleName == role.RoleName&& 
@@ -257,7 +286,7 @@ public class ChatServiceTest : BaseMessageTestService<IChatService, ChatService>
                                       m.User.Id == user3.Id)) == false);
         
         await Service.DelRole(user1.Id, chat.Id, role.Id);
-        Assert.That((await Service.GetAllChatRoles(user1.Id, chat.Id)).Count == 1);
+        Assert.That((await Service.GetAllChatRoles(user1.Id,paginationModel, chat.Id)).Data.Count() == 1);
     }
     [Test]
     public async Task TryToLeave_MakeHost_Leave()
@@ -276,14 +305,18 @@ public class ChatServiceTest : BaseMessageTestService<IChatService, ChatService>
             Logo = "null",
             IsGroup = true,
         });
-        
-        var chat = (await Service.FindChatByName(user1.Id, "ChatLeave")).First();
+        var paginationModel = new PaginationModel
+        {
+            CurrentPage = 1,
+            PageSize = 1
+        };
+        var chat = (await Service.FindChatByName(user1.Id, paginationModel, "ChatLeave")).Data.First();
         await Service.AddUsers(user1.Id, chat.Id, new List<int>{user2!.Id});
-        chat = (await Service.FindChatByName(user1.Id, "ChatLeave")).First();
+        chat = (await Service.FindChatByName(user1.Id, paginationModel, "ChatLeave")).Data.First();
         
         Assert.ThrowsAsync<CreatorCantLeaveException>( async () => await Service.LeaveChat(user1.Id, chat.Id));
         await Service.MakeHost(user1.Id, chat.Id, user2.Id);
-        chat = (await Service.FindChatByName(user1.Id, "ChatLeave")).First();
+        chat = (await Service.FindChatByName(user1.Id, paginationModel,"ChatLeave")).Data.First();
         var chatService = ServiceProvider.GetRequiredService<IChatMemberRepository>();
         var chatMember2 = await chatService.GetByUserIdAndChatId(user2.Id, chat.Id);
         Assert.That(chatMember2!.Role.Any(r => r.Rank == 0));

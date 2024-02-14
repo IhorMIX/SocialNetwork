@@ -114,14 +114,20 @@ public class BlackListServiceTest : BaseMessageTestService<IBlackListService, Bl
             IsGroup = true,
         });
 
-        var chat = await chatService.FindChatByName(user1.Id, "Chat2");
-        Assert.That(chat.Count == 1);
+        var paginationModel = new PaginationModel
+        {
+            CurrentPage = 1,
+            PageSize = 1
+        };
+
+        var chat = await chatService.FindChatByName(user1.Id, paginationModel, "Chat2");
+        Assert.That(chat.Data.Count() == 1);
 
         var banneduser = await UserModelHelper.CreateTestDataAsync(userService);
         await Service.AddUserToBlackListAsync(user1!.Id, banneduser.Id);
 
         Assert.ThrowsAsync<BannedUserException>(async () =>
-         await chatService.AddUsers(user1.Id, chat.First().Id, new List<int> { banneduser!.Id }));
+         await chatService.AddUsers(user1.Id, chat.Data.First().Id, new List<int> { banneduser!.Id }));
     }
 
     [Test]
@@ -142,13 +148,19 @@ public class BlackListServiceTest : BaseMessageTestService<IBlackListService, Bl
             IsGroup = true,
         });
 
-        var chat = await chatService.FindChatByName(user1.Id, "Chat2");
-        Assert.That(chat.Count == 1);
+        var paginationModel = new PaginationModel
+        {
+            CurrentPage = 1,
+            PageSize = 1
+        };
+
+        var chat = await chatService.FindChatByName(user1.Id, paginationModel, "Chat2");
+        Assert.That(chat.Data.Count()==1);
 
         var banneduser = await UserModelHelper.CreateTestDataAsync(userService);
         await Service.AddUserToBlackListAsync(banneduser!.Id, user1.Id);
 
         Assert.ThrowsAsync<BannedUserException>(async () =>
-         await chatService.AddUsers(user1.Id, chat.First().Id, new List<int> { banneduser!.Id }));
+         await chatService.AddUsers(user1.Id, chat.Data.First().Id, new List<int> { banneduser!.Id }));
     }
 }

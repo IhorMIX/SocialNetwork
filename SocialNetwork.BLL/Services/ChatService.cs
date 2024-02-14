@@ -11,6 +11,7 @@ using SocialNetwork.DAL.Entity.Enums;
 using SocialNetwork.DAL.Options;
 using SocialNetwork.DAL.Repository;
 using SocialNetwork.DAL.Repository.Interfaces;
+using System.Data;
 
 namespace SocialNetwork.BLL.Services;
 
@@ -284,7 +285,7 @@ public class ChatService : IChatService
         return _mapper.Map<ChatModel>(chatDb);
     }
 
-    public async Task<List<ChatModel>> FindChatByName(int userId, string chatName,
+    public async Task<PaginationResultModel<ChatModel>> FindChatByName(int userId,PaginationModel pagination, string chatName,
         CancellationToken cancellationToken = default)
     {
         var userDb = await _userRepository.GetByIdAsync(userId, cancellationToken);
@@ -293,19 +294,64 @@ public class ChatService : IChatService
         chatName = chatName.ToLower();
         var chatList = await _chatRepository.GetAll()
             .Where(i => i.ChatMembers!.Any(u => u.User.Id == userId) && i.Name.ToLower().StartsWith(chatName))
+            .Pagination(pagination.CurrentPage, pagination.PageSize)
             .ToListAsync(cancellationToken);
-        return _mapper.Map<List<ChatModel>>(chatList);
+        var chatNameModel =  _mapper.Map<List<ChatModel>>(chatList);
+
+        var paginationModel = new PaginationResultModel<ChatModel>
+        {
+            Data = chatNameModel,
+            CurrentPage = pagination.CurrentPage,
+            PageSize = pagination.PageSize,
+            TotalItems = chatList.Count,
+        };
+
+        return paginationModel;
     }
 
-    public async Task<List<ChatModel>> GetAllChats(int userId, CancellationToken cancellationToken = default)
+    public async Task<PaginationResultModel<ChatModel>> GetAllChats(int userId, CancellationToken cancellationToken = default)
+    {
+        return await GetAllChats(userId, new PaginationModel(), cancellationToken);
+    }
+
+    public async Task<PaginationResultModel<ChatModel>> GetAllChats(int userId, PaginationModel pagination, CancellationToken cancellationToken = default)
     {
         var userDb = await _userRepository.GetByIdAsync(userId, cancellationToken);
         _logger.LogAndThrowErrorIfNull(userDb, new UserNotFoundException($"User with this Id {userId} not found"));
 
-        var chatList = await _chatRepository.GetAll()
-            .Where(chat => chat.ChatMembers!.Any(member => member.User.Id == userId))
-            .ToListAsync(cancellationToken);
-        return _mapper.Map<List<ChatModel>>(chatList);
+        var chatList = new List<Chat>();
+
+        if (pagination == null)
+        {
+            chatList = await _chatRepository.GetAll()
+                .Where(chat => chat.ChatMembers!.Any(member => member.User.Id == userId))
+                .ToListAsync(cancellationToken);
+            
+
+        }
+        else
+        {
+            pagination.CurrentPage = (pagination.CurrentPage==0) ? 1 : pagination.CurrentPage;
+            pagination.PageSize = (pagination.PageSize == 0) ? 1 : pagination.PageSize;
+
+            chatList = await _chatRepository.GetAll()
+                .Where(chat => chat.ChatMembers!.Any(member => member.User.Id == userId))
+                .Pagination(pagination.CurrentPage, pagination.PageSize)
+                .ToListAsync(cancellationToken);
+
+            
+        }
+        var chatNameModel = _mapper.Map<List<ChatModel>>(chatList);
+
+        var paginationModel = new PaginationResultModel<ChatModel>
+        {
+            Data = chatNameModel,
+            CurrentPage = pagination!.CurrentPage,
+            PageSize = pagination.PageSize,
+            TotalItems = chatList.Count,
+        };
+
+        return paginationModel;
     }
 
     public async Task AddRole(int userId, int chatId, RoleModel roleModel,
@@ -506,7 +552,7 @@ public class ChatService : IChatService
         await _chatMemberRepository.SetRole(chatMembersDb, cancellationToken);
     }
 
-    public async Task<List<RoleModel>> GetAllChatRoles(int userId, int chatId,
+    public async Task<PaginationResultModel<RoleModel>> GetAllChatRoles(int userId, PaginationModel pagination, int chatId,
         CancellationToken cancellationToken = default)
     {
         var userDb = await _userRepository.GetByIdAsync(userId, cancellationToken);
@@ -517,11 +563,21 @@ public class ChatService : IChatService
         var userInChat = await _chatMemberRepository.GetByUserIdAndChatId(userId, chatId, cancellationToken);
         _logger.LogAndThrowErrorIfNull(userInChat, new UserNotFoundException($"ChatMember with this Id {userId} not found"));
         
-        var roles = await _roleRepository.GetAll().Where(r => r.Chat == chatDb).ToListAsync(cancellationToken);
-        return _mapper.Map<List<RoleModel>>(roles);
+        var roles = await _roleRepository.GetAll().Where(r => r.Chat == chatDb).Pagination(pagination.CurrentPage, pagination.PageSize).ToListAsync(cancellationToken);
+        var rolesModels =  _mapper.Map<IEnumerable<RoleModel>>(roles);
+
+        var paginationModel = new PaginationResultModel<RoleModel>
+        {
+            Data = rolesModels,
+            CurrentPage = pagination.CurrentPage,
+            PageSize = pagination.PageSize,
+            TotalItems = roles.Count(),
+        };
+
+        return paginationModel;
     }
 
-    public async Task<List<ChatMemberModel>> GetChatMembers(int userId, int chatId, int roleId,
+    public async Task<PaginationResultModel<ChatMemberModel>> GetChatMembers(int userId, PaginationModel pagination, int chatId, int roleId,
         CancellationToken cancellationToken = default)
     {
         var userDb = await _userRepository.GetByIdAsync(userId, cancellationToken);
@@ -536,11 +592,22 @@ public class ChatService : IChatService
         
         var chatMembers = await _chatMemberRepository.GetAll()
             .Where(c => c.Role.Any(r => r == roleDb) && c.Chat == chatDb)
+            .Pagination(pagination.CurrentPage, pagination.PageSize)
             .ToListAsync(cancellationToken);
-        return _mapper.Map<List<ChatMemberModel>>(chatMembers);
+        var chatmembersModels = _mapper.Map<IEnumerable<ChatMemberModel>>(chatMembers);
+
+        var paginationModel = new PaginationResultModel<ChatMemberModel>
+        {
+            Data = chatmembersModels,
+            CurrentPage = pagination.CurrentPage,
+            PageSize = pagination.PageSize,
+            TotalItems = chatMembers.Count,
+        };
+
+        return paginationModel;
     }
 
-    public async Task<List<ChatMemberModel>> GetChatMembers(int userId, int chatId,
+    public async Task<PaginationResultModel<ChatMemberModel>> GetChatMembers(int userId, PaginationModel pagination, int chatId,
         CancellationToken cancellationToken = default)
     {
         var userDb = await _userRepository.GetByIdAsync(userId, cancellationToken);
@@ -553,8 +620,20 @@ public class ChatService : IChatService
         
         var chatMembers = await _chatMemberRepository.GetAll()
             .Where(c => c.Chat == chatDb)
+            .Pagination(pagination.CurrentPage, pagination.PageSize)
             .ToListAsync(cancellationToken);
-        return _mapper.Map<List<ChatMemberModel>>(chatMembers);
+
+        var chatmembersModels = _mapper.Map<IEnumerable<ChatMemberModel>>(chatMembers);
+
+        var paginationModel = new PaginationResultModel<ChatMemberModel>
+        {
+            Data = chatmembersModels,
+            CurrentPage = pagination.CurrentPage,
+            PageSize = pagination.PageSize,
+            TotalItems = chatMembers.Count,
+        };
+
+        return paginationModel;
     }
 
     public async Task<List<RoleModel>> EditRolesRank(int userId, int chatId, List<RoleModel> roleModels,
