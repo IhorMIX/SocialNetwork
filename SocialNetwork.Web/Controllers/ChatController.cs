@@ -97,7 +97,7 @@ public class ChatController : ControllerBase
     }
     
     [HttpGet("all-chats")]
-    public async Task<IActionResult> GetAllChats([FromQuery] PaginationModel pagination, CancellationToken cancellationToken)
+    public async Task<IActionResult> GetAllChats([FromQuery] PaginationModel? pagination, CancellationToken cancellationToken)
     {
         var userId = User.GetUserId();
         var chat = await _chatService.GetAllChats(userId, pagination, cancellationToken);

@@ -14,7 +14,7 @@ public interface IChatService : IBaseService<ChatModel>
     Task DeleteChat(int userId, int chatId, CancellationToken cancellationToken = default);
     Task<PaginationResultModel<ChatModel>> FindChatByName(int userId, PaginationModel pagination, string chatName, CancellationToken cancellationToken = default);
     Task<PaginationResultModel<ChatModel>> GetAllChats(int userId, CancellationToken cancellationToken = default);
-    Task<PaginationResultModel<ChatModel>> GetAllChats(int userId, PaginationModel pagination, CancellationToken cancellationToken = default);
+    Task<PaginationResultModel<ChatModel>> GetAllChats(int userId, PaginationModel? pagination, CancellationToken cancellationToken = default);
 
     Task AddRole(int userId, int chatId, RoleModel roleModel, CancellationToken cancellationToken = default);
     Task<RoleModel> GetRoleById(int userId, int chatId, int roleId, CancellationToken cancellationToken = default);

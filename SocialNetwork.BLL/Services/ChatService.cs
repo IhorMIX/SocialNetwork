@@ -10,7 +10,6 @@ using SocialNetwork.DAL.Entity;
 using SocialNetwork.DAL.Entity.Enums;
 using SocialNetwork.DAL.Options;
 using SocialNetwork.DAL.Repository.Interfaces;
-using System.Data;
 
 namespace SocialNetwork.BLL.Services;
 
@@ -21,7 +20,6 @@ public class ChatService : IChatService
     private readonly IFriendshipService _friendshipService;
     private readonly IRoleRepository _roleRepository;
     private readonly IBlackListRepository _blackListRepository;
-    private readonly IBlackListService _blackListService;
     private readonly ILogger<ChatService> _logger;
     private readonly IChatMemberRepository _chatMemberRepository;
     private readonly IMapper _mapper;
@@ -38,7 +36,6 @@ public class ChatService : IChatService
         IChatMemberRepository chatMemberRepository,
         IOptions<RoleOption> roleOptions,
         IBlackListRepository blackListRepository,
-        IBlackListService blackListService, 
         INotificationRepository notificationRepository)
     {
         _chatRepository = chatRepository;
@@ -51,7 +48,6 @@ public class ChatService : IChatService
         _notificationRepository = notificationRepository;
         _roleOptions = roleOptions.Value;
         _blackListRepository = blackListRepository;
-        _blackListService = blackListService;
     }
 
     private Task<ChatMember?> GetUserInChatAsync(int userId, int chatId, ChatAccess access,
@@ -170,7 +166,7 @@ public class ChatService : IChatService
         var alreadyIn = await _chatMemberRepository.GetAll()
             .Where(c => userIds.Contains(c.User.Id) && c.Chat.Id == chatId).Select(u => u.User.Id)
             .ToListAsync(cancellationToken);
-        var idsToAdd = userIds.Except(alreadyIn);
+        var idsToAdd = userIds.Except(alreadyIn).ToList();
 
         var roleList = new List<Role>()
         {
@@ -182,12 +178,12 @@ public class ChatService : IChatService
             .ToListAsync(cancellationToken);
         _logger.LogAndThrowErrorIfNull(usersToAdd, new ChatNotFoundException($"Chat with this Id {chatId} not found"));
 
-        var BannedUsers = await _blackListRepository.GetAll().Where(i =>
+        var bannedUsers = await _blackListRepository.GetAll().Where(i =>
             i.UserId == userId && idsToAdd.Contains(i.BannedUserId)
             || idsToAdd.Contains(i.UserId) && i.BannedUserId == userId).ToListAsync(cancellationToken);
 
-        var bannedUserInChat = BannedUsers.Where(r => r.BannedUserId != userDb!.Id).Select(r => r.BannedUser)
-            .Union(BannedUsers.Where(r => r.UserId != userDb!.Id).Select(r => r.User)).ToList();
+        var bannedUserInChat = bannedUsers.Where(r => r.BannedUserId != userDb!.Id).Select(r => r.BannedUser)
+            .Union(bannedUsers.Where(r => r.UserId != userDb!.Id).Select(r => r.User)).ToList();
 
         foreach (var us in bannedUserInChat)
         {
@@ -325,7 +321,7 @@ public class ChatService : IChatService
 
         chatName = chatName.ToLower();
         var chatList = await _chatRepository.GetAll()
-            .Where(i => i.ChatMembers!.Any(u => u.User.Id == userId) && i.Name.ToLower().StartsWith(chatName))
+            .Where(i => i.ChatMembers.Any(u => u.User.Id == userId) && i.Name.ToLower().StartsWith(chatName))
             .Pagination(pagination.CurrentPage, pagination.PageSize)
             .ToListAsync(cancellationToken);
         var chatNameModel =  _mapper.Map<List<ChatModel>>(chatList);
@@ -346,20 +342,18 @@ public class ChatService : IChatService
         return await GetAllChats(userId, new PaginationModel(), cancellationToken);
     }
 
-    public async Task<PaginationResultModel<ChatModel>> GetAllChats(int userId, PaginationModel pagination, CancellationToken cancellationToken = default)
+    public async Task<PaginationResultModel<ChatModel>> GetAllChats(int userId, PaginationModel? pagination, CancellationToken cancellationToken = default)
     {
         var userDb = await _userRepository.GetByIdAsync(userId, cancellationToken);
         _logger.LogAndThrowErrorIfNull(userDb, new UserNotFoundException($"User with this Id {userId} not found"));
 
-        var chatList = new List<Chat>();
+        List<Chat> chatList;
 
         if (pagination == null)
         {
             chatList = await _chatRepository.GetAll()
-                .Where(chat => chat.ChatMembers!.Any(member => member.User.Id == userId))
+                .Where(chat => chat.ChatMembers.Any(member => member.User.Id == userId))
                 .ToListAsync(cancellationToken);
-            
-
         }
         else
         {
@@ -370,8 +364,6 @@ public class ChatService : IChatService
                 .Where(chat => chat.ChatMembers!.Any(member => member.User.Id == userId))
                 .Pagination(pagination.CurrentPage, pagination.PageSize)
                 .ToListAsync(cancellationToken);
-
-            
         }
         var chatNameModel = _mapper.Map<List<ChatModel>>(chatList);
 
