@@ -2,6 +2,7 @@
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using SocialNetwork.BLL.Models;
 using Microsoft.AspNetCore.SignalR;
 using SocialNetwork.BLL.Services.Interfaces;
 using SocialNetwork.Web.Extensions;
@@ -56,17 +57,17 @@ public class FriendRequestController : ControllerBase
         return Ok();
     }
     [HttpGet("received")]
-    public async Task<IActionResult> GetAllIncomeRequest(CancellationToken cancellationToken)
+    public async Task<IActionResult> GetAllIncomeRequest([FromQuery] PaginationModel pagination, CancellationToken cancellationToken)
     {
         var userId = User.GetUserId();
-        var requests = await _friendRequestService.GetAllIncomeRequest(userId, cancellationToken);
-        return Ok(_mapper.Map<List<FriendRequestViewModel>>(requests));
+        var requests = await _friendRequestService.GetAllIncomeRequest(userId,pagination, cancellationToken);
+        return Ok(_mapper.Map<PaginationResultViewModel<FriendRequestViewModel>>(requests));
     }
     [HttpGet("sent")]
-    public async Task<IActionResult> GetAllSentRequest(CancellationToken cancellationToken)
+    public async Task<IActionResult> GetAllSentRequest([FromQuery] PaginationModel pagination, CancellationToken cancellationToken)
     {
         var userId = User.GetUserId();
-        var requests = await _friendRequestService.GetAllSentRequest(userId, cancellationToken);
-        return Ok(_mapper.Map<List<FriendRequestViewModel>>(requests));
+        var requests = await _friendRequestService.GetAllSentRequest(userId,pagination, cancellationToken);
+        return Ok(_mapper.Map<PaginationResultViewModel<FriendRequestViewModel>>(requests));
     }
 }

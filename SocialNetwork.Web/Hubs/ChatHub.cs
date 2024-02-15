@@ -106,7 +106,7 @@ public class ChatHub : Hub
         {
             var chatId = chatIdValues[0];
             var userId = Context.GetHttpContext()!.User.GetUserId();
-            var userChats = await _chatService.GetAllChats(userId, CancellationToken.None);
+            var userChats = (await _chatService.GetAllChats(userId, CancellationToken.None)).Data;
             
             if (userChats.Any(chat => chat.Id.ToString() == chatId))
             {
@@ -125,7 +125,7 @@ public class ChatHub : Hub
         {
             var chatId = chatIdValues[0];
             var userId = Context.GetHttpContext()!.User.GetUserId();
-            var userChats = await _chatService.GetAllChats(userId, CancellationToken.None);
+            var userChats = (await _chatService.GetAllChats(userId, CancellationToken.None)).Data;
             
             if (userChats.Any(chat => chat.Id.ToString() == chatId))
             {
@@ -197,15 +197,14 @@ public class ChatHub : Hub
                 Text = textMess,
                 FileModels = _mapper.Map<List<FileModel>>(files),
             }, CancellationToken.None);
-        await Clients.Group(chatId.ToString())
-            .SendAsync("EditMessage", JsonSerializer.Serialize(_mapper.Map<MessageViewModel>(message)));
+        await Clients.Group(chatId.ToString()).SendAsync("EditMessage", JsonSerializer.Serialize(_mapper.Map<MessageViewModel>(message)));
     }
 
     public async Task GetMessagesByText(int chatId, string text)
     {
         var userId = Context.GetHttpContext()!.User.GetUserId();
         var messages = await _messageService.GetMessagesByTextAsync(userId, chatId, text, CancellationToken.None);
-        await Clients.Caller.SendAsync("GetMessagesByText",
-            JsonSerializer.Serialize(_mapper.Map<List<MessageViewModel>>(messages)));
+        await Clients.Caller.SendAsync("GetMessagesByText", JsonSerializer.Serialize(_mapper.Map<List<MessageViewModel>>(messages)));
     }
+
 }

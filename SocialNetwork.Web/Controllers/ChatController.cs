@@ -89,19 +89,19 @@ public class ChatController : ControllerBase
     }
 
     [HttpGet("chats-by-name")]
-    public async Task<IActionResult> FindChatByName([FromQuery] string chatName, CancellationToken cancellationToken)
+    public async Task<IActionResult> FindChatByName([FromQuery] PaginationModel pagination,[FromQuery] string chatName, CancellationToken cancellationToken)
     {
         var userId = User.GetUserId();
-        var chat = await _chatService.FindChatByName(userId, chatName, cancellationToken);
-        return Ok(_mapper.Map<List<ChatViewModel>>(chat));
+        var chat = await _chatService.FindChatByName(userId, pagination,chatName, cancellationToken);
+        return Ok(_mapper.Map<PaginationResultViewModel<ChatViewModel>>(chat));
     }
     
     [HttpGet("all-chats")]
-    public async Task<IActionResult> GetAllChats(CancellationToken cancellationToken)
+    public async Task<IActionResult> GetAllChats([FromQuery] PaginationModel pagination, CancellationToken cancellationToken)
     {
         var userId = User.GetUserId();
-        var chat = await _chatService.GetAllChats(userId, cancellationToken);
-        return Ok(_mapper.Map<List<ChatViewModel>>(chat));
+        var chat = await _chatService.GetAllChats(userId, pagination, cancellationToken);
+        return Ok(_mapper.Map<PaginationResultViewModel<ChatViewModel>>(chat));
     }
     
     [HttpPost("role")]
@@ -135,11 +135,11 @@ public class ChatController : ControllerBase
     }
     
     [HttpGet("roles")]
-    public async Task<IActionResult> GetAllRoles([FromQuery] int chatId, CancellationToken cancellationToken)
+    public async Task<IActionResult> GetAllRoles([FromQuery] PaginationModel pagination, [FromQuery] int chatId, CancellationToken cancellationToken)
     {
         var userId = User.GetUserId();
-        var roles = await _chatService.GetAllChatRoles(userId, chatId, cancellationToken);
-        return Ok(_mapper.Map<List<RoleViewModel>>(roles));
+        var roles = await _chatService.GetAllChatRoles(userId, pagination, chatId, cancellationToken);
+        return Ok(_mapper.Map<PaginationResultViewModel<RoleViewModel>>(roles));
     }
     
     [HttpGet("role")]
@@ -160,15 +160,15 @@ public class ChatController : ControllerBase
     }
 
     [HttpGet("chat-members")]
-    public async Task<IActionResult> GetChatMembers([FromQuery] int chatId, [FromQuery] int roleId, CancellationToken cancellationToken)
+    public async Task<IActionResult> GetChatMembers([FromQuery] PaginationModel pagination, [FromQuery] int chatId, [FromQuery] int roleId, CancellationToken cancellationToken)
     {
         var userId = User.GetUserId();
         if(roleId != 0)
-            return Ok(_mapper.Map<List<ChatMemberViewModel>>
-                (await _chatService.GetChatMembers(userId, chatId, roleId, cancellationToken)));
+            return Ok(_mapper.Map<PaginationResultViewModel<ChatMemberViewModel>>
+                (await _chatService.GetChatMembers(userId, pagination, chatId, roleId, cancellationToken)));
         
-        return Ok(_mapper.Map<List<ChatMemberViewModel>>
-            (await _chatService.GetChatMembers(userId, chatId, cancellationToken)));
+        return Ok(_mapper.Map<PaginationResultViewModel<ChatMemberViewModel>>
+            (await _chatService.GetChatMembers(userId, pagination, chatId, cancellationToken)));
     }
 
     [HttpPost("edit-roles-rank")]

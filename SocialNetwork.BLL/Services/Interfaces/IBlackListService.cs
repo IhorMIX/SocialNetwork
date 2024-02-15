@@ -12,7 +12,7 @@ using System.Threading.Tasks;
         Task AddUserToBlackListAsync(int userId, int bannedUserId, CancellationToken cancellationToken = default);
         Task DeleteUserFromBlackListAsync(int userId, int bannedUserId, CancellationToken cancellationToken = default);
 
-        Task<IEnumerable<UserModel>> GetAllBannedUser(int userId, CancellationToken cancellationToken = default);
+        Task<PaginationResultModel<UserModel>> GetAllBannedUser(int userId, PaginationModel pagination, CancellationToken cancellationToken = default);
         Task<IEnumerable<UserModel>> FindBannedUserByNameSurname(int userId, string nameSurname, CancellationToken cancellationToken = default);
         Task<bool> IsBannedUser(int userId, int bannedUserId, CancellationToken cancellationToken = default);
     }

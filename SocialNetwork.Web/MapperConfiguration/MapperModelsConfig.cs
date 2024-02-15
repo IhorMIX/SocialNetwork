@@ -17,10 +17,22 @@ namespace SocialNetwork.Web.MapperConfiguration
             CreateMap<FriendshipModel, Friendship>().ReverseMap();
             CreateMap<FriendRequestModel, FriendRequest>().ReverseMap();
             CreateMap<BlackListModel, BlackList>().ReverseMap();
+            CreateMap<FriendRequestModel, FriendRequestViewModel>().ReverseMap();
 
-            CreateMap<FriendRequestModel, FriendRequestViewModel>()
-                .ReverseMap();
+            CreatePaginationResultMapping<BannedUserViewModel, UserModel>();
+            CreatePaginationResultMapping<FriendViewModel, UserModel>();
+            CreatePaginationResultMapping<FriendRequestViewModel, FriendRequestModel>();
+            CreatePaginationResultMapping<ChatViewModel, ChatModel>();
+            CreatePaginationResultMapping<RoleViewModel, RoleModel>();
+            CreatePaginationResultMapping<ChatMemberViewModel, ChatMemberModel>();
             
+            void CreatePaginationResultMapping<TViewModel, TModel>()
+            {
+                CreateMap<PaginationResultViewModel<TViewModel>, PaginationResultModel<TModel>>()
+                    .ForMember(dest => dest.PageSize, opt => opt.Ignore())
+                    .ReverseMap();
+            }
+
             CreateMap<ProfileFriendViewModel, ProfileModel>()
                 .ForMember(dest =>dest.Birthday, opt=> opt.Ignore())
                 .ForMember(dest =>dest.Description, opt=> opt.Ignore())

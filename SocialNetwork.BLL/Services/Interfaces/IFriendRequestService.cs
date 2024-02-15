@@ -8,6 +8,6 @@ public interface IFriendRequestService : IBaseService<FriendRequestModel>
     Task<int> SendRequest(int userId, int receiverId, CancellationToken cancellationToken = default);
     Task<int> AcceptRequest(int userId, int requestId, CancellationToken cancellationToken = default);
     Task CancelRequest(int userId, int requestId, CancellationToken cancellationToken = default);
-    Task<IEnumerable<FriendRequestModel>> GetAllIncomeRequest(int userId, CancellationToken cancellationToken = default);
-    Task<IEnumerable<FriendRequestModel>> GetAllSentRequest(int userId, CancellationToken cancellationToken = default);
+    Task<PaginationResultModel<FriendRequestModel>> GetAllIncomeRequest(int userId, PaginationModel pagination, CancellationToken cancellationToken = default);
+    Task<PaginationResultModel<FriendRequestModel>> GetAllSentRequest(int userId, PaginationModel pagination, CancellationToken cancellationToken = default);
 }
