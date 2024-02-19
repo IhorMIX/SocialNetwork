@@ -108,4 +108,21 @@ public class ReactionService : IReactionService
         await _notificationService.CreateNotification(notification!, cancellationToken);
         return notification;
     }
+
+    public async Task<ReactionNotificationModel> CreateNotification(ReactionModel model, IEnumerable<int> connectedUsersIds,
+        CancellationToken cancellationToken = default)
+    {
+        var notification = new ReactionNotificationModel
+        {
+            NotificationMessage = model.Message.Text,
+            CreatedAt = DateTime.Now,
+            ToUserId = model.Message.AuthorId,
+            InitiatorId = model.Author!.User.Id,
+            ChatId = model.Message.ChatId,
+            ReactionId = model.Id
+        };
+        
+        await _notificationService.CreateNotification(notification!, cancellationToken);
+        return notification;
+    }
 }

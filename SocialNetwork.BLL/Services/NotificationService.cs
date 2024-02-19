@@ -28,10 +28,10 @@ public class NotificationService : INotificationService
 
     public async Task<BaseNotificationModel?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
     {
-        var friendRequestNotification = await _notificationRepository.GetByIdAsync(id, cancellationToken);
-        _logger.LogAndThrowErrorIfNull(friendRequestNotification,
+        var notification = await _notificationRepository.GetByIdAsync(id, cancellationToken);
+        _logger.LogAndThrowErrorIfNull(notification,
             new NotificationNotFoundException($"Notification with this Id {id} not found"));
-        return _mapper.Map<BaseNotificationModel>(friendRequestNotification);
+        return _mapper.Map<BaseNotificationModel>(notification);
     }
     
    public async Task<BaseNotificationModel> CreateNotification(BaseNotificationModel baseNotificationModel,
@@ -76,7 +76,11 @@ public class NotificationService : INotificationService
     {
         var userDb = await _userService.GetByIdAsync(userId, cancellationToken);
         _logger.LogAndThrowErrorIfNull(userDb, new UserNotFoundException($"User with this Id {userId} not found"));
-        var notification = await _notificationRepository.GetAll().Where(r => r.ToUserId == userId).ToListAsync(cancellationToken);
+        var notification = await _notificationRepository.GetAll()
+            .Include(i => i.Initiator).ThenInclude(i => i.Profile)
+            .Include(i => (i as ChatNotification)!.Chat)
+            .Include(i => (i as MessageNotification)!.Message).ThenInclude(i => i.Files)
+            .Where(r => r.ToUserId == userId).ToListAsync(cancellationToken);
         
         _logger.LogAndThrowErrorIfNull(notification,
             new NotificationNotFoundException($"Notifications with this user id {userId} not found"));
@@ -87,7 +91,10 @@ public class NotificationService : INotificationService
     {
         var userDb = await _userService.GetByIdAsync(userId, cancellationToken);
         _logger.LogAndThrowErrorIfNull(userDb, new UserNotFoundException($"User with this Id {userId} not found"));
-        var notification = await _notificationRepository.GetAll().Where(r => r.ToUserId == userId && !(r is MessageNotification)).ToListAsync(cancellationToken);
+        var notification = await _notificationRepository.GetAll()
+            .Include(i => i.Initiator).ThenInclude(i => i.Profile)
+            .Include(i => (i as ChatNotification)!.Chat)
+            .Where(r => r.ToUserId == userId && !(r is MessageNotification)).ToListAsync(cancellationToken);
         
         _logger.LogAndThrowErrorIfNull(notification,
             new NotificationNotFoundException($"Notifications with this user id {userId} not found"));

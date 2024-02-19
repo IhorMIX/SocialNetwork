@@ -33,4 +33,5 @@ public interface IChatService : IBaseService<ChatModel>
 
     Task LeaveChat(int userId, int chatId, CancellationToken cancellationToken = default);
     Task MakeHost(int userId, int chatId, int user2Id, CancellationToken cancellationToken = default);
+    Task<bool> UserInChatCheck(int userId, int chatId, CancellationToken cancellationToken = default);
 }

@@ -298,27 +298,27 @@ public class MessageService : IMessageService
 
         var messageIds = messageModels.Select(m => m.Id);
         var messNotification = await _notificationRepository.GetAll()
-            .Where(r => messageIds.Contains((r as MessageNotification).Message.Id))
+            .Where(r => messageIds.Contains((r as MessageNotification)!.Message.Id))
             .ToListAsync(cancellationToken);
         
         await _notificationRepository.RemoveNotification(messNotification, cancellationToken);
         
         await _messageReadStatusRepository.UpdateStatus(_mapper.Map<IEnumerable<MessageReadStatus>>(messageReadStatuses), cancellationToken);
     }
-
-    public async Task<List<MessageNotificationModel>> CreateNotifications(MessageModel messageModel, IEnumerable<int> connectedUsersIds,
+    
+    public async Task<List<MessageNotificationModel>> CreateNotification(MessageModel model, IEnumerable<int> connectedUsersIds,
         CancellationToken cancellationToken = default)
     {
-        var notifications = messageModel.Chat.ChatMembers!
-            .Where(r => r.User.Id != messageModel.AuthorId && !connectedUsersIds.Contains(r.User.Id))
+        var notifications = model.Chat.ChatMembers!
+            .Where(r => r.User.Id != model.AuthorId && !connectedUsersIds.Contains(r.User.Id))
             .Select(chatMember =>  new MessageNotification
             {
-                NotificationMessage = messageModel.Text,
+                NotificationMessage = model.Text,
                 CreatedAt = DateTime.Now,
                 ToUserId = chatMember.User.Id,
-                InitiatorId = messageModel.Author!.User.Id,
-                ChatId = messageModel.ChatId,
-                MessageId = messageModel.Id,
+                InitiatorId = model.Author!.User.Id,
+                ChatId = model.ChatId,
+                MessageId = model.Id,
             }).ToList();
         
         await _notificationRepository.CreateNotifications(notifications, cancellationToken);

@@ -50,10 +50,10 @@ public class ChatService : IChatService
         _blackListRepository = blackListRepository;
     }
 
-    private Task<ChatMember?> GetUserInChatAsync(int userId, int chatId, ChatAccess access,
+    private async Task<ChatMember?> GetUserInChatAsync(int userId, int chatId, ChatAccess access,
         CancellationToken cancellationToken)
     {
-        return _chatMemberRepository.GetAll()
+        return await _chatMemberRepository.GetAll()
             .Where(c => c.Chat.Id == chatId)
             .Where(c => c.User.Id == userId)
             .SingleOrDefaultAsync(c => c.Role.Any(r => r.RoleAccesses.Any(i => i.ChatAccess == access)), cancellationToken);
@@ -736,5 +736,15 @@ public class ChatService : IChatService
         
         // notification message in chat
         // user is new host
+    }
+
+    public async Task<bool> UserInChatCheck(int userId, int chatId, CancellationToken cancellationToken = default)
+    {
+        var chatMember = await _chatMemberRepository.GetAll()
+            .Where(c => c.Chat.Id == chatId)
+            .Where(c => c.User.Id == userId)
+            .SingleOrDefaultAsync(cancellationToken);
+        
+        return chatMember is not null;
     }
 }

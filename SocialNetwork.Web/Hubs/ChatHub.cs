@@ -54,7 +54,7 @@ public class ChatHub : Hub
         await Clients.Group(chatId.ToString()).SendAsync("ReceiveMessage",
             JsonSerializer.Serialize(_mapper.Map<MessageViewModel>(messageModel)));
        
-        var notifications = await _messageService.CreateNotifications(messageModel, connectedUsers);
+        var notifications = await _messageService.CreateNotification(messageModel, connectedUsers);
         
         foreach (var notification in notifications)
         {
@@ -79,7 +79,7 @@ public class ChatHub : Hub
         await Clients.Group(chatId.ToString()).SendAsync("ReceiveReplyOnMessage",
             JsonSerializer.Serialize(_mapper.Map<MessageViewModel>(messageModel)));
 
-        var notifications = await _messageService.CreateNotifications(messageModel, connectedUsers);
+        var notifications = await _messageService.CreateNotification(messageModel, connectedUsers);
         foreach (var notification in notifications)
         {
             await _notificationHubContext.Clients.Group(notification!.ToUserId.ToString())
@@ -104,17 +104,16 @@ public class ChatHub : Hub
         
         if (!string.IsNullOrEmpty(chatIdValues))
         {
-            var chatId = chatIdValues[0];
+            var stringChatId = chatIdValues[0];
             var userId = Context.GetHttpContext()!.User.GetUserId();
-            var userChats = (await _chatService.GetAllChats(userId, CancellationToken.None)).Data;
+            var isInChat =  await _chatService.UserInChatCheck(userId, int.Parse(stringChatId!));
             
-            if (userChats.Any(chat => chat.Id.ToString() == chatId))
+            if (isInChat)
             {
-                await Groups.AddToGroupAsync(Context.ConnectionId, chatId!);
-                _userTracker.AddToGroup(userId.ToString(), chatId!);
+                await Groups.AddToGroupAsync(Context.ConnectionId, stringChatId!);
+                _userTracker.AddToGroup(userId.ToString(), stringChatId!);
             }
         }
-        
         await base.OnConnectedAsync();
     }
 
@@ -158,12 +157,14 @@ public class ChatHub : Hub
         
         await Clients.Group(chatId.ToString()).SendAsync("AddReactionToMessage",
             JsonSerializer.Serialize(_mapper.Map<ReactionViewModel>(reactionModel)));
-
-        var notification = await _reactionService.CreateNotification(reactionModel);
+       
+        if (reaction.Type != reactionModel.Type)
+        {
+            var notification = await _reactionService.CreateNotification(reactionModel);
         
-        await _notificationHubContext.Clients.Group(notification!.ToUserId.ToString())
-            .SendAsync("ReceivedNotification", JsonSerializer.Serialize(_mapper.Map<BaseNotificationViewModel>(notification)));
-        
+            await _notificationHubContext.Clients.Group(notification!.ToUserId.ToString())
+                .SendAsync("ReceivedNotification", JsonSerializer.Serialize(_mapper.Map<BaseNotificationViewModel>(notification)));
+        }
     }
 
     public async Task DelReaction(int chatId, int messageId, int reactionId)

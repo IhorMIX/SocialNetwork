@@ -19,10 +19,7 @@ public class NotificationRepository : INotificationRepository
 
     public IQueryable<BaseNotificationEntity> GetAll()
     {
-        return _socialNetworkDbContext.Notifications.Include(i => i.Initiator).ThenInclude(i => i.Profile)
-            .Include(i => (i as ChatNotification)!.Chat)
-            .Include(i => (i as MessageNotification)!.Message).ThenInclude(i => i.Files)
-            .AsQueryable();
+        return _socialNetworkDbContext.Notifications.AsQueryable();
     }
 
     public async Task<BaseNotificationEntity?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
