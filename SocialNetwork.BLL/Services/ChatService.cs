@@ -142,7 +142,7 @@ public class ChatService : IChatService
         return _mapper.Map<ChatModel>(await _chatRepository.GetByIdAsync(chatId, cancellationToken));
     }
 
-    public async Task AddUsers(int userId, int chatId, List<int> userIds, CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<ChatNotificationModel>> AddUsers(int userId, int chatId, List<int> userIds, CancellationToken cancellationToken = default)
     {
         var userDb = await _userRepository.GetByIdAsync(userId, cancellationToken);
         _logger.LogAndThrowErrorIfNull(userDb, new UserNotFoundException($"User with this Id {userId} not found"));
