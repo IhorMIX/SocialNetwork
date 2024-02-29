@@ -75,8 +75,6 @@ public class UserRepository : IUserRepository
     public async Task ChangeOnlineStatus(int userId, CancellationToken cancellationToken = default)
     {
         await _socialNetworkDbContext.Users.Where(u => u.Id == userId).ExecuteUpdateAsync(r => r.SetProperty(b => b.OnlineStatus, 
-                b => b.OnlineStatus == OnlineStatus.Online ? OnlineStatus.Offline : OnlineStatus.Online), 
-            cancellationToken);
-        await _socialNetworkDbContext.SaveChangesAsync(cancellationToken);
+                b => b.OnlineStatus == OnlineStatus.Online ? OnlineStatus.Offline : OnlineStatus.Online), cancellationToken);
     }
 }

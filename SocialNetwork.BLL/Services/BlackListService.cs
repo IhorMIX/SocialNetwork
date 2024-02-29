@@ -3,13 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using SocialNetwork.BLL.Helpers;
 using SocialNetwork.DAL.Entity;
-using SocialNetwork.DAL.Repository;
 using SocialNetwork.DAL.Repository.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using SocialNetwork.BLL.Exceptions;
 using SocialNetwork.BLL.Models;
 using SocialNetwork.BLL.Services.Interfaces;
@@ -130,15 +124,29 @@ namespace SocialNetwork.BLL.Services
         }
 
 
-        public async Task<IEnumerable<UserModel>> GetAllBannedUser(int userId, CancellationToken cancellationToken = default)
+        public async Task<PaginationResultModel<UserModel>> GetAllBannedUser(int userId,PaginationModel pagination, CancellationToken cancellationToken = default)
         {
             var bannedUser = await _userRepository.GetByIdAsync(userId, cancellationToken);
             _logger.LogAndThrowErrorIfNull(bannedUser, new BannedUserNotFoundException("Banned user not found"));
 
-            var blackLists = await _blackrepository.GetAllBannedUserByUserId(bannedUser!.Id).Select(f => f.BannedUser).ToListAsync(cancellationToken);
+            var blackLists = await _blackrepository.GetAllBannedUserByUserId(bannedUser!.Id)
+                                      .Select(f => f.BannedUser)
+                                      .Pagination(pagination.CurrentPage, pagination.PageSize)  
+                                      .ToListAsync(cancellationToken);
+
             var userModels = _mapper.Map<IEnumerable<UserModel>>(blackLists);
-            return userModels;
+
+            var paginationModel = new PaginationResultModel<UserModel>
+            {
+                Data = userModels,
+                CurrentPage = pagination.CurrentPage,
+                PageSize = pagination.PageSize,
+                TotalItems = blackLists.Count,
+            };
+
+            return paginationModel;
         }
+
 
 
 

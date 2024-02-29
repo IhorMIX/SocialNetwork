@@ -35,9 +35,13 @@ public class ReactionServiceTest : BaseMessageTestService<IReactionService, Reac
             Logo = "null",
             IsGroup = true,
         });
-
-        var chatList = await chatService.FindChatByName(user1.Id, "Chat2");
-        var chat = chatList.First();
+        var paginationModel = new PaginationModel
+        {
+            CurrentPage = 1,
+            PageSize = 1
+        };
+        var chatList = await chatService.FindChatByName(user1.Id, paginationModel, "Chat2");
+        var chat = chatList.Data.First();
 
         await chatService.AddUsers(user1.Id, chat.Id, new List<int>
         {

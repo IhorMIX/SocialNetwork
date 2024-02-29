@@ -1,8 +1,7 @@
 ﻿namespace SocialNetwork.BLL.Models;
 
-public class ChatNotificationModel : NotificationModel
+public class ChatNotificationModel : BaseNotificationModel
 {
     public int ChatId { get; set; }
-    public string ChatName { get; set; } = null!;
-    public string Logo { get; set; } = null!;
+    public ChatModel Chat { get; set; } = null!;
 }

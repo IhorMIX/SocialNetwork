@@ -24,24 +24,9 @@ public class NotificationRepository : INotificationRepository
 
     public async Task<BaseNotificationEntity?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
     {
-        return await _socialNetworkDbContext.Notifications.SingleOrDefaultAsync(i => i.Id == id, cancellationToken);
+        return await _socialNetworkDbContext.Notifications.Include(i => i.Initiator).ThenInclude(i => i.Profile).SingleOrDefaultAsync(i => i.Id == id, cancellationToken);
     }
-
-
-    public async Task<BaseNotificationEntity?> GetByIdAsync(int id, NotificationType notificationType, CancellationToken cancellationToken = default)
-    {
-        return notificationType switch
-        {
-            NotificationType.FriendRequest => await _socialNetworkDbContext.Notifications.OfType<FriendRequestNotification>()
-                .FirstOrDefaultAsync(i => i.Id == id, cancellationToken),
-            
-            NotificationType.Chat => await _socialNetworkDbContext.Notifications.OfType<ChatNotification>()
-                .FirstOrDefaultAsync(i => i.Id == id, cancellationToken),
-            
-            _ => throw new ArgumentOutOfRangeException(nameof(notificationType), notificationType, null)
-        };
-    }
-
+    
     public async Task<int> CreateNotification(BaseNotificationEntity baseNotificationEntity,
         CancellationToken cancellationToken = default)
     {
@@ -50,12 +35,19 @@ public class NotificationRepository : INotificationRepository
         return entityEntry.Entity.Id;
     }
 
-    public async Task CreateNotifications(List<BaseNotificationEntity> baseNotificationEntities, CancellationToken cancellationToken = default)
+    public async Task CreateNotifications(IEnumerable<BaseNotificationEntity> baseNotificationEntities, CancellationToken cancellationToken = default)
     {
         await _socialNetworkDbContext.Notifications.AddRangeAsync(baseNotificationEntities, cancellationToken);
         await _socialNetworkDbContext.SaveChangesAsync(cancellationToken);
     }
 
+    public async Task RemoveNotification(IEnumerable<BaseNotificationEntity> baseNotificationEntity,
+        CancellationToken cancellationToken = default)
+    {
+        _socialNetworkDbContext.Notifications.RemoveRange(baseNotificationEntity);
+        await _socialNetworkDbContext.SaveChangesAsync(cancellationToken);
+    }
+    
     public async Task RemoveNotification(BaseNotificationEntity baseNotificationEntity,
         CancellationToken cancellationToken = default)
     {

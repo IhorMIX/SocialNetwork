@@ -26,6 +26,7 @@ public class ChatRepository : IChatRepository
         return await _socialNetworkDbContext.Chats
             .Include(i => i.ChatMembers)
             .Include(c => c.Roles)
+            .Include(c => c.ChatMembers).ThenInclude(i => i.User)
             .FirstOrDefaultAsync(i => i.Id == id, cancellationToken);
     }
 

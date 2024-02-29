@@ -15,14 +15,14 @@ public class ReactionRepository : IReactionRepository
 
     public IQueryable<Reaction> GetAll()
     {
-        return _socialNetworkDbContext.Reactions.Include(i => i.Author)
+        return _socialNetworkDbContext.Reactions.Include(i => i.Author).ThenInclude(i=> i.User).ThenInclude(i => i.Profile)
             .Include(i => i.Message)
             .AsQueryable();
     }
 
     public async Task<Reaction?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
     {
-        return await _socialNetworkDbContext.Reactions.Include(i => i.Author)
+        return await _socialNetworkDbContext.Reactions.Include(i => i.Author).ThenInclude(i=> i.User).ThenInclude(i => i.Profile)
             .Include(i => i.Message)
             .Where(i => i.Id == id)
             .FirstOrDefaultAsync(cancellationToken);
@@ -43,6 +43,14 @@ public class ReactionRepository : IReactionRepository
 
     public async Task DeleteReactionAsync(Reaction reaction, CancellationToken cancellationToken = default)
     {
+        
+        var notification = await _socialNetworkDbContext.Notifications
+            .OfType<ReactionNotification>()
+            .Where(rn => rn.ReactionId == reaction.Id) 
+            .SingleOrDefaultAsync(cancellationToken);
+        if(notification is not null)
+            
+            _socialNetworkDbContext.Notifications.Remove(notification);
         _socialNetworkDbContext.Reactions.Remove(reaction);
         await _socialNetworkDbContext.SaveChangesAsync(cancellationToken);
     }

@@ -10,7 +10,7 @@ using SocialNetwork.Test.Helpers;
 
 namespace SocialNetwork.Test.Services;
 
-public class NotificationTest : BaseMessageTestService<INotificationService, NotificationService>
+public class BaseNotificationEntityTest : BaseMessageTestService<INotificationService, NotificationService>
 {
     protected override void SetUpAdditionalDependencies(IServiceCollection services)
     {
@@ -45,7 +45,7 @@ public class NotificationTest : BaseMessageTestService<INotificationService, Not
         await fiendRequestService.SendRequest(createdUser1!.Id, createdUser2!.Id);
         var notification = await Service.GetByUserId(createdUser2!.Id);
         var notificationModels = notification.ToList();
-        Assert.That(notificationModels.First().UserId == createdUser2!.Id);
+        Assert.That(notificationModels.First().ToUserId == createdUser2!.Id);
         Assert.That(notificationModels.First().IsRead is false);
     }
 
@@ -66,7 +66,7 @@ public class NotificationTest : BaseMessageTestService<INotificationService, Not
         var notification = notifications.First();
         await Service.ReadNotification(createdUser2.Id, notification!.Id);
         
-        notification = await Service.GetByIdAsync(notification.Id, NotificationType.FriendRequest);
+        notification = await Service.GetByIdAsync(notification.Id);
         Assert.That(notification!.IsRead);
     
         await Service.RemoveNotification(createdUser2.Id, notification.Id);

@@ -4,13 +4,17 @@ using SocialNetwork.DAL.Entity.Enums;
 
 namespace SocialNetwork.BLL.Services.Interfaces;
 
-public interface INotificationService : IBaseService<NotificationModel>
+public interface INotificationService : IBaseService<BaseNotificationModel>
 {
-    
-    Task<NotificationModel?> GetByIdAsync(int id, NotificationType notificationType, CancellationToken cancellationToken = default);
-    Task<NotificationModel> CreateNotification(NotificationModel notificationModel,
+    Task<BaseNotificationModel> CreateNotification(BaseNotificationModel baseNotificationModel,
+        CancellationToken cancellationToken = default);
+
+    Task CreateNotifications(IEnumerable<BaseNotificationModel> baseNotificationModel,
         CancellationToken cancellationToken = default);
     Task RemoveNotification(int userId, int notificationId, CancellationToken cancellationToken = default);
     Task ReadNotification(int userId, int notificationId, CancellationToken cancellationToken = default);
-    Task<IEnumerable<NotificationModel>> GetByUserId(int userId, CancellationToken cancellationToken = default);
+    Task<IEnumerable<BaseNotificationModel>> GetByUserId(int userId, CancellationToken cancellationToken = default);
+
+    Task<IEnumerable<BaseNotificationModel>> GetBoxNotificationsByUserId(int userId,
+        CancellationToken cancellationToken = default);
 }

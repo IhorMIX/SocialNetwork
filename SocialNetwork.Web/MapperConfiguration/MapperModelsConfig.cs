@@ -17,10 +17,22 @@ namespace SocialNetwork.Web.MapperConfiguration
             CreateMap<FriendshipModel, Friendship>().ReverseMap();
             CreateMap<FriendRequestModel, FriendRequest>().ReverseMap();
             CreateMap<BlackListModel, BlackList>().ReverseMap();
+            CreateMap<FriendRequestModel, FriendRequestViewModel>().ReverseMap();
 
-            CreateMap<FriendRequestModel, FriendRequestViewModel>()
-                .ReverseMap();
+            CreatePaginationResultMapping<BannedUserViewModel, UserModel>();
+            CreatePaginationResultMapping<FriendViewModel, UserModel>();
+            CreatePaginationResultMapping<FriendRequestViewModel, FriendRequestModel>();
+            CreatePaginationResultMapping<ChatViewModel, ChatModel>();
+            CreatePaginationResultMapping<RoleViewModel, RoleModel>();
+            CreatePaginationResultMapping<ChatMemberViewModel, ChatMemberModel>();
             
+            void CreatePaginationResultMapping<TViewModel, TModel>()
+            {
+                CreateMap<PaginationResultViewModel<TViewModel>, PaginationResultModel<TModel>>()
+                    .ForMember(dest => dest.PageSize, opt => opt.Ignore())
+                    .ReverseMap();
+            }
+
             CreateMap<ProfileFriendViewModel, ProfileModel>()
                 .ForMember(dest =>dest.Birthday, opt=> opt.Ignore())
                 .ForMember(dest =>dest.Description, opt=> opt.Ignore())
@@ -148,8 +160,9 @@ namespace SocialNetwork.Web.MapperConfiguration
                 .ForMember(dest => dest.FileModels, opt => opt.MapFrom(d => d.FileModels))
                 .ForMember(dest => dest.Author, opt => opt.Ignore())
                 .ForMember(dest => dest.ToReplyMessage, opt => opt.Ignore())
-                .ForMember(dest => dest.ChatModel, opt => opt.Ignore())
+                .ForMember(dest => dest.Chat, opt => opt.Ignore())
                 .ForMember(dest => dest.Reactions, opt => opt.MapFrom(src => src.Reactions))
+                .ForMember(dest => dest.MessageReadStatuses, opt => opt.MapFrom(src => src.MessageReadStatuses))
                 .ReverseMap();
             
             CreateMap<ReactionViewModel, ReactionModel>()
@@ -171,14 +184,57 @@ namespace SocialNetwork.Web.MapperConfiguration
                 .ForMember(dest => dest.Role, opt => opt.Ignore())
                 .ReverseMap();
             
-            CreateMap<BaseNotificationEntity, NotificationModel>().ReverseMap();
+            CreateMap<BaseNotificationEntity, BaseNotificationModel>().ReverseMap();
            
             CreateMap<FriendRequestNotification, FriendRequestNotificationModel>()
-                .ForMember(dest => dest.FromUserModelId, opt => opt.MapFrom(d => d.FromUserId))
-                .IncludeBase<BaseNotificationEntity, NotificationModel>();
+                .IncludeBase<BaseNotificationEntity, BaseNotificationModel>();
+
+            CreateMap<MessageReadStatusModel, MessageReadStatus>()
+                .ForMember(dest => dest.Message, opt => opt.Ignore())
+                .ForMember(dest => dest.ChatMember, opt => opt.Ignore())
+                .ReverseMap();
+            
+            CreateMap<MessageReadStatusModel, MessageReadStatusViewModel>()
+                .ReverseMap();
             
             CreateMap<ChatNotification, ChatNotificationModel>()
-                .IncludeBase<BaseNotificationEntity, NotificationModel>();
+                .IncludeBase<BaseNotificationEntity, BaseNotificationModel>()
+                .ReverseMap();
+            
+            CreateMap<FriendRequestNotification, FriendRequestNotificationModel>()
+                .IncludeBase<BaseNotificationEntity, BaseNotificationModel>();
+
+            CreateMap<BaseNotificationViewModel, BaseNotificationModel>()
+                .ReverseMap();
+            
+            CreateMap<MessageNotification, MessageNotificationModel>()
+                .IncludeBase<ChatNotification, ChatNotificationModel>()
+                .IncludeBase<BaseNotificationEntity, BaseNotificationModel>()
+                .ReverseMap();
+            
+            CreateMap<ReactionNotification, ReactionNotificationModel>()
+                .IncludeBase<ChatNotification, ChatNotificationModel>()
+                .IncludeBase<BaseNotificationEntity, BaseNotificationModel>()
+                .ReverseMap();
+            
+            CreateMap<ChatNotificationViewModel, ChatNotificationModel>()
+                .IncludeBase<BaseNotificationViewModel, BaseNotificationModel>()
+                .ReverseMap();
+            
+            CreateMap<FriendRequestNotificationViewModel, FriendRequestNotificationModel>()
+                .IncludeBase<BaseNotificationViewModel, BaseNotificationModel>()
+                .ReverseMap();
+            
+            CreateMap<MessageNotificationViewModel, MessageNotificationModel>()
+                .IncludeBase<ChatNotificationViewModel, ChatNotificationModel>()
+                .IncludeBase<BaseNotificationViewModel, BaseNotificationModel>()
+                .ReverseMap();
+            
+            CreateMap<ReactionNotificationViewModel, ReactionNotificationModel>()
+                .IncludeBase<ChatNotificationViewModel, ChatNotificationModel>()
+                .IncludeBase<BaseNotificationViewModel, BaseNotificationModel>()
+                .ReverseMap();
+            
         }
     }
 }

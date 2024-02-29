@@ -30,9 +30,13 @@ public class MessageServiceTest : BaseMessageTestService<IMessageService, Messag
             Logo = "null",
             IsGroup = true,
         });
-
-        var chatList = await chatService.FindChatByName(user1.Id, "Chat1");
-        var chat = chatList.First();
+        var paginationModel = new PaginationModel
+        {
+            CurrentPage = 1,
+            PageSize = 1
+        };
+        var chatList = await chatService.FindChatByName(user1.Id,paginationModel, "Chat1");
+        var chat = chatList.Data.First();
 
         var messageService = ServiceProvider.GetRequiredService<IMessageService>();
         var createdMessage = await messageService.CreateMessage(user1.Id, chat.Id, new MessageModel()
@@ -79,9 +83,13 @@ public class MessageServiceTest : BaseMessageTestService<IMessageService, Messag
             Logo = "null",
             IsGroup = true,
         });
-
-        var chatList = await chatService.FindChatByName(user1.Id, "Chat2");
-        var chat = chatList.First();
+        var paginationModel = new PaginationModel
+        {
+            CurrentPage = 1,
+            PageSize = 1
+        };
+        var chatList = await chatService.FindChatByName(user1.Id,paginationModel, "Chat2");
+        var chat = chatList.Data.First();
 
         await chatService.AddUsers(user1.Id, chat.Id, new List<int>
         {
@@ -157,9 +165,13 @@ public class MessageServiceTest : BaseMessageTestService<IMessageService, Messag
             Logo = "null",
             IsGroup = true,
         });
-
-        var chatList = await chatService.FindChatByName(user1.Id, "Chat2");
-        var chat = chatList.First();
+        var paginationModel = new PaginationModel
+        {
+            CurrentPage = 1,
+            PageSize = 1
+        };
+        var chatList = await chatService.FindChatByName(user1.Id,paginationModel, "Chat2");
+        var chat = chatList.Data.First();
 
         await chatService.AddUsers(user1.Id, chat.Id, new List<int>
         {
@@ -255,9 +267,13 @@ public class MessageServiceTest : BaseMessageTestService<IMessageService, Messag
             Logo = "null",
             IsGroup = true,
         });
-
-        var chatList = await chatService.FindChatByName(user1.Id, "Chat2");
-        var chat = chatList.First();
+        var paginationModel = new PaginationModel
+        {
+            CurrentPage = 1,
+            PageSize = 1
+        };
+        var chatList = await chatService.FindChatByName(user1.Id,paginationModel, "Chat2");
+        var chat = chatList.Data.First();
 
         await chatService.AddUsers(user1.Id, chat.Id, new List<int>
         {

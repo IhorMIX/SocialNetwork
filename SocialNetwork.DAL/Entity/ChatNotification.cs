@@ -3,6 +3,5 @@
 public class ChatNotification : BaseNotificationEntity
 {
     public int ChatId { get; set; }
-    public string ChatName { get; set; } = null!;
-    public string Logo { get; set; } = null!;
+    public Chat Chat { get; set; } = null!;
 }

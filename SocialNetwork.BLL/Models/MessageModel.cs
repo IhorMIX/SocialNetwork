@@ -7,7 +7,6 @@ public class MessageModel : BaseModel
 
     public DateTime CreatedAt { get; set; }
     
-    public bool IsRead { get; set; }
     public bool IsEdited { get; set; }
     public bool IsDeleted { get; set; }
     
@@ -17,8 +16,9 @@ public class MessageModel : BaseModel
     public int? ToReplyMessageId { get; set; }
     
     public ChatMemberModel? Author { get; set; }
-    public ChatModel ChatModel { get; set; } = null!;
+    public ChatModel Chat { get; set; } = null!;
     public MessageModel? ToReplyMessage { get; set; }
     
     public ICollection<ReactionModel> Reactions { get; set; } = null!;
+    public ICollection<MessageReadStatusModel>? MessageReadStatuses { get; set; }
 }
