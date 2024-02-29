@@ -33,6 +33,8 @@ public class UserServiceTest : DefaultServiceTest<IUserService, UserService>
         services.AddScoped<IFriendshipRepository, FriendshipRepository>();
         services.AddScoped<IFriendRequestRepository, FriendRequestRepository>();
         
+        services.AddScoped<INotificationRepository, NotificationRepository>();
+        services.AddScoped<INotificationService, NotificationService>();
         base.SetUpAdditionalDependencies(services);
     }
 

@@ -36,7 +36,7 @@ public class FriendRequestRepository : IFriendRequestRepository
             .Where(f =>
                 (f.SenderId == friendRequest.SenderId && f.ReceiverId == friendRequest.ReceiverId))
             .SingleOrDefaultAsync(cancellationToken);
-
+        
         if (friendRequestToRemove != null)
         {
             _socialNetworkDbContext.FriendRequests.Remove(friendRequestToRemove);
@@ -65,11 +65,13 @@ public class FriendRequestRepository : IFriendRequestRepository
         return false;
     }
 
-    public async Task CreateFriendRequestAsync(FriendRequest friendRequest,
+    public async Task<int> CreateFriendRequestAsync(FriendRequest friendRequest,
         CancellationToken cancellationToken = default)
     {
-        await _socialNetworkDbContext.FriendRequests.AddAsync(friendRequest, cancellationToken);
+        
+        var entityEntry = await _socialNetworkDbContext.FriendRequests.AddAsync(friendRequest, cancellationToken);
         await _socialNetworkDbContext.SaveChangesAsync(cancellationToken);
+        return entityEntry.Entity.Id;
     }
 
     public async Task<bool> RequestExists(int senderId, int receiverId, CancellationToken cancellationToken = default)

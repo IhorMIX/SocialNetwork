@@ -8,7 +8,7 @@ public interface IFriendRequestRepository : IBasicRepository<FriendRequest>
     Task<bool> DeleteAllFriendRequestAsync(int userId, CancellationToken cancellationToken = default);
 
     Task<bool> RequestExists(int senderId, int receiverId, CancellationToken cancellationToken = default);
-    Task CreateFriendRequestAsync(FriendRequest friendRequest, CancellationToken cancellationToken = default);
+    Task<int> CreateFriendRequestAsync(FriendRequest friendRequest, CancellationToken cancellationToken = default);
     
     IQueryable<FriendRequest> GetAllFriendRequests(int id);
 }

@@ -16,4 +16,7 @@ public interface IUserRepository : IBasicRepository<User>
     Task DeleteUserAsync(User user, CancellationToken cancellationToken = default);
 
     Task<User?> GetByIdDisabledUser(int id, CancellationToken cancellationToken = default);
+
+    Task ChangeOnlineStatus(int userId, CancellationToken cancellationToken = default);
+
 }

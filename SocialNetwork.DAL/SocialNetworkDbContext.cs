@@ -28,6 +28,12 @@ public class SocialNetworkDbContext : DbContext
     public DbSet<FileEntity> Files { get; set; }
 
     public DbSet<BlackList> BlackLists { get; set; }
+    public DbSet<FriendRequestNotification> FriendRequestNotifications { get; set; }
+    public DbSet<ChatNotification> ChatFriendRequestNotifications { get; set; }
+    public DbSet<MessageNotification> MessageNotifications { get; set; }
+    public DbSet<ReactionNotification> ReactionNotifications { get; set; }
+    public DbSet<BaseNotificationEntity> Notifications { get; set; }
+    public DbSet<MessageReadStatus> MessageReadStatuses { get; set; }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(SocialNetworkDbContext).Assembly);

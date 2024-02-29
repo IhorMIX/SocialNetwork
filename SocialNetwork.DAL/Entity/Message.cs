@@ -8,18 +8,17 @@ public class Message : BaseEntity
     public ICollection<FileEntity>? Files { get; set; }
 
     public DateTime CreatedAt { get; set; }
-    
-    public bool IsRead { get; set; }
+
     public bool IsEdited { get; set; }
     public bool IsDeleted { get; set; }
-    
+
     public int AuthorId { get; set; }
     public int ChatId { get; set; }
     public int? ToReplyMessageId { get; set; }
-    
-    public ChatMember? Author { get; set; }
+
+    public ChatMember Author { get; set; } = null!;
     public Chat Chat { get; set; } = null!;
     public Message? ToReplyMessage { get; set; }
-    
-    public ICollection<Reaction>? Reactions { get; set; }
+    public ICollection<Reaction> Reactions { get; set; } = null!;
+    public ICollection<MessageReadStatus> MessageReadStatuses { get; set; } = null!;
 }

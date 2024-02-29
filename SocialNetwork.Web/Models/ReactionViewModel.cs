@@ -4,5 +4,5 @@ public class ReactionViewModel
 {
     private int Id { get; set; }
     public string Type { get; set; } = null!;
-    public UserViewModel Author { get; set; } = null!;
+    public ChatMemberViewModel Author { get; set; } = null!;
 }

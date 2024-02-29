@@ -28,6 +28,9 @@ public class FriendRequestTest : DefaultServiceTest<IFriendRequestService, Frien
         services.AddScoped<IChatMemberRepository, ChatMemberRepository>();
         services.AddScoped<IBlackListService, BlackListService>();
         services.AddScoped<IBlackListRepository, BlackListRepository>();
+        
+        services.AddScoped<INotificationRepository, NotificationRepository>();
+        services.AddScoped<INotificationService, NotificationService>();
         base.SetUpAdditionalDependencies(services);
     }
 

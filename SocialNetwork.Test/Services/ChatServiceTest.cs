@@ -77,7 +77,7 @@ public class ChatServiceTest : BaseMessageTestService<IChatService, ChatService>
         chat = await Service.FindChatByName(user1.Id, new PaginationModel { CurrentPage = 1, PageSize = 10 }, "Chat2");
         Assert.That(chat.Data.First().ChatMembers!.Count == 4);
 
-        await Service.DelMember(user1.Id, chat.Data.First().Id, new List<int>() { user2.Id });
+        await Service.DelMembers(user1.Id, chat.Data.First().Id, new List<int>() { user2.Id });
         chat = await Service.FindChatByName(user1.Id, new PaginationModel { CurrentPage = 1, PageSize = 10 }, "Chat2");
         Assert.That(chat.Data.First().ChatMembers!.Count == 3);
 
@@ -315,10 +315,12 @@ public class ChatServiceTest : BaseMessageTestService<IChatService, ChatService>
         chat = (await Service.FindChatByName(user1.Id, paginationModel, "ChatLeave")).Data.First();
         
         Assert.ThrowsAsync<CreatorCantLeaveException>( async () => await Service.LeaveChat(user1.Id, chat.Id));
+        
         await Service.MakeHost(user1.Id, chat.Id, user2.Id);
         chat = (await Service.FindChatByName(user1.Id, paginationModel,"ChatLeave")).Data.First();
         var chatService = ServiceProvider.GetRequiredService<IChatMemberRepository>();
         var chatMember2 = await chatService.GetByUserIdAndChatId(user2.Id, chat.Id);
+        
         Assert.That(chatMember2!.Role.Any(r => r.Rank == 0));
         
     }

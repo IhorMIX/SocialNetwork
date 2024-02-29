@@ -2,7 +2,9 @@
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Http.Connections;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Newtonsoft.Json.Converters;
+using SocialNetwork.BLL.Helpers;
 using SocialNetwork.BLL.Services;
 using SocialNetwork.BLL.Services.Interfaces;
 using SocialNetwork.BLL.Settings;
@@ -74,15 +76,20 @@ public class Startup
         services.AddScoped<IMessageRepository, MessageRepository>();
         services.AddScoped<IMessageService, MessageService>();
 
-
         services.AddScoped<IBlackListService, BlackListService>();
         services.AddScoped<IBlackListRepository, BlackListRepository>();
-
 
         services.AddScoped<IReactionService, ReactionService>();
         services.AddScoped<IReactionRepository, ReactionRepository>();
         
-
+        services.AddScoped<INotificationRepository, NotificationRepository>();
+        services.AddScoped<INotificationService, NotificationService>();
+        services.AddScoped<IMessageReadStatusRepository, MessageReadStatusRepository>();
+        
+        services.AddSingleton<IDbReadySignal, DbContextReadySignal>();
+        services.AddSingleton<DelayedWriter>();
+        services.AddSingleton<IUserInChatTracker, UserInChatTracker>();
+            
         var connectionString = Environment.GetEnvironmentVariable("SQLSERVER_CONNECTION_STRING") ?? Configuration.GetConnectionString("ConnectionString");
 
         services.AddDbContext<SocialNetworkDbContext>(options =>
@@ -116,6 +123,14 @@ public class Startup
         {
             endpoints.MapDefaultControllerRoute();
             endpoints.MapHub<ChatHub>("/chatHub", options =>
+            {
+                options.Transports = HttpTransportType.LongPolling | HttpTransportType.WebSockets;
+            });
+            endpoints.MapHub<OnlineStatusHub>("/connection", options =>
+            {
+                options.Transports = HttpTransportType.LongPolling | HttpTransportType.WebSockets;
+            });
+            endpoints.MapHub<NotificationHub>("/notification", options =>
             {
                 options.Transports = HttpTransportType.LongPolling | HttpTransportType.WebSockets;
             });

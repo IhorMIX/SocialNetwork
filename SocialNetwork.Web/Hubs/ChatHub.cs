@@ -5,7 +5,10 @@ using System.Text.Json;
 using SocialNetwork.BLL.Models;
 using SocialNetwork.BLL.Models.Enums;
 using SocialNetwork.BLL.Services.Interfaces;
+using SocialNetwork.DAL.Entity;
+using SocialNetwork.DAL.Repository.Interfaces;
 using SocialNetwork.Web.Extensions;
+using SocialNetwork.Web.Helpers;
 using SocialNetwork.Web.Models;
 
 namespace SocialNetwork.Web.Hubs;
@@ -18,115 +21,174 @@ public class ChatHub : Hub
     private readonly IUserService _userService;
     private readonly IChatService _chatService;
     private readonly IMapper _mapper;
-
-    public ChatHub(IMessageService messageService, IMapper mapper, IUserService userService, IChatService chatService, IReactionService reactionService)
+    private readonly INotificationService _notificationService;
+    private readonly IUserInChatTracker _userTracker;
+    private readonly IHubContext<NotificationHub> _notificationHubContext;
+    
+    public ChatHub(IMessageService messageService, IMapper mapper, IUserService userService, IChatService chatService,
+        IReactionService reactionService, INotificationService notificationService, IUserInChatTracker userTracker, IHubContext<NotificationHub> notificationHubContext)
     {
         _messageService = messageService;
         _mapper = mapper;
         _userService = userService;
         _chatService = chatService;
         _reactionService = reactionService;
+        _notificationService = notificationService;
+        _userTracker = userTracker;
+        _notificationHubContext = notificationHubContext;
     }
-    
+
     public async Task SendMessage(int chatId, string textMess, List<FileSend> files)
     {
         var userId = Context.GetHttpContext()!.User.GetUserId();
+        var connectedUsers = (_userTracker.GetUsersInGroup(chatId.ToString())).ConvertAll(int.Parse);
         
-        var message = await _messageService.CreateMessage(userId, chatId,
+        var messageModel = await _messageService.CreateMessage(userId, chatId,
             new MessageModel()
             {
-                Text = textMess, 
+                Text = textMess,
                 FileModels = _mapper.Map<List<FileModel>>(files),
-            }, CancellationToken.None);
+            },
+            CancellationToken.None);
         
-        await Clients.Group(message.ChatId.ToString()).SendAsync("ReceiveMessage", JsonSerializer.Serialize(_mapper.Map<MessageViewModel>(message)));
+        await Clients.Group(chatId.ToString()).SendAsync("ReceiveMessage",
+            JsonSerializer.Serialize(_mapper.Map<MessageViewModel>(messageModel)));
+       
+        var notifications = await _messageService.CreateNotification(messageModel, connectedUsers);
         
+        foreach (var notification in notifications)
+        {
+            await _notificationHubContext.Clients.Group(notification!.ToUserId.ToString())
+                .SendAsync("ReceivedNotification", JsonSerializer.Serialize(_mapper.Map<BaseNotificationViewModel>(notification)));
+        }
         await Clients.GroupExcept(chatId.ToString(), Context.ConnectionId).SendAsync("UserTyping", userId);
     }
 
     public async Task ReplyMessage(int chatId, string textMess, List<FileSend> files, int messageToReplyId)
     {
         var userId = Context.GetHttpContext()!.User.GetUserId();
+        var connectedUsers = (_userTracker.GetUsersInGroup(chatId.ToString())).ConvertAll(int.Parse);
         
-        var message = await _messageService.ReplyMessageAsync(userId, chatId, messageToReplyId,
+        var messageModel = await _messageService.ReplyMessageAsync(userId, chatId, messageToReplyId,
             new MessageModel()
             {
-                Text = textMess, 
+                Text = textMess,
                 FileModels = _mapper.Map<List<FileModel>>(files),
-            }, CancellationToken.None);
-        
-        await Clients.Group(message.ChatId.ToString()).SendAsync("ReplyOnMessage", JsonSerializer.Serialize(_mapper.Map<MessageViewModel>(message)));
+            },
+            CancellationToken.None);
+        await Clients.Group(chatId.ToString()).SendAsync("ReceiveReplyOnMessage",
+            JsonSerializer.Serialize(_mapper.Map<MessageViewModel>(messageModel)));
+
+        var notifications = await _messageService.CreateNotification(messageModel, connectedUsers);
+        foreach (var notification in notifications)
+        {
+            await _notificationHubContext.Clients.Group(notification!.ToUserId.ToString())
+                .SendAsync("ReceivedNotification", JsonSerializer.Serialize(_mapper.Map<BaseNotificationViewModel>(notification)));
+        }
         
         await Clients.GroupExcept(chatId.ToString(), Context.ConnectionId).SendAsync("UserTyping", userId);
     }
-    
+
     public async Task TextTyping(int chatId)
     {
         var userId = Context.GetHttpContext()!.User.GetUserId();
         var user = await _userService.GetByIdAsync(userId, CancellationToken.None);
-        
+
         await Clients.GroupExcept(chatId.ToString(), Context.ConnectionId).SendAsync("TextTyping", user!.Profile.Name);
     }
-    
+
+
     public override async Task OnConnectedAsync()
     {
-        var userId = Context.GetHttpContext()!.User.GetUserId();
-        await _userService.ChangeOnlineStatus(userId, CancellationToken.None);
-        var userChats = await _chatService.GetAllChats(userId, CancellationToken.None);
+        var chatIdValues = Context.GetHttpContext()!.Request.Query["chatId"];
         
-        foreach (var chat in userChats.Data)
+        if (!string.IsNullOrEmpty(chatIdValues))
         {
-            await Groups.AddToGroupAsync(Context.ConnectionId, chat.Id.ToString());
-        }
-        await base.OnConnectedAsync();
-    } 
-    public override async Task OnDisconnectedAsync(Exception? exception)
-    {
-        var userId = Context.GetHttpContext()!.User.GetUserId();
-        await _userService.ChangeOnlineStatus(userId, CancellationToken.None);
-        var userChats = await _chatService.GetAllChats(userId, CancellationToken.None);
-        foreach (var chat in userChats.Data)
-        {
-            await Groups.RemoveFromGroupAsync(Context.ConnectionId, chat.Id.ToString());
+            var stringChatId = chatIdValues[0];
+            var userId = Context.GetHttpContext()!.User.GetUserId();
+            var isInChat =  await _chatService.UserInChatCheck(userId, int.Parse(stringChatId!));
+            
+            if (isInChat)
+            {
+                await Groups.AddToGroupAsync(Context.ConnectionId, stringChatId!);
+                _userTracker.AddToGroup(userId.ToString(), stringChatId!);
+            }
         }
         await base.OnConnectedAsync();
     }
-    
+
+    public override async Task OnDisconnectedAsync(Exception? exception)
+    {
+        var chatIdValues = Context.GetHttpContext()!.Request.Query["chatId"];
+        if (!string.IsNullOrEmpty(chatIdValues))
+        {
+            var chatId = chatIdValues[0];
+            var userId = Context.GetHttpContext()!.User.GetUserId();
+            var userChats = (await _chatService.GetAllChats(userId, CancellationToken.None)).Data;
+            
+            if (userChats.Any(chat => chat.Id.ToString() == chatId))
+            {
+                await Groups.RemoveFromGroupAsync(Context.ConnectionId, chatId!);
+                _userTracker.RemoveFromGroup(userId.ToString(), chatId!);
+            }
+        }
+        await base.OnDisconnectedAsync(exception);
+    }
+
     //need pagination
     public async Task OpenChat(int chatId)
     {
         var userId = Context.GetHttpContext()!.User.GetUserId();
+        // optimize
         var messages = await _messageService.GetMessagesAsync(userId, chatId, CancellationToken.None);
-        await Clients.Caller.SendAsync("GetMessages", JsonSerializer.Serialize(_mapper.Map<List<MessageViewModel>>(messages)));
-    }
+        await _messageService.ReadMessages(userId, chatId, messages, CancellationToken.None);
+        messages = await _messageService.GetMessagesAsync(userId, chatId, CancellationToken.None);
 
+        await Clients.Caller.SendAsync("GetMessages",
+            JsonSerializer.Serialize(_mapper.Map<List<MessageViewModel>>(messages)));
+    }
+    
     public async Task AddReaction(int chatId, int messageId, AddReactionModel reaction)
     {
         var userId = Context.GetHttpContext()!.User.GetUserId();
-        await _reactionService.AddReaction(userId, messageId, _mapper.Map<ReactionModel>(reaction), CancellationToken.None);
-        var message = await _messageService.GetByIdAsync(messageId, CancellationToken.None);
-        await Clients.Group(chatId.ToString()).SendAsync("AddReactionToMessage", JsonSerializer.Serialize(_mapper.Map<MessageViewModel>(message)));
+      
+        var reactionModel = await _reactionService.AddReaction(userId, messageId, _mapper.Map<ReactionModel>(reaction),
+            CancellationToken.None);
+        
+        await Clients.Group(chatId.ToString()).SendAsync("AddReactionToMessage",
+            JsonSerializer.Serialize(_mapper.Map<ReactionViewModel>(reactionModel)));
+       
+        if (reaction.Type != reactionModel.Type)
+        {
+            var notification = await _reactionService.CreateNotification(reactionModel);
+        
+            await _notificationHubContext.Clients.Group(notification!.ToUserId.ToString())
+                .SendAsync("ReceivedNotification", JsonSerializer.Serialize(_mapper.Map<BaseNotificationViewModel>(notification)));
+        }
     }
-    
+
     public async Task DelReaction(int chatId, int messageId, int reactionId)
     {
         var userId = Context.GetHttpContext()!.User.GetUserId();
         var message = await _messageService.GetByIdAsync(messageId, CancellationToken.None);
-        await Clients.Group(chatId.ToString()).SendAsync("RemoveReactionToMessage", JsonSerializer.Serialize(_mapper.Map<MessageViewModel>(message)));
+        await Clients.Group(chatId.ToString()).SendAsync("RemoveReactionToMessage",
+            JsonSerializer.Serialize(_mapper.Map<MessageViewModel>(message)));
         await _reactionService.RemoveReaction(userId, chatId, reactionId, CancellationToken.None);
     }
-    
+
     public async Task DelMessage(int chatId, int messageId, bool isForAuthor)
     {
         var userId = Context.GetHttpContext()!.User.GetUserId();
         var message = await _messageService.GetByIdAsync(userId, chatId, messageId, CancellationToken.None);
         if (isForAuthor)
-            await Clients.Caller.SendAsync("DelMessageForAuthor", JsonSerializer.Serialize(_mapper.Map<MessageViewModel>(message)));
+            await Clients.Caller.SendAsync("DelMessageForAuthor",
+                JsonSerializer.Serialize(_mapper.Map<MessageViewModel>(message)));
         else
-            await Clients.Group(chatId.ToString()).SendAsync("DelMessage", JsonSerializer.Serialize(_mapper.Map<MessageViewModel>(message)));
+            await Clients.Group(chatId.ToString()).SendAsync("DelMessage",
+                JsonSerializer.Serialize(_mapper.Map<MessageViewModel>(message)));
         await _messageService.DeleteMessageAsync(userId, chatId, messageId, isForAuthor, CancellationToken.None);
     }
-    
+
     public async Task EditMessage(int chatId, int messageId, string textMess, List<FileSend> files)
     {
         var userId = Context.GetHttpContext()!.User.GetUserId();

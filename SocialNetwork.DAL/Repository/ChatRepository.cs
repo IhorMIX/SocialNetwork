@@ -26,6 +26,7 @@ public class ChatRepository : IChatRepository
         return await _socialNetworkDbContext.Chats
             .Include(i => i.ChatMembers)
             .Include(c => c.Roles)
+            .Include(c => c.ChatMembers).ThenInclude(i => i.User)
             .FirstOrDefaultAsync(i => i.Id == id, cancellationToken);
     }
 
@@ -45,18 +46,13 @@ public class ChatRepository : IChatRepository
     public async Task AddChatMemberAsync(ChatMember сhatMember, Chat chat,
         CancellationToken cancellationToken = default)
     {
-        if (chat.ChatMembers == null)
-            chat.ChatMembers = new List<ChatMember>();
         chat.ChatMembers.Add(сhatMember);
-        _socialNetworkDbContext.ChatMembers.AddRange(сhatMember);
         await _socialNetworkDbContext.SaveChangesAsync(cancellationToken);
     }
 
     public async Task AddChatMemberAsync(List<ChatMember> сhatMembers, Chat chat,
         CancellationToken cancellationToken = default)
     {
-        if (chat.ChatMembers == null)
-            chat.ChatMembers = new List<ChatMember>();
         _socialNetworkDbContext.ChatMembers.AddRange(сhatMembers);
         await _socialNetworkDbContext.SaveChangesAsync(cancellationToken);
     }

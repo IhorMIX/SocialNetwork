@@ -7,14 +7,14 @@ public interface IChatService : IBaseService<ChatModel>
 {
     Task CreateP2PChat(int userId, int user2Id, ChatModel chatModel, CancellationToken cancellationToken = default);
     Task<ChatModel> CreateGroupChat(int userId, ChatModel chatModel, CancellationToken cancellationToken = default);
-    Task AddUsers(int userId, int chatId, List<int> userIds, CancellationToken cancellationToken = default);
-    Task DelMember(int userId, int chatId, List<int> userIds, CancellationToken cancellationToken = default);
+    Task<IEnumerable<ChatNotificationModel>> AddUsers(int userId, int chatId, List<int> userIds, CancellationToken cancellationToken = default);
+    Task<IEnumerable<ChatNotificationModel>> DelMembers(int userId, int chatId, List<int> userIds, CancellationToken cancellationToken = default);
     
     Task<ChatModel> EditChat(int userId, int chatId, ChatModel chatModel, CancellationToken cancellationToken = default);
     Task DeleteChat(int userId, int chatId, CancellationToken cancellationToken = default);
     Task<PaginationResultModel<ChatModel>> FindChatByName(int userId, PaginationModel pagination, string chatName, CancellationToken cancellationToken = default);
     Task<PaginationResultModel<ChatModel>> GetAllChats(int userId, CancellationToken cancellationToken = default);
-    Task<PaginationResultModel<ChatModel>> GetAllChats(int userId, PaginationModel pagination, CancellationToken cancellationToken = default);
+    Task<PaginationResultModel<ChatModel>> GetAllChats(int userId, PaginationModel? pagination, CancellationToken cancellationToken = default);
 
     Task AddRole(int userId, int chatId, RoleModel roleModel, CancellationToken cancellationToken = default);
     Task<RoleModel> GetRoleById(int userId, int chatId, int roleId, CancellationToken cancellationToken = default);
@@ -33,4 +33,5 @@ public interface IChatService : IBaseService<ChatModel>
 
     Task LeaveChat(int userId, int chatId, CancellationToken cancellationToken = default);
     Task MakeHost(int userId, int chatId, int user2Id, CancellationToken cancellationToken = default);
+    Task<bool> UserInChatCheck(int userId, int chatId, CancellationToken cancellationToken = default);
 }

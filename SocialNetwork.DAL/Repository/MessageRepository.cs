@@ -16,9 +16,12 @@ public class MessageRepository : IMessageRepository
     public IQueryable<Message> GetAll()
     {
         return _socialNetworkDbContext.Messages.Include(m => m.Chat)
-            .Include(m => m.Author)
+            .Include(m => m.Author).ThenInclude(m => m.User).ThenInclude(i => i.Profile)
+            .Include(m => m.Author).ThenInclude(m => m.Role)
             .Include(m => m.Reactions)
             .Include(m => m.Files)
+            .Include(i => i.MessageReadStatuses)!.ThenInclude(i => i.ChatMember).ThenInclude(i => i.User).ThenInclude(i => i.Profile)
+            .Include(i => i.MessageReadStatuses)!.ThenInclude(i => i.ChatMember).ThenInclude(i => i.Role)
             .AsQueryable();
     }
 

@@ -66,6 +66,45 @@ namespace SocialNetwork.DAL.Migrations
                     b.ToTable("AuthorizationInfo");
                 });
 
+            modelBuilder.Entity("SocialNetwork.DAL.Entity.BaseNotificationEntity", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Discriminator")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("InitiatorId")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsRead")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("NotificationMessage")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("ToUserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("InitiatorId");
+
+                    b.ToTable("Notifications");
+
+                    b.HasDiscriminator<string>("Discriminator").HasValue("BaseNotificationEntity");
+
+                    b.UseTphMappingStrategy();
+                });
+
             modelBuilder.Entity("SocialNetwork.DAL.Entity.BlackList", b =>
                 {
                     b.Property<int>("UserId")
@@ -217,9 +256,6 @@ namespace SocialNetwork.DAL.Migrations
                     b.Property<bool>("IsEdited")
                         .HasColumnType("bit");
 
-                    b.Property<bool>("IsRead")
-                        .HasColumnType("bit");
-
                     b.Property<string>("Text")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -236,6 +272,30 @@ namespace SocialNetwork.DAL.Migrations
                     b.HasIndex("ToReplyMessageId");
 
                     b.ToTable("Messages");
+                });
+
+            modelBuilder.Entity("SocialNetwork.DAL.Entity.MessageReadStatus", b =>
+                {
+                    b.Property<int>("ChatMemberId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("MessageId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Id")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsRead")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime>("ReadAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("ChatMemberId", "MessageId");
+
+                    b.HasIndex("MessageId");
+
+                    b.ToTable("MessageReadStatuses");
                 });
 
             modelBuilder.Entity("SocialNetwork.DAL.Entity.Profile", b =>
@@ -393,6 +453,54 @@ namespace SocialNetwork.DAL.Migrations
                     b.ToTable("Users");
                 });
 
+            modelBuilder.Entity("SocialNetwork.DAL.Entity.ChatNotification", b =>
+                {
+                    b.HasBaseType("SocialNetwork.DAL.Entity.BaseNotificationEntity");
+
+                    b.Property<int>("ChatId")
+                        .HasColumnType("int");
+
+                    b.HasIndex("ChatId");
+
+                    b.HasDiscriminator().HasValue("ChatNotification");
+                });
+
+            modelBuilder.Entity("SocialNetwork.DAL.Entity.FriendRequestNotification", b =>
+                {
+                    b.HasBaseType("SocialNetwork.DAL.Entity.BaseNotificationEntity");
+
+                    b.Property<int>("FriendRequestId")
+                        .HasColumnType("int");
+
+                    b.HasDiscriminator().HasValue("FriendRequestNotification");
+                });
+
+            modelBuilder.Entity("SocialNetwork.DAL.Entity.MessageNotification", b =>
+                {
+                    b.HasBaseType("SocialNetwork.DAL.Entity.ChatNotification");
+
+                    b.Property<int>("MessageId")
+                        .HasColumnType("int");
+
+                    b.HasIndex("MessageId");
+
+                    b.HasDiscriminator().HasValue("MessageNotification");
+                });
+
+            modelBuilder.Entity("SocialNetwork.DAL.Entity.ReactionNotification", b =>
+                {
+                    b.HasBaseType("SocialNetwork.DAL.Entity.ChatNotification");
+
+                    b.Property<int>("ReactionId")
+                        .HasColumnType("int");
+
+                    b.HasIndex("ReactionId")
+                        .IsUnique()
+                        .HasFilter("[ReactionId] IS NOT NULL");
+
+                    b.HasDiscriminator().HasValue("ReactionNotification");
+                });
+
             modelBuilder.Entity("ChatMemberRole", b =>
                 {
                     b.HasOne("SocialNetwork.DAL.Entity.ChatMember", null)
@@ -417,6 +525,17 @@ namespace SocialNetwork.DAL.Migrations
                         .IsRequired();
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("SocialNetwork.DAL.Entity.BaseNotificationEntity", b =>
+                {
+                    b.HasOne("SocialNetwork.DAL.Entity.User", "Initiator")
+                        .WithMany("Notifications")
+                        .HasForeignKey("InitiatorId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Initiator");
                 });
 
             modelBuilder.Entity("SocialNetwork.DAL.Entity.BlackList", b =>
@@ -517,7 +636,7 @@ namespace SocialNetwork.DAL.Migrations
                     b.HasOne("SocialNetwork.DAL.Entity.Chat", "Chat")
                         .WithMany("Messages")
                         .HasForeignKey("ChatId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.ClientCascade)
                         .IsRequired();
 
                     b.HasOne("SocialNetwork.DAL.Entity.Message", "ToReplyMessage")
@@ -529,6 +648,25 @@ namespace SocialNetwork.DAL.Migrations
                     b.Navigation("Chat");
 
                     b.Navigation("ToReplyMessage");
+                });
+
+            modelBuilder.Entity("SocialNetwork.DAL.Entity.MessageReadStatus", b =>
+                {
+                    b.HasOne("SocialNetwork.DAL.Entity.ChatMember", "ChatMember")
+                        .WithMany()
+                        .HasForeignKey("ChatMemberId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("SocialNetwork.DAL.Entity.Message", "Message")
+                        .WithMany("MessageReadStatuses")
+                        .HasForeignKey("MessageId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ChatMember");
+
+                    b.Navigation("Message");
                 });
 
             modelBuilder.Entity("SocialNetwork.DAL.Entity.Profile", b =>
@@ -581,6 +719,39 @@ namespace SocialNetwork.DAL.Migrations
                     b.Navigation("Role");
                 });
 
+            modelBuilder.Entity("SocialNetwork.DAL.Entity.ChatNotification", b =>
+                {
+                    b.HasOne("SocialNetwork.DAL.Entity.Chat", "Chat")
+                        .WithMany()
+                        .HasForeignKey("ChatId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Chat");
+                });
+
+            modelBuilder.Entity("SocialNetwork.DAL.Entity.MessageNotification", b =>
+                {
+                    b.HasOne("SocialNetwork.DAL.Entity.Message", "Message")
+                        .WithMany()
+                        .HasForeignKey("MessageId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Message");
+                });
+
+            modelBuilder.Entity("SocialNetwork.DAL.Entity.ReactionNotification", b =>
+                {
+                    b.HasOne("SocialNetwork.DAL.Entity.Reaction", "Reaction")
+                        .WithOne("Notification")
+                        .HasForeignKey("SocialNetwork.DAL.Entity.ReactionNotification", "ReactionId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Reaction");
+                });
+
             modelBuilder.Entity("SocialNetwork.DAL.Entity.Chat", b =>
                 {
                     b.Navigation("ChatMembers");
@@ -601,7 +772,14 @@ namespace SocialNetwork.DAL.Migrations
                 {
                     b.Navigation("Files");
 
+                    b.Navigation("MessageReadStatuses");
+
                     b.Navigation("Reactions");
+                });
+
+            modelBuilder.Entity("SocialNetwork.DAL.Entity.Reaction", b =>
+                {
+                    b.Navigation("Notification");
                 });
 
             modelBuilder.Entity("SocialNetwork.DAL.Entity.Role", b =>
@@ -618,6 +796,8 @@ namespace SocialNetwork.DAL.Migrations
                     b.Navigation("ChatMembers");
 
                     b.Navigation("Friends");
+
+                    b.Navigation("Notifications");
 
                     b.Navigation("Profile")
                         .IsRequired();

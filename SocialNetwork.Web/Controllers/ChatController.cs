@@ -1,10 +1,13 @@
-﻿using AutoMapper;
+﻿using System.Text.Json;
+using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using SocialNetwork.BLL.Models;
 using SocialNetwork.BLL.Services;
 using SocialNetwork.BLL.Services.Interfaces;
 using SocialNetwork.Web.Extensions;
+using SocialNetwork.Web.Hubs;
 using SocialNetwork.Web.Models;
 
 namespace SocialNetwork.Web.Controllers;
@@ -17,12 +20,13 @@ public class ChatController : ControllerBase
     private readonly ILogger<ChatController> _logger;
     private readonly IMapper _mapper;
     private readonly IChatService _chatService;
-
-    public ChatController(ILogger<ChatController> logger, IMapper mapper, IChatService chatService)
+    private readonly IHubContext<NotificationHub> _notificationHubContext;
+    public ChatController(ILogger<ChatController> logger, IMapper mapper, IChatService chatService, IHubContext<NotificationHub> notificationHubContext)
     {
         _logger = logger;
         _mapper = mapper;
         _chatService = chatService;
+        _notificationHubContext = notificationHubContext;
     }
 
 
@@ -41,8 +45,13 @@ public class ChatController : ControllerBase
     {
         _logger.LogInformation("Start to add user in chat");
         var userId = User.GetUserId();
-        await _chatService.AddUsers(userId, addUserInChatModel.ChatId, addUserInChatModel.NewMeberIds, cancellationToken);
+        var notifications = await _chatService.AddUsers(userId, addUserInChatModel.ChatId, addUserInChatModel.NewMeberIds, cancellationToken);
         _logger.LogInformation("User was added in chat");
+        foreach (var notification in notifications)
+        {
+            await _notificationHubContext.Clients.Group(notification!.ToUserId.ToString())
+                .SendAsync("ReceivedNotification", JsonSerializer.Serialize(_mapper.Map<BaseNotificationViewModel>(notification)), cancellationToken: cancellationToken);
+        }
         return Ok();
     }
 
@@ -51,12 +60,16 @@ public class ChatController : ControllerBase
     {
         _logger.LogInformation("Start to delete user in chat");
         var userId = User.GetUserId();
-        await _chatService.DelMember(userId, delChatMembersModel.ChatId, delChatMembersModel.MemberIds , cancellationToken);
+        var notifications = await _chatService.DelMembers(userId, delChatMembersModel.ChatId, delChatMembersModel.MemberIds , cancellationToken);
         _logger.LogInformation("User was deleted in chat");
+        foreach (var notification in notifications)
+        {
+            await _notificationHubContext.Clients.Group(notification!.ToUserId.ToString())
+                .SendAsync("ReceivedNotification", JsonSerializer.Serialize(_mapper.Map<BaseNotificationViewModel>(notification)), cancellationToken);
+        }
         return Ok();
     }
     
-    //EditChat
     [HttpPost("edit-chat")]
     public async Task<IActionResult> EditChat([FromBody] ChatEditModel chatEditModel ,CancellationToken cancellationToken)
     {
@@ -84,7 +97,7 @@ public class ChatController : ControllerBase
     }
     
     [HttpGet("all-chats")]
-    public async Task<IActionResult> GetAllChats([FromQuery] PaginationModel pagination, CancellationToken cancellationToken)
+    public async Task<IActionResult> GetAllChats([FromQuery] PaginationModel? pagination, CancellationToken cancellationToken)
     {
         var userId = User.GetUserId();
         var chat = await _chatService.GetAllChats(userId, pagination, cancellationToken);

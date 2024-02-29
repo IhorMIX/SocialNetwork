@@ -11,4 +11,5 @@ public class Reaction : BaseEntity
     public ChatMember Author { get; set; } = null!;
     
     public Message Message { get; set; } = null!;
+    public ReactionNotification? Notification { get; set; }
 }

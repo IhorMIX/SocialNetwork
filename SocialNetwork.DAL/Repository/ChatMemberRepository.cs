@@ -45,7 +45,7 @@ public class ChatMemberRepository : IChatMemberRepository
             .Include(c => c.Chat)
             .Include(c => c.Role)
             .ThenInclude(r => r.RoleAccesses)
-            .Include(c => c.User)
+            .Include(c => c.User).ThenInclude(i => i.Profile)
             .FirstOrDefaultAsync(i => i.User.Id == userId && i.Chat.Id == chatId, cancellationToken);
     }
 }

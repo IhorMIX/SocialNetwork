@@ -9,9 +9,7 @@ using SocialNetwork.BLL.Services.Interfaces;
 using SocialNetwork.DAL.Entity;
 using SocialNetwork.DAL.Entity.Enums;
 using SocialNetwork.DAL.Options;
-using SocialNetwork.DAL.Repository;
 using SocialNetwork.DAL.Repository.Interfaces;
-using System.Data;
 
 namespace SocialNetwork.BLL.Services;
 
@@ -22,11 +20,11 @@ public class ChatService : IChatService
     private readonly IFriendshipService _friendshipService;
     private readonly IRoleRepository _roleRepository;
     private readonly IBlackListRepository _blackListRepository;
-    private readonly IBlackListService _blackListService;
     private readonly ILogger<ChatService> _logger;
     private readonly IChatMemberRepository _chatMemberRepository;
     private readonly IMapper _mapper;
     private readonly RoleOption _roleOptions;
+    private readonly INotificationRepository _notificationRepository;
 
     public ChatService(
         IChatRepository chatRepository,
@@ -38,7 +36,7 @@ public class ChatService : IChatService
         IChatMemberRepository chatMemberRepository,
         IOptions<RoleOption> roleOptions,
         IBlackListRepository blackListRepository,
-        IBlackListService blackListService)
+        INotificationRepository notificationRepository)
     {
         _chatRepository = chatRepository;
         _logger = logger;
@@ -47,9 +45,9 @@ public class ChatService : IChatService
         _friendshipService = friendshipService;
         _roleRepository = roleRepository;
         _chatMemberRepository = chatMemberRepository;
+        _notificationRepository = notificationRepository;
         _roleOptions = roleOptions.Value;
         _blackListRepository = blackListRepository;
-        _blackListService = blackListService;
     }
 
     private async Task<ChatMember?> GetUserInChatAsync(int userId, int chatId, ChatAccess access,
@@ -144,7 +142,7 @@ public class ChatService : IChatService
         return _mapper.Map<ChatModel>(await _chatRepository.GetByIdAsync(chatId, cancellationToken));
     }
 
-    public async Task AddUsers(int userId, int chatId, List<int> userIds, CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<ChatNotificationModel>> AddUsers(int userId, int chatId, List<int> userIds, CancellationToken cancellationToken = default)
     {
         var userDb = await _userRepository.GetByIdAsync(userId, cancellationToken);
         _logger.LogAndThrowErrorIfNull(userDb, new UserNotFoundException($"User with this Id {userId} not found"));
@@ -168,23 +166,24 @@ public class ChatService : IChatService
         var alreadyIn = await _chatMemberRepository.GetAll()
             .Where(c => userIds.Contains(c.User.Id) && c.Chat.Id == chatId).Select(u => u.User.Id)
             .ToListAsync(cancellationToken);
-        var idsToAdd = userIds.Except(alreadyIn);
+        var idsToAdd = userIds.Except(alreadyIn).ToList();
 
         var roleList = new List<Role>()
-    {
-        (await _roleRepository.GetAll().Where(r => r.Chat == chatDb)
-            .FirstOrDefaultAsync(r => r.RoleName == "everyone", cancellationToken))!
-    };
+        {
+            (await _roleRepository.GetAll().Where(r => r.Chat == chatDb)
+                .FirstOrDefaultAsync(r => r.RoleName == "everyone", cancellationToken))!
+        };
 
         var usersToAdd = await _userRepository.GetAll().Where(i => idsToAdd.Contains(i.Id))
-        .ToListAsync(cancellationToken);
+            .ToListAsync(cancellationToken);
         _logger.LogAndThrowErrorIfNull(usersToAdd, new ChatNotFoundException($"Chat with this Id {chatId} not found"));
 
-        var BannedUsers = await _blackListRepository.GetAll().Where(i => i.UserId == userId && idsToAdd.Contains(i.BannedUserId)
-        || idsToAdd.Contains(i.UserId) && i.BannedUserId == userId).ToListAsync(cancellationToken);
+        var bannedUsers = await _blackListRepository.GetAll().Where(i =>
+            i.UserId == userId && idsToAdd.Contains(i.BannedUserId)
+            || idsToAdd.Contains(i.UserId) && i.BannedUserId == userId).ToListAsync(cancellationToken);
 
-        var bannedUserInChat = BannedUsers.Where(r => r.BannedUserId != userDb!.Id).Select(r => r.BannedUser)
-            .Union(BannedUsers.Where(r => r.UserId != userDb!.Id).Select(r => r.User)).ToList();
+        var bannedUserInChat = bannedUsers.Where(r => r.BannedUserId != userDb!.Id).Select(r => r.BannedUser)
+            .Union(bannedUsers.Where(r => r.UserId != userDb!.Id).Select(r => r.User)).ToList();
 
         foreach (var us in bannedUserInChat)
         {
@@ -206,9 +205,22 @@ public class ChatService : IChatService
             var excludedUsersMessage = string.Join(", ", banedUs);
             throw new BannedUserException($"Users {excludedUsersMessage} were not added to the chat.");
         }
-    }
 
-    public async Task DelMember(int userId, int chatId, List<int> userIds,
+        // in notification box
+        var chatNotifications = usersToAdd.Select(userToAdd => new ChatNotification
+        {
+            NotificationMessage = "You have been added to the chat",
+            CreatedAt = DateTime.Now,
+            ToUserId = userToAdd.Id,
+            ChatId = chatDb.Id,
+            InitiatorId = userId,
+        }).ToList();
+        
+        await _notificationRepository.CreateNotifications(chatNotifications, cancellationToken);
+        return _mapper.Map<IEnumerable<ChatNotificationModel>>(chatNotifications);
+    }
+    
+    public async Task<IEnumerable<ChatNotificationModel>> DelMembers(int userId, int chatId, List<int> userIds,
         CancellationToken cancellationToken = default)
     {
         var userDb = await _userRepository.GetByIdAsync(userId, cancellationToken);
@@ -236,6 +248,18 @@ public class ChatService : IChatService
             _logger.LogAndThrowErrorIfNull(userInChat, new NoRightException($"You have no rights for it"));
             
         await _chatRepository.DelChatMemberAsync(membersToDel, chatDb!, cancellationToken);
+        
+        // notification box
+        var chatNotifications = membersToDel.Select(userToDel => new ChatNotification
+        {
+            NotificationMessage = $"You have been kicked out of the chat '{chatDb!.Name}'",
+            CreatedAt = DateTime.Now,
+            ToUserId = userToDel.User.Id,
+            ChatId = chatDb.Id,
+            InitiatorId = userId,
+        }).ToList();
+        await _notificationRepository.CreateNotifications(chatNotifications, cancellationToken);
+        return _mapper.Map<IEnumerable<ChatNotificationModel>>(chatNotifications);
     }
 
     public async Task DeleteChat(int userId, int chatId, CancellationToken cancellationToken = default)
@@ -282,6 +306,10 @@ public class ChatService : IChatService
 
         await _chatRepository.EditChat(chatDb!, cancellationToken);
 
+        // notification message in chat
+        // user edited chat (and enumerate changes)
+        //
+        
         return _mapper.Map<ChatModel>(chatDb);
     }
 
@@ -293,7 +321,7 @@ public class ChatService : IChatService
 
         chatName = chatName.ToLower();
         var chatList = await _chatRepository.GetAll()
-            .Where(i => i.ChatMembers!.Any(u => u.User.Id == userId) && i.Name.ToLower().StartsWith(chatName))
+            .Where(i => i.ChatMembers.Any(u => u.User.Id == userId) && i.Name.ToLower().StartsWith(chatName))
             .Pagination(pagination.CurrentPage, pagination.PageSize)
             .ToListAsync(cancellationToken);
         var chatNameModel =  _mapper.Map<List<ChatModel>>(chatList);
@@ -314,20 +342,18 @@ public class ChatService : IChatService
         return await GetAllChats(userId, new PaginationModel(), cancellationToken);
     }
 
-    public async Task<PaginationResultModel<ChatModel>> GetAllChats(int userId, PaginationModel pagination, CancellationToken cancellationToken = default)
+    public async Task<PaginationResultModel<ChatModel>> GetAllChats(int userId, PaginationModel? pagination, CancellationToken cancellationToken = default)
     {
         var userDb = await _userRepository.GetByIdAsync(userId, cancellationToken);
         _logger.LogAndThrowErrorIfNull(userDb, new UserNotFoundException($"User with this Id {userId} not found"));
 
-        var chatList = new List<Chat>();
+        List<Chat> chatList;
 
         if (pagination == null)
         {
             chatList = await _chatRepository.GetAll()
-                .Where(chat => chat.ChatMembers!.Any(member => member.User.Id == userId))
+                .Where(chat => chat.ChatMembers.Any(member => member.User.Id == userId))
                 .ToListAsync(cancellationToken);
-            
-
         }
         else
         {
@@ -338,8 +364,6 @@ public class ChatService : IChatService
                 .Where(chat => chat.ChatMembers!.Any(member => member.User.Id == userId))
                 .Pagination(pagination.CurrentPage, pagination.PageSize)
                 .ToListAsync(cancellationToken);
-
-            
         }
         var chatNameModel = _mapper.Map<List<ChatModel>>(chatList);
 
@@ -682,6 +706,9 @@ public class ChatService : IChatService
         }
         
         await _chatRepository.DelChatMemberAsync(new List<ChatMember>{userInChat}, chatDb!, cancellationToken);
+        
+        // notification message in chat
+        // user leaved
     }
 
     public async Task MakeHost(int userId, int chatId, int user2Id, CancellationToken cancellationToken = default)
@@ -706,5 +733,18 @@ public class ChatService : IChatService
         adminRole!.ChatMembers.Remove(userInChat);
         adminRole.ChatMembers.Add(user2InChat!);
         await _roleRepository.EditRole(_mapper.Map<Role>(adminRole), cancellationToken);
+        
+        // notification message in chat
+        // user is new host
+    }
+
+    public async Task<bool> UserInChatCheck(int userId, int chatId, CancellationToken cancellationToken = default)
+    {
+        var chatMember = await _chatMemberRepository.GetAll()
+            .Where(c => c.Chat.Id == chatId)
+            .Where(c => c.User.Id == userId)
+            .SingleOrDefaultAsync(cancellationToken);
+        
+        return chatMember is not null;
     }
 }
