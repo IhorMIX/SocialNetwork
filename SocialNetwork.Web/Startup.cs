@@ -42,6 +42,7 @@ public class Startup
         services.Configure<CacheOptions>(Configuration.GetSection("CacheOptions"));
         services.Configure<RoleOption>(Configuration.GetSection("Roles"));
         services.Configure<HexKeyConfig>(Configuration.GetSection("HexKeyConfig"));
+        services.Configure<ChunkSizeOfDisconnectedUsers>(Configuration.GetSection("ChunkSizeOfDisconnectedUsers"));
         
         //automapper
         services.AddAutoMapper(typeof(Startup));

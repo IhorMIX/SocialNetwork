@@ -42,16 +42,16 @@ public class NotificationController : ControllerBase
         return Ok(_mapper.Map<IEnumerable<BaseNotificationViewModel>>(notification));
     }
     
-    [HttpPut]
-    public async Task<IActionResult> ReadNotifications([FromQuery] int notificationId,  CancellationToken cancellationToken)
+    [HttpPut("{notificationId:int}")]
+    public async Task<IActionResult> ReadNotifications(int notificationId,  CancellationToken cancellationToken)
     {
         var userId = User.GetUserId();
         await _notificationService.ReadNotification(userId, notificationId, cancellationToken);
         return Ok();
     }
 
-    [HttpDelete]
-    public async Task<IActionResult> RemoveNotification([FromQuery] int notificationId, CancellationToken cancellationToken)
+    [HttpDelete("{notificationId:int}")]
+    public async Task<IActionResult> RemoveNotification(int notificationId, CancellationToken cancellationToken)
     {
         var userId = User.GetUserId();
         await _notificationService.RemoveNotification(userId, notificationId, cancellationToken);

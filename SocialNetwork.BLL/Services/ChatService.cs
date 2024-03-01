@@ -152,7 +152,7 @@ public class ChatService : IChatService
         {
             _logger.LogAndThrowErrorIfNull(chatDb, new NoRightException($"Chat is not group"));
         }
-
+    
         var usersDb = await _userRepository.GetByIdsAsync(userIds, cancellationToken);
         var notFoundUsers = userIds.Where(u => !usersDb.Select(i => i.Id).Contains(u)).ToList();
         if (notFoundUsers.Any())
