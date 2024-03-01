@@ -43,7 +43,7 @@ public class NotificationController : ControllerBase
     }
     
     [HttpPut("{notificationId:int}")]
-    public async Task<IActionResult> ReadNotifications([FromQuery] int notificationId,  CancellationToken cancellationToken)
+    public async Task<IActionResult> ReadNotifications(int notificationId,  CancellationToken cancellationToken)
     {
         var userId = User.GetUserId();
         await _notificationService.ReadNotification(userId, notificationId, cancellationToken);
@@ -51,7 +51,7 @@ public class NotificationController : ControllerBase
     }
 
     [HttpDelete("{notificationId:int}")]
-    public async Task<IActionResult> RemoveNotification([FromQuery] int notificationId, CancellationToken cancellationToken)
+    public async Task<IActionResult> RemoveNotification(int notificationId, CancellationToken cancellationToken)
     {
         var userId = User.GetUserId();
         await _notificationService.RemoveNotification(userId, notificationId, cancellationToken);
