@@ -16,10 +16,12 @@ public interface IMessageService : IBaseService<MessageModel>, INotificationCrea
         CancellationToken cancellationToken = default);
     
     public Task<List<MessageModel>> GetMessagesAsync(int userId, int chatId, CancellationToken cancellationToken = default);
+    public Task<PaginationResultModel<MessageModel>> GetMessagesAsync(int userId, int chatId, PaginationModel? pagination, CancellationToken cancellationToken = default);
     public Task<MessageModel> GetLastMessageAsync(int userId, int chatId, CancellationToken cancellationToken = default);
 
     public Task<MessageModel> GetByIdAsync(int userId, int chatId, int messageId, CancellationToken cancellationToken = default);
     public Task<List<MessageModel>> GetMessagesByTextAsync(int userId, int chatId, string text, CancellationToken cancellationToken = default);
+    public Task<PaginationResultModel<MessageModel>> GetMessagesByTextAsync(int userId, int chatId, string text, PaginationModel? pagination, CancellationToken cancellationToken = default);
 
     public Task ReadMessages(int userId, int chatId, IEnumerable<MessageModel> messageModels, CancellationToken cancellationToken = default);
 }

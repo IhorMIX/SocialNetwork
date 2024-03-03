@@ -105,8 +105,8 @@ public class UserController : ControllerBase
     }
    
     [AllowAnonymous]
-    [HttpPost("new-token")]
-    public async Task<IActionResult> UpdateTokenAsync([FromQuery] string refreshToken, CancellationToken cancellationToken)
+    [HttpPost("new-token/{refreshToken}")]
+    public async Task<IActionResult> UpdateTokenAsync(string refreshToken, CancellationToken cancellationToken)
     {
 
         refreshToken = refreshToken.Replace(" ", "+"); 

@@ -29,7 +29,7 @@ public class FriendRequestController : ControllerBase
         _notificationService = notificationService;
     }
 
-    [HttpPost("send")]
+    [HttpPost]
     public async Task<IActionResult> SendRequest([FromQuery]int receiverId, CancellationToken cancellationToken)
     {
         var userId = User.GetUserId();

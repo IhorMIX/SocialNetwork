@@ -25,6 +25,7 @@ namespace SocialNetwork.Web.MapperConfiguration
             CreatePaginationResultMapping<ChatViewModel, ChatModel>();
             CreatePaginationResultMapping<RoleViewModel, RoleModel>();
             CreatePaginationResultMapping<ChatMemberViewModel, ChatMemberModel>();
+            CreatePaginationResultMapping<MessageViewModel, MessageModel>();
             
             void CreatePaginationResultMapping<TViewModel, TModel>()
             {
@@ -32,7 +33,7 @@ namespace SocialNetwork.Web.MapperConfiguration
                     .ForMember(dest => dest.PageSize, opt => opt.Ignore())
                     .ReverseMap();
             }
-
+            
             CreateMap<ProfileFriendViewModel, ProfileModel>()
                 .ForMember(dest =>dest.Birthday, opt=> opt.Ignore())
                 .ForMember(dest =>dest.Description, opt=> opt.Ignore())
@@ -157,12 +158,8 @@ namespace SocialNetwork.Web.MapperConfiguration
                 .ReverseMap();
             
             CreateMap<MessageViewModel, MessageModel>()
-                .ForMember(dest => dest.FileModels, opt => opt.MapFrom(d => d.FileModels))
-                .ForMember(dest => dest.Author, opt => opt.Ignore())
                 .ForMember(dest => dest.ToReplyMessage, opt => opt.Ignore())
                 .ForMember(dest => dest.Chat, opt => opt.Ignore())
-                .ForMember(dest => dest.Reactions, opt => opt.MapFrom(src => src.Reactions))
-                .ForMember(dest => dest.MessageReadStatuses, opt => opt.MapFrom(src => src.MessageReadStatuses))
                 .ReverseMap();
             
             CreateMap<ReactionViewModel, ReactionModel>()

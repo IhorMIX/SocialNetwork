@@ -243,6 +243,39 @@ public class MessageService : IMessageService
         
         return _mapper.Map<List<MessageModel>>(messages);
     }
+    
+    public async Task<PaginationResultModel<MessageModel>> GetMessagesAsync(int userId, int chatId, PaginationModel? pagination, CancellationToken cancellationToken = default)
+    {
+        var chatMemberDb = await _chatMemberRepository.GetByUserIdAndChatId(userId, chatId, cancellationToken);
+        _logger.LogAndThrowErrorIfNull(chatMemberDb, new UserNotFoundException($"Chat member with id-{userId} not found"));
+        
+        var chatDb = await _chatRepository.GetByIdAsync(chatId, cancellationToken);
+        _logger.LogAndThrowErrorIfNull(chatDb, new UserNotFoundException($"Chat with id-{chatId} not found"));
+
+        List<Message> messages;
+        if (pagination == null)
+        {
+            messages = await _messageRepository.GetAll()
+                .Where(m => m.ChatId == chatId && (!m.IsDeleted || m.AuthorId != chatMemberDb!.Id))
+                .ToListAsync(cancellationToken);
+            
+        }
+        else
+        {
+            messages = await _messageRepository.GetAll()
+                .Where(m => m.ChatId == chatId && (!m.IsDeleted || m.AuthorId != chatMemberDb!.Id))
+                .Pagination(pagination.CurrentPage, pagination.PageSize)
+                .ToListAsync(cancellationToken);
+        }
+        
+        return new PaginationResultModel<MessageModel>
+        {
+            Data = _mapper.Map<List<MessageModel>>(messages),
+            CurrentPage = pagination!.CurrentPage,
+            PageSize = pagination.PageSize,
+            TotalItems = messages.Count,
+        };
+    }
 
     public async Task<MessageModel> GetLastMessageAsync(int userId, int chatId, CancellationToken cancellationToken = default)
     {
@@ -251,8 +284,11 @@ public class MessageService : IMessageService
         
         var chatDb = await _chatRepository.GetByIdAsync(chatId, cancellationToken);
         _logger.LogAndThrowErrorIfNull(chatDb, new UserNotFoundException($"Chat with id-{chatId} not found"));
+        
+        return _mapper.Map<MessageModel>(await _messageRepository.GetAll().Where(m => m.ChatId == chatId && m.IsDeleted == false)
+            .OrderBy(m=> m.CreatedAt)
+            .LastOrDefaultAsync(cancellationToken));
 
-        return _mapper.Map<MessageModel> (await _messageRepository.GetAll().Where(m => m.ChatId == chatId && m.IsDeleted == false).LastOrDefaultAsync(cancellationToken));
     }
 
     public async Task<MessageModel> GetByIdAsync(int userId, int chatId, int messageId, CancellationToken cancellationToken = default)
@@ -279,6 +315,39 @@ public class MessageService : IMessageService
         return _mapper.Map<List<MessageModel>> (await _messageRepository.GetAll()
             .Where(m => m.ChatId == chatId && m.Text.Contains(text) && !m.IsDeleted)
             .ToListAsync(cancellationToken));
+    }
+    
+    public async Task<PaginationResultModel<MessageModel>> GetMessagesByTextAsync(int userId, int chatId, string text, PaginationModel? pagination, CancellationToken cancellationToken = default)
+    {
+        var chatMemberDb = await _chatMemberRepository.GetByUserIdAndChatId(userId, chatId, cancellationToken);
+        _logger.LogAndThrowErrorIfNull(chatMemberDb, new UserNotFoundException($"Chat member with id-{userId} not found"));
+        
+        var chatDb = await _chatRepository.GetByIdAsync(chatId, cancellationToken);
+        _logger.LogAndThrowErrorIfNull(chatDb, new UserNotFoundException($"Chat with id-{chatId} not found"));
+        
+        List<Message> messages;
+        if (pagination == null)
+        {
+            messages = await _messageRepository.GetAll()
+                .Where(m => m.ChatId == chatId && m.Text.Contains(text) && !m.IsDeleted)
+                .ToListAsync(cancellationToken);
+
+        }
+        else
+        {
+            messages = await _messageRepository.GetAll()
+                .Where(m => m.ChatId == chatId && m.Text.Contains(text) && !m.IsDeleted)
+                .Pagination(pagination.CurrentPage, pagination.PageSize)
+                .ToListAsync(cancellationToken);
+        }
+        
+        return new PaginationResultModel<MessageModel>
+        {
+            Data = _mapper.Map<List<MessageModel>>(messages),
+            CurrentPage = pagination!.CurrentPage,
+            PageSize = pagination.PageSize,
+            TotalItems = messages.Count,
+        };
     }
 
     public async Task ReadMessages(int userId, int chatId, IEnumerable<MessageModel> messageModels, CancellationToken cancellationToken = default)

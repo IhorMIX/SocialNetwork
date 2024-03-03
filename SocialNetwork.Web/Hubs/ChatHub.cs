@@ -135,17 +135,17 @@ public class ChatHub : Hub
         await base.OnDisconnectedAsync(exception);
     }
 
-    //need pagination
-    public async Task OpenChat(int chatId)
+
+    public async Task OpenChat(int chatId, PaginationModel paginationModel)
     {
         var userId = Context.GetHttpContext()!.User.GetUserId();
-        // optimize
-        var messages = await _messageService.GetMessagesAsync(userId, chatId, CancellationToken.None);
-        await _messageService.ReadMessages(userId, chatId, messages, CancellationToken.None);
-        messages = await _messageService.GetMessagesAsync(userId, chatId, CancellationToken.None);
+        
+        var messages = await _messageService.GetMessagesAsync(userId, chatId, paginationModel, CancellationToken.None);
+        await _messageService.ReadMessages(userId, chatId, messages.Data, CancellationToken.None);
+        messages = await _messageService.GetMessagesAsync(userId, chatId, paginationModel, CancellationToken.None);
 
         await Clients.Caller.SendAsync("GetMessages",
-            JsonSerializer.Serialize(_mapper.Map<List<MessageViewModel>>(messages)));
+            JsonSerializer.Serialize(_mapper.Map<PaginationResultViewModel<MessageViewModel>>(messages)));
     }
     
     public async Task AddReaction(int chatId, int messageId, AddReactionModel reaction)

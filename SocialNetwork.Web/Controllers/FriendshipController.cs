@@ -36,6 +36,7 @@ public class FriendshipController : ControllerBase
         return Ok();
     }
     
+    /// <param name="request">mail or name_surname</param>
     [HttpGet] 
     public async Task<IActionResult> GetFriendship([FromQuery] string? request,[FromQuery] PaginationModel pagination, CancellationToken cancellationToken)
     {

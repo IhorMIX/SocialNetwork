@@ -20,17 +20,19 @@ public class ChatController : ControllerBase
     private readonly ILogger<ChatController> _logger;
     private readonly IMapper _mapper;
     private readonly IChatService _chatService;
+    private readonly IMessageService _messageService;
     private readonly IHubContext<NotificationHub> _notificationHubContext;
-    public ChatController(ILogger<ChatController> logger, IMapper mapper, IChatService chatService, IHubContext<NotificationHub> notificationHubContext)
+    public ChatController(ILogger<ChatController> logger, IMapper mapper, IChatService chatService, IHubContext<NotificationHub> notificationHubContext, IMessageService messageService)
     {
         _logger = logger;
         _mapper = mapper;
         _chatService = chatService;
         _notificationHubContext = notificationHubContext;
+        _messageService = messageService;
     }
 
 
-    [HttpPost("create-group-chat")]
+    [HttpPost]
     public async Task<IActionResult> CreateGroupChat([FromBody]ChatCreateViewModel chatCreateViewModel, CancellationToken cancellationToken)
     {
         _logger.LogInformation("Start to create group chat");
@@ -78,7 +80,7 @@ public class ChatController : ControllerBase
         return Ok(_mapper.Map<ChatViewModel>(chat));
     }
     
-    [HttpDelete("del-chat")]
+    [HttpDelete]
     public async Task<IActionResult> DelChat([FromQuery] int chatId, CancellationToken cancellationToken)
     {
         _logger.LogInformation("Start to delete chat");
@@ -197,4 +199,21 @@ public class ChatController : ControllerBase
         return Ok();
     }
     
+    [HttpGet("last-mess/{chatId:int}")]
+    public async Task<IActionResult> GetLastMessage(int chatId, CancellationToken cancellationToken)
+    {
+        var userId = User.GetUserId();
+        var lastMessage = await _messageService.GetLastMessageAsync(userId, chatId, cancellationToken);
+        return Ok(_mapper.Map<MessageViewModel>(lastMessage));
+    }
+    
+    [HttpGet("messages")]
+    public async Task<IActionResult> GetMessages([FromQuery] int chatId, [FromQuery] PaginationModel pagination, CancellationToken cancellationToken)
+    {
+        var userId = User.GetUserId();
+        var messages = await _messageService.GetMessagesAsync(userId, chatId, pagination, cancellationToken);
+        await _messageService.ReadMessages(userId, chatId, messages.Data, CancellationToken.None);
+        messages = await _messageService.GetMessagesAsync(userId, chatId, pagination, cancellationToken);
+        return Ok(_mapper.Map<PaginationResultViewModel<MessageViewModel>>(messages));
+    }
 }
