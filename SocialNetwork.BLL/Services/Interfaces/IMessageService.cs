@@ -24,4 +24,7 @@ public interface IMessageService : IBaseService<MessageModel>, INotificationCrea
     public Task<PaginationResultModel<MessageModel>> GetMessagesByTextAsync(int userId, int chatId, string text, PaginationModel? pagination, CancellationToken cancellationToken = default);
 
     public Task ReadMessages(int userId, int chatId, IEnumerable<MessageModel> messageModels, CancellationToken cancellationToken = default);
+    
+    public Task<MessageModel> ShareWithMessage(int userId, int messageId, int chatId, bool showCreator,
+        CancellationToken cancellationToken = default);
 }

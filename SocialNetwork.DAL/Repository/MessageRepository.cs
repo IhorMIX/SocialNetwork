@@ -16,8 +16,9 @@ public class MessageRepository : IMessageRepository
     public IQueryable<Message> GetAll()
     {
         return _socialNetworkDbContext.Messages.Include(m => m.Chat)
-            .Include(m => m.Author).ThenInclude(m => m.User).ThenInclude(i => i.Profile)
-            .Include(m => m.Author).ThenInclude(m => m.Role)
+            .Include(m => m.Creator).ThenInclude(i => i.Profile)
+            .Include(m => m.Sender).ThenInclude(m => m.User).ThenInclude(i => i.Profile)
+            .Include(m => m.Sender).ThenInclude(m => m.Role)
             .Include(m => m.Reactions)
             .Include(m => m.Files)
             .Include(i => i.MessageReadStatuses)!.ThenInclude(i => i.ChatMember).ThenInclude(i => i.User).ThenInclude(i => i.Profile)
@@ -28,12 +29,13 @@ public class MessageRepository : IMessageRepository
     public async Task<Message?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
     {
         return await _socialNetworkDbContext.Messages.Include(m => m.Chat)
-            .Include(m => m.Author)
+            .Include(m => m.Creator).ThenInclude(i => i.Profile)
+            .Include(m => m.Sender)
             .Include(m => m.Reactions)
             .Include(m => m.Files)
             .Where(i => i.Id == id)
             .FirstOrDefaultAsync(cancellationToken);
-    }
+    } 
 
     public async Task<Message> CreateMessageAsync(Message message, CancellationToken cancellationToken = default)
     {

@@ -208,4 +208,24 @@ public class ChatHub : Hub
         await Clients.Caller.SendAsync("GetMessagesByText", JsonSerializer.Serialize(_mapper.Map<List<MessageViewModel>>(messages)));
     }
 
+    public async Task ShareWithMessage(int chatId, int messageId, bool showCreator)
+    {
+        var userId = Context.GetHttpContext()!.User.GetUserId();
+        var connectedUsers = (_userTracker.GetUsersInGroup(chatId.ToString())).ConvertAll(int.Parse);
+        
+        var messageModel = await _messageService.ShareWithMessage(userId, messageId, chatId, showCreator);
+        
+        await Clients.Group(chatId.ToString()).SendAsync("ReceiveReplyOnMessage",
+            JsonSerializer.Serialize(_mapper.Map<MessageViewModel>(messageModel)));
+
+        var notifications = await _messageService.CreateNotification(messageModel, connectedUsers);
+        foreach (var notification in notifications)
+        {
+            await _notificationHubContext.Clients.Group(notification!.ToUserId.ToString())
+                .SendAsync("ReceivedNotification", JsonSerializer.Serialize(_mapper.Map<BaseNotificationViewModel>(notification)));
+        }
+        
+        await Clients.GroupExcept(chatId.ToString(), Context.ConnectionId).SendAsync("UserTyping", userId);
+    }
+    
 }

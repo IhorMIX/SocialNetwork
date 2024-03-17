@@ -241,20 +241,23 @@ namespace SocialNetwork.DAL.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("AuthorId")
-                        .HasColumnType("int");
-
                     b.Property<int>("ChatId")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<int>("CreatorId")
+                        .HasColumnType("int");
+
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
                     b.Property<bool>("IsEdited")
                         .HasColumnType("bit");
+
+                    b.Property<int>("SenderId")
+                        .HasColumnType("int");
 
                     b.Property<string>("Text")
                         .IsRequired()
@@ -265,9 +268,11 @@ namespace SocialNetwork.DAL.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("AuthorId");
-
                     b.HasIndex("ChatId");
+
+                    b.HasIndex("CreatorId");
+
+                    b.HasIndex("SenderId");
 
                     b.HasIndex("ToReplyMessageId");
 
@@ -627,25 +632,33 @@ namespace SocialNetwork.DAL.Migrations
 
             modelBuilder.Entity("SocialNetwork.DAL.Entity.Message", b =>
                 {
-                    b.HasOne("SocialNetwork.DAL.Entity.ChatMember", "Author")
-                        .WithMany("MessagesSent")
-                        .HasForeignKey("AuthorId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
                     b.HasOne("SocialNetwork.DAL.Entity.Chat", "Chat")
                         .WithMany("Messages")
                         .HasForeignKey("ChatId")
                         .OnDelete(DeleteBehavior.ClientCascade)
                         .IsRequired();
 
+                    b.HasOne("SocialNetwork.DAL.Entity.User", "Creator")
+                        .WithMany("CreatedMessages")
+                        .HasForeignKey("CreatorId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("SocialNetwork.DAL.Entity.ChatMember", "Sender")
+                        .WithMany("MessagesSent")
+                        .HasForeignKey("SenderId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("SocialNetwork.DAL.Entity.Message", "ToReplyMessage")
                         .WithMany()
                         .HasForeignKey("ToReplyMessageId");
 
-                    b.Navigation("Author");
-
                     b.Navigation("Chat");
+
+                    b.Navigation("Creator");
+
+                    b.Navigation("Sender");
 
                     b.Navigation("ToReplyMessage");
                 });
@@ -794,6 +807,8 @@ namespace SocialNetwork.DAL.Migrations
                     b.Navigation("BlackLists");
 
                     b.Navigation("ChatMembers");
+
+                    b.Navigation("CreatedMessages");
 
                     b.Navigation("Friends");
 
