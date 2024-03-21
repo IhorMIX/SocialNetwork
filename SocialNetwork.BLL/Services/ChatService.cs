@@ -488,7 +488,7 @@ public class ChatService : IChatService
                 roleDbProperty.SetValue(roleDb, roleSourceValue);
             }
 
-            else if (roleSourceValue is List<ChatAccess> chatAccesses && chatAccesses.Any())
+            else if (roleSourceValue is List<ChatAccess> chatAccesses)
             {
                 roleDbProperty.SetValue(roleDb, chatAccesses.Select(i => new RoleChatAccess()
                 {

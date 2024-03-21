@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using SocialNetwork.BLL.Models;
-using SocialNetwork.BLL.Services;
 using SocialNetwork.BLL.Services.Interfaces;
 using SocialNetwork.Web.Extensions;
 using SocialNetwork.Web.Hubs;
@@ -20,15 +19,13 @@ public class ChatController : ControllerBase
     private readonly ILogger<ChatController> _logger;
     private readonly IMapper _mapper;
     private readonly IChatService _chatService;
-    private readonly IMessageService _messageService;
     private readonly IHubContext<NotificationHub> _notificationHubContext;
-    public ChatController(ILogger<ChatController> logger, IMapper mapper, IChatService chatService, IHubContext<NotificationHub> notificationHubContext, IMessageService messageService)
+    public ChatController(ILogger<ChatController> logger, IMapper mapper, IChatService chatService, IHubContext<NotificationHub> notificationHubContext)
     {
         _logger = logger;
         _mapper = mapper;
         _chatService = chatService;
         _notificationHubContext = notificationHubContext;
-        _messageService = messageService;
     }
 
 
@@ -98,7 +95,7 @@ public class ChatController : ControllerBase
         return Ok(_mapper.Map<PaginationResultViewModel<ChatViewModel>>(chat));
     }
     
-    [HttpGet("all-chats")]
+    [HttpGet]
     public async Task<IActionResult> GetAllChats([FromQuery] PaginationModel? pagination, CancellationToken cancellationToken)
     {
         var userId = User.GetUserId();
@@ -199,21 +196,5 @@ public class ChatController : ControllerBase
         return Ok();
     }
     
-    [HttpGet("last-mess/{chatId:int}")]
-    public async Task<IActionResult> GetLastMessage(int chatId, CancellationToken cancellationToken)
-    {
-        var userId = User.GetUserId();
-        var lastMessage = await _messageService.GetLastMessageAsync(userId, chatId, cancellationToken);
-        return Ok(_mapper.Map<MessageViewModel>(lastMessage));
-    }
-    
-    [HttpGet("messages")]
-    public async Task<IActionResult> GetMessages([FromQuery] int chatId, [FromQuery] PaginationModel pagination, CancellationToken cancellationToken)
-    {
-        var userId = User.GetUserId();
-        var messages = await _messageService.GetMessagesAsync(userId, chatId, pagination, cancellationToken);
-        await _messageService.ReadMessages(userId, chatId, messages.Data, CancellationToken.None);
-        messages = await _messageService.GetMessagesAsync(userId, chatId, pagination, cancellationToken);
-        return Ok(_mapper.Map<PaginationResultViewModel<MessageViewModel>>(messages));
-    }
+
 }
