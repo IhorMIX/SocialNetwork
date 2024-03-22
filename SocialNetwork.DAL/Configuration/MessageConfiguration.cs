@@ -13,7 +13,7 @@ public class MessageConfiguration : IEntityTypeConfiguration<Message>
         builder.HasOne(m => m.Sender)
             .WithMany(u => u.MessagesSent)
             .HasForeignKey(m => m.SenderId)
-            .OnDelete(DeleteBehavior.Restrict);
+            .OnDelete(DeleteBehavior.ClientCascade);
         
         builder.HasOne(m => m.Creator)
             .WithMany(u => u.CreatedMessages)

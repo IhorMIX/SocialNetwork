@@ -15,5 +15,9 @@ public class ChatMembersConfiguration : IEntityTypeConfiguration<ChatMember>
         
         builder.HasMany(i => i.Role)
             .WithMany(r => r.ChatMembers);
+        
+        builder.HasMany(i => i.MessagesSent)
+            .WithOne(r => r.Sender)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

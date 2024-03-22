@@ -77,8 +77,8 @@ public class ChatController : ControllerBase
         return Ok(_mapper.Map<ChatViewModel>(chat));
     }
     
-    [HttpDelete]
-    public async Task<IActionResult> DelChat([FromQuery] int chatId, CancellationToken cancellationToken)
+    [HttpDelete("{chatId:int}")]
+    public async Task<IActionResult> DelChat(int chatId, CancellationToken cancellationToken)
     {
         _logger.LogInformation("Start to delete chat");
         var userId = User.GetUserId();
