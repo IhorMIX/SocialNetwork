@@ -141,8 +141,8 @@ public class ChatHub : Hub
         var userId = Context.GetHttpContext()!.User.GetUserId();
         
         var messages = await _messageService.GetMessagesAsync(userId, chatId, paginationModel, CancellationToken.None);
-        await _messageService.ReadMessages(userId, chatId, messages.Data, CancellationToken.None);
-        messages = await _messageService.GetMessagesAsync(userId, chatId, paginationModel, CancellationToken.None);
+        // await _messageService.ReadMessages(userId, chatId, messages.Data, CancellationToken.None);
+        // messages = await _messageService.GetMessagesAsync(userId, chatId, paginationModel, CancellationToken.None);
 
         await Clients.Caller.SendAsync("GetMessages",
             JsonSerializer.Serialize(_mapper.Map<PaginationResultViewModel<MessageViewModel>>(messages)));

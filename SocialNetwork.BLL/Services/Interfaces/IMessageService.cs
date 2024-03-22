@@ -15,15 +15,15 @@ public interface IMessageService : IBaseService<MessageModel>, INotificationCrea
     public Task<MessageModel> ReplyMessageAsync(int userId, int chatId, int messageId, MessageModel messageModel,
         CancellationToken cancellationToken = default);
     
-    public Task<List<MessageModel>> GetMessagesAsync(int userId, int chatId, CancellationToken cancellationToken = default);
+    public Task<IEnumerable<MessageModel>> GetMessagesAsync(int userId, int chatId, CancellationToken cancellationToken = default);
     public Task<PaginationResultModel<MessageModel>> GetMessagesAsync(int userId, int chatId, PaginationModel? pagination, CancellationToken cancellationToken = default);
     public Task<MessageModel> GetLastMessageAsync(int userId, int chatId, CancellationToken cancellationToken = default);
 
     public Task<MessageModel> GetByIdAsync(int userId, int chatId, int messageId, CancellationToken cancellationToken = default);
-    public Task<List<MessageModel>> GetMessagesByTextAsync(int userId, int chatId, string text, CancellationToken cancellationToken = default);
+    public Task<IEnumerable<MessageModel>> GetMessagesByTextAsync(int userId, int chatId, string text, CancellationToken cancellationToken = default);
     public Task<PaginationResultModel<MessageModel>> GetMessagesByTextAsync(int userId, int chatId, string text, PaginationModel? pagination, CancellationToken cancellationToken = default);
 
-    public Task ReadMessages(int userId, int chatId, IEnumerable<MessageModel> messageModels, CancellationToken cancellationToken = default);
+    public Task<IEnumerable<MessageModel>>  ReadMessages(int userId, int chatId, IEnumerable<MessageModel> messageModels, CancellationToken cancellationToken = default);
     
     public Task<MessageModel> ShareWithMessage(int userId, int messageId, int chatId, bool showCreator,
         CancellationToken cancellationToken = default);

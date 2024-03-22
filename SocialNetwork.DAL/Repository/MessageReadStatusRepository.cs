@@ -36,9 +36,33 @@ public class MessageReadStatusRepository : IMessageReadStatusRepository
         await _socialNetworkDbContext.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task UpdateStatus(IEnumerable<MessageReadStatus> messageReadStatuses, CancellationToken cancellationToken = default)
+    // public async Task UpdateStatus(IEnumerable<MessageReadStatus> messageReadStatuses, CancellationToken cancellationToken = default)
+    // {
+    //     
+    //     foreach (var messageReadStatus in messageReadStatuses)
+    //     {
+    //         // Load the existing entity from the database
+    //         var existingMessageReadStatus = await _socialNetworkDbContext.MessageReadStatuses
+    //             .FirstOrDefaultAsync(mrs => mrs.ChatMemberId == messageReadStatus.ChatMemberId && mrs.MessageId == messageReadStatus.MessageId, cancellationToken);
+    //
+    //         if (existingMessageReadStatus != null)
+    //         {
+    //             // Update only the IsRead property
+    //             existingMessageReadStatus.IsRead = messageReadStatus.IsRead;
+    //             // You can also update other properties if needed
+    //             // Mark the entity as modified
+    //             _socialNetworkDbContext.Entry(existingMessageReadStatus).State = EntityState.Modified;
+    //         }
+    //     }
+    //
+    //     await _socialNetworkDbContext.SaveChangesAsync(cancellationToken);
+    //
+    //     
+    // }
+    public async Task<IEnumerable<MessageReadStatus>> UpdateStatus(IEnumerable<MessageReadStatus> messageReadStatuses, CancellationToken cancellationToken = default)
     {
-        
+        var updatedMessageReadStatuses = new List<MessageReadStatus>();
+
         foreach (var messageReadStatus in messageReadStatuses)
         {
             // Load the existing entity from the database
@@ -52,11 +76,13 @@ public class MessageReadStatusRepository : IMessageReadStatusRepository
                 // You can also update other properties if needed
                 // Mark the entity as modified
                 _socialNetworkDbContext.Entry(existingMessageReadStatus).State = EntityState.Modified;
+
+                updatedMessageReadStatuses.Add(existingMessageReadStatus);
             }
         }
 
         await _socialNetworkDbContext.SaveChangesAsync(cancellationToken);
 
-        
+        return updatedMessageReadStatuses;
     }
 }

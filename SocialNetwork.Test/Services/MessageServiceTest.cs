@@ -317,13 +317,13 @@ public class MessageServiceTest : BaseMessageTestService<IMessageService, Messag
         
         await Service.DeleteMessageAsync(user3.Id, chat.Id, replyMessage.Id, true);
         var messages = await Service.GetMessagesAsync(user3.Id, chat.Id);
-        Assert.That(messages.Count == 2);
+        Assert.That(messages.Count() == 2);
         Assert.That(messages.Any(c => c.Text == "Test message 1"));
         Assert.That(messages.Any(c => c.Text == "Test message 2"));
         Assert.That(messages.Any(c => c.Text == "Test message 3") is false);
         
         messages = await Service.GetMessagesAsync(user2.Id, chat.Id);
-        Assert.That(messages.Count == 3);
+        Assert.That(messages.Count() == 3);
         Assert.That(messages.Any(c => c.Text == "Test message 1"));
         Assert.That(messages.Any(c => c.Text == "Test message 2"));
         Assert.That(messages.Any(c => c.Text == "Test message 3"));

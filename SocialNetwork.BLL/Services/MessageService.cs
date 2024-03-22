@@ -1,6 +1,5 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using SocialNetwork.BLL.Exceptions;
 using SocialNetwork.BLL.Helpers;
@@ -116,6 +115,12 @@ public class MessageService : IMessageService
         else
         {
             await _messageRepository.DeleteAsync(messageDb!, cancellationToken);
+            
+            var notifications = await _notificationRepository.GetAll()
+                .Where(r => r is MessageNotification && (r as MessageNotification).Message.Id == messageId)
+                .ToListAsync(cancellationToken);
+
+            await _notificationRepository.RemoveNotification(notifications, cancellationToken);
         }
     }
 
@@ -234,7 +239,7 @@ public class MessageService : IMessageService
         return _mapper.Map<MessageModel>(messageDb);
     }
 
-    public async Task<List<MessageModel>> GetMessagesAsync(int userId, int chatId, CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<MessageModel>> GetMessagesAsync(int userId, int chatId, CancellationToken cancellationToken = default)
     {
         var chatMemberDb = await _chatMemberRepository.GetByUserIdAndChatId(userId, chatId, cancellationToken);
         _logger.LogAndThrowErrorIfNull(chatMemberDb, new UserNotFoundException($"Chat member with id-{userId} not found"));
@@ -246,7 +251,9 @@ public class MessageService : IMessageService
             .Where(m => m.ChatId == chatId && (!m.IsDeleted || m.SenderId != chatMemberDb!.Id))
             .ToListAsync(cancellationToken);
         
-        return _mapper.Map<List<MessageModel>>(messages);
+        var messageModels = await ReadMessages(userId, chatId, _mapper.Map<List<MessageModel>>(messages), cancellationToken);
+        
+        return messageModels;
     }
     
     public async Task<PaginationResultModel<MessageModel>> GetMessagesAsync(int userId, int chatId, PaginationModel? pagination, CancellationToken cancellationToken = default)
@@ -257,29 +264,32 @@ public class MessageService : IMessageService
         var chatDb = await _chatRepository.GetByIdAsync(chatId, cancellationToken);
         _logger.LogAndThrowErrorIfNull(chatDb, new ChatNotFoundException($"Chat with id-{chatId} not found"));
 
-        List<Message> messages;
+        List<Message> messagesDb;
         if (pagination == null)
         {
-            messages = await _messageRepository.GetAll()
+            messagesDb = await _messageRepository.GetAll()
                 .Where(m => m.ChatId == chatId && (!m.IsDeleted || m.SenderId != chatMemberDb!.Id))
                 .ToListAsync(cancellationToken);
-            
         }
         else
         {
-            messages = await _messageRepository.GetAll()
+            messagesDb = await _messageRepository.GetAll()
                 .Where(m => m.ChatId == chatId && (!m.IsDeleted || m.SenderId != chatMemberDb!.Id))
                 .Pagination(pagination.CurrentPage, pagination.PageSize)
                 .ToListAsync(cancellationToken);
         }
         
-        return new PaginationResultModel<MessageModel>
+        var messageModels = await ReadMessages(userId, chatId, _mapper.Map<List<MessageModel>>(messagesDb), cancellationToken);
+        
+        var messages = new PaginationResultModel<MessageModel>
         {
-            Data = _mapper.Map<List<MessageModel>>(messages),
+            Data = messageModels,
             CurrentPage = pagination!.CurrentPage,
             PageSize = pagination.PageSize,
-            TotalItems = messages.Count,
+            TotalItems = messagesDb.Count,
         };
+        
+        return messages;
     }
 
     public async Task<MessageModel> GetLastMessageAsync(int userId, int chatId, CancellationToken cancellationToken = default)
@@ -309,7 +319,7 @@ public class MessageService : IMessageService
             .SingleOrDefaultAsync(cancellationToken));
     }
 
-    public async Task<List<MessageModel>> GetMessagesByTextAsync(int userId, int chatId, string text, CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<MessageModel>> GetMessagesByTextAsync(int userId, int chatId, string text, CancellationToken cancellationToken = default)
     {
         var chatMemberDb = await _chatMemberRepository.GetByUserIdAndChatId(userId, chatId, cancellationToken);
         _logger.LogAndThrowErrorIfNull(chatMemberDb, new UserNotFoundException($"Chat member with id-{userId} not found"));
@@ -355,12 +365,12 @@ public class MessageService : IMessageService
         };
     }
 
-    public async Task ReadMessages(int userId, int chatId, IEnumerable<MessageModel> messageModels, CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<MessageModel>> ReadMessages(int userId, int chatId, IEnumerable<MessageModel> messageModels, CancellationToken cancellationToken = default)
     {
         var chatMemberDb = await _chatMemberRepository.GetByUserIdAndChatId(userId, chatId, cancellationToken);
         _logger.LogAndThrowErrorIfNull(chatMemberDb, new UserNotFoundException($"Chat member with id-{userId} not found"));
 
-        List<MessageReadStatusModel> messageReadStatuses = messageModels.Where(i => i.Sender!.Id != chatMemberDb!.Id && i.MessageReadStatuses != null)
+        List<MessageReadStatusModel> messageReadStatuses = messageModels.Where(i => i.Sender.Id != chatMemberDb!.Id && i.MessageReadStatuses!.Any())
             .Select(i => i.MessageReadStatuses!.SingleOrDefault(i => i.ChatMemberId == chatMemberDb!.Id))
             .ToList();
         messageReadStatuses = messageReadStatuses.Select(messageStatus =>
@@ -370,14 +380,20 @@ public class MessageService : IMessageService
             return messageStatus;
         }).ToList();
 
-        var messageIds = messageModels.Select(m => m.Id);
-        var messNotification = await _notificationRepository.GetAll()
-            .Where(r => messageIds.Contains((r as MessageNotification)!.Message.Id))
+        var messageIds = messageModels!.Select(m => m.Id);
+        
+        var messNotifications = await _notificationRepository.GetAll()
+            .Where(r => r is MessageNotification && messageIds.Contains((r as MessageNotification)!.Message.Id))
+            .Where(r=> r.ToUserId == userId)
             .ToListAsync(cancellationToken);
         
-        await _notificationRepository.RemoveNotification(messNotification, cancellationToken);
-        
+        await _notificationRepository.RemoveNotification(messNotifications, cancellationToken);
         await _messageReadStatusRepository.UpdateStatus(_mapper.Map<IEnumerable<MessageReadStatus>>(messageReadStatuses), cancellationToken);
+       
+        var updatedMessages = await _messageRepository.GetAll().Where(r => messageIds.Contains(r.Id))
+            .ToListAsync(cancellationToken);
+        
+        return _mapper.Map<List<MessageModel>>(updatedMessages);
     }
 
     public async Task<MessageModel> ShareWithMessage(int userId, int messageId, int chatId, bool showCreator,
