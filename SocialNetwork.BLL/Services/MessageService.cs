@@ -76,7 +76,7 @@ public class MessageService : IMessageService
         var messageDb = await _messageRepository.CreateMessageAsync(new Message
         {
             Text = messageModel.Text,
-            Files = _mapper.Map<List<FileEntity>>(messageModel.FileModels),
+            Files = _mapper.Map<List<FileInMessage>>(messageModel.FileModels),
             CreatedAt = DateTime.Now,
             AuthorId = chatMemberDb!.Id,
             ChatId = chatId,
@@ -202,7 +202,7 @@ public class MessageService : IMessageService
         var messageDb = await _messageRepository.CreateMessageAsync(new Message
         {
             Text = messageModel.Text,
-            Files = _mapper.Map<List<FileEntity>>(messageModel.FileModels),
+            Files = _mapper.Map<List<FileInMessage>>(messageModel.FileModels),
             CreatedAt = DateTime.Now,
             AuthorId = chatMemberDb!.Id,
             ChatId = chatId,
