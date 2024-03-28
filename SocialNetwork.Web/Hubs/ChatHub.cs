@@ -47,7 +47,7 @@ public class ChatHub : Hub
             new MessageModel()
             {
                 Text = textMess,
-                FileModels = _mapper.Map<List<FileModel>>(files),
+                FileModels = _mapper.Map<List<FileInMessageModel>>(files),
             },
             CancellationToken.None);
         
@@ -73,7 +73,7 @@ public class ChatHub : Hub
             new MessageModel()
             {
                 Text = textMess,
-                FileModels = _mapper.Map<List<FileModel>>(files),
+                FileModels = _mapper.Map<List<FileInMessageModel>>(files),
             },
             CancellationToken.None);
         await Clients.Group(chatId.ToString()).SendAsync("ReceiveReplyOnMessage",
@@ -196,7 +196,7 @@ public class ChatHub : Hub
             new MessageModel
             {
                 Text = textMess,
-                FileModels = _mapper.Map<List<FileModel>>(files),
+                FileModels = _mapper.Map<List<FileInMessageModel>>(files),
             }, CancellationToken.None);
         await Clients.Group(chatId.ToString()).SendAsync("EditMessage", JsonSerializer.Serialize(_mapper.Map<MessageViewModel>(message)));
     }

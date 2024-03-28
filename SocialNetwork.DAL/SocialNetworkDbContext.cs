@@ -25,7 +25,7 @@ public class SocialNetworkDbContext : DbContext
     public DbSet<Message> Messages { get; set; }
 
     public DbSet<Reaction> Reactions { get; set; }
-    public DbSet<FileEntity> Files { get; set; }
+    public DbSet<BaseFileEntity> Files { get; set; }
     public DbSet<FileInMessage> FilesInMassages { get; set; }
     public DbSet<FileInPost> FilesInPost { get; set; }
     
