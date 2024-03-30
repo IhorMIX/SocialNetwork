@@ -86,7 +86,13 @@ public class Startup
         services.AddScoped<INotificationRepository, NotificationRepository>();
         services.AddScoped<INotificationService, NotificationService>();
         services.AddScoped<IMessageReadStatusRepository, MessageReadStatusRepository>();
-        
+
+        services.AddScoped<IGroupService, GroupService>();
+        services.AddScoped<IGroupRepository, GroupRepository>();
+        services.AddScoped<IGroupMemberRepository, GroupMemberRepository>();
+        services.AddScoped<IRoleGroupRepository, RoleGroupRepository>();
+        services.AddScoped<IBannedUserListRepository, BannedUserListRepository>();
+
         services.AddSingleton<IDbReadySignal, DbContextReadySignal>();
         services.AddSingleton<DelayedWriter>();
         services.AddSingleton<IUserInChatTracker, UserInChatTracker>();

@@ -25,7 +25,12 @@ namespace SocialNetwork.Web.MapperConfiguration
             CreatePaginationResultMapping<ChatViewModel, ChatModel>();
             CreatePaginationResultMapping<RoleViewModel, RoleModel>();
             CreatePaginationResultMapping<ChatMemberViewModel, ChatMemberModel>();
-            
+            CreatePaginationResultMapping<BannedUsersInGroupViewModel, BannedUserInGroupModel>();
+            CreatePaginationResultMapping<BannedUserList, BannedUserInGroupModel>();
+
+            CreatePaginationResultMapping<GroupViewModel, GroupModel>();
+            CreatePaginationResultMapping<GroupMemberViewModel, GroupMemberModel>();
+            CreatePaginationResultMapping<RoleGroupViewModel, RoleGroupModel>();
             void CreatePaginationResultMapping<TViewModel, TModel>()
             {
                 CreateMap<PaginationResultViewModel<TViewModel>, PaginationResultModel<TModel>>()
@@ -86,10 +91,17 @@ namespace SocialNetwork.Web.MapperConfiguration
                 .ForMember(dest => dest.RoleAccesses, from => from.MapFrom(f => f.RoleAccesses.Select(i => i.ChatAccess)))
                 .ReverseMap();
 
+            CreateMap<RoleGroup, RoleGroupModel>()
+                .ForMember(dest => dest.UsersIds, opt => opt.MapFrom(src => src.GroupMembers.Select(cm => cm.User.Id)))
+                .ForMember(dest => dest.RoleAccesses, from => from.MapFrom(f => f.RoleAccesses.Select(i => i.GroupAccess)))
+                .ReverseMap();
+
             CreateMap<ChatAccess, RoleChatAccess>()
                 .ForMember(dest => dest.ChatAccess, from => from.MapFrom(f => f));
-          
-            
+
+            CreateMap<GroupAccess, RoleGroupAccess>()
+                            .ForMember(dest => dest.GroupAccess, from => from.MapFrom(f => f));
+
             CreateMap<ChatCreateViewModel, ChatModel>()
                 .ForMember(dest => dest.ChatMembers, opt=>opt.Ignore())
                 .ForMember(dest => dest.Roles, opt=>opt.Ignore())
@@ -99,18 +111,28 @@ namespace SocialNetwork.Web.MapperConfiguration
                 .ForMember(dest => dest.Chat, opt => opt.Ignore())
                 .ForMember(dest => dest.UsersIds, opt => opt.Ignore())
                 .ReverseMap();
-            
+
+            CreateMap<CreateRoleGroupModel, RoleGroupModel>()
+                .ForMember(dest => dest.Group, opt => opt.Ignore())
+                .ForMember(dest => dest.UsersIds, opt => opt.Ignore())
+                .ReverseMap();
+
             CreateMap<RoleEditModel, RoleModel>()
                 .ForMember(dest => dest.Chat, opt => opt.Ignore())
                 .ReverseMap();
             CreateMap<RoleViewModel, RoleModel>()
                 .ForMember(dest => dest.Chat, opt => opt.Ignore())
                 .ReverseMap();
-            CreateMap<ChatMemberRoleViewModel, RoleModel>()
-                .ForMember(dest => dest.Chat, opt => opt.Ignore())
+
+            CreateMap<RoleGroupViewModel, RoleGroupModel>()
+                .ForMember(dest => dest.Group, opt => opt.Ignore())
+                .ReverseMap();
+
+            CreateMap<GroupMemberRoleGroupViewModel, RoleGroupModel>()
+                .ForMember(dest => dest.Group, opt => opt.Ignore())
                 .ForMember(dest => dest.UsersIds, opt => opt.Ignore())
                 .ReverseMap();
-            
+
             CreateMap<ChatMemberViewModel, ChatMemberModel>()
                 .ForMember(dest => dest.Chat, opt => opt.Ignore())
                 .ForMember(dest => dest.Role, opt => opt.Ignore())
@@ -128,7 +150,15 @@ namespace SocialNetwork.Web.MapperConfiguration
             CreateMap<ChatModel, ChatEditModel>()
                 .ForMember(dest => dest.ChatId, opt => opt.Ignore())
                 .ReverseMap();
-            
+
+            CreateMap<GroupEditModel, GroupModel>()
+                .ForMember(dest => dest.GroupMembers, opt => opt.Ignore())
+                .ForMember(dest => dest.Roles, opt => opt.Ignore())
+                .ReverseMap();
+            CreateMap<GroupModel, GroupEditModel>()
+                .ForMember(dest => dest.GroupId, opt => opt.Ignore())
+                .ReverseMap();
+
             CreateMap<RoleRankModel, RoleModel>()
                 .ForMember(dest => dest.RoleName, opt => opt.Ignore())
                 .ForMember(dest => dest.RoleColor, opt => opt.Ignore())
@@ -183,7 +213,12 @@ namespace SocialNetwork.Web.MapperConfiguration
                 .ForMember(dest => dest.Chat, opt => opt.Ignore())
                 .ForMember(dest => dest.Role, opt => opt.Ignore())
                 .ReverseMap();
-            
+
+            CreateMap<UserViewModel, GroupMemberModel>()
+                .ForMember(dest => dest.Group, opt => opt.Ignore())
+                .ForMember(dest => dest.RoleGroup, opt => opt.Ignore())
+                .ReverseMap();
+
             CreateMap<BaseNotificationEntity, BaseNotificationModel>().ReverseMap();
            
             CreateMap<FriendRequestNotification, FriendRequestNotificationModel>()
@@ -234,7 +269,30 @@ namespace SocialNetwork.Web.MapperConfiguration
                 .IncludeBase<ChatNotificationViewModel, ChatNotificationModel>()
                 .IncludeBase<BaseNotificationViewModel, BaseNotificationModel>()
                 .ReverseMap();
-            
+
+            CreateMap<GroupMember, User>().ReverseMap();
+
+            CreateMap<GroupModel, Group>().ReverseMap(); //+
+
+            CreateMap<GroupMemberModel, GroupMember>().ReverseMap();//+
+
+            CreateMap<GroupCreateViewModel, GroupModel>()
+                .ForMember(dest => dest.GroupMembers, opt => opt.Ignore())
+                .ForMember(dest => dest.Roles, opt => opt.Ignore())
+                .ReverseMap(); //+
+
+            CreateMap<GroupMemberViewModel, GroupMemberModel>()
+                .ForMember(dest => dest.Group, opt => opt.Ignore())
+                .ForMember(dest => dest.RoleGroup, opt => opt.Ignore())
+                .ReverseMap(); //+
+
+            CreateMap<GroupViewModel, GroupModel>()
+                .ForMember(dest => dest.GroupMembers, opt => opt.Ignore())
+                .ForMember(dest => dest.Roles, opt => opt.Ignore())
+                .ReverseMap(); //+
+
+            CreateMap<BannedUserList, BannedUserInGroupModel>().ReverseMap();
+            CreateMap<BannedUsersInGroupViewModel, BannedUserInGroupModel>().ReverseMap();
         }
     }
 }

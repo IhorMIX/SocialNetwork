@@ -34,6 +34,10 @@ public class SocialNetworkDbContext : DbContext
     public DbSet<ReactionNotification> ReactionNotifications { get; set; }
     public DbSet<BaseNotificationEntity> Notifications { get; set; }
     public DbSet<MessageReadStatus> MessageReadStatuses { get; set; }
+    public DbSet<Group> Groups { get; set; }
+    public DbSet<GroupMember> GroupMembers { get; set; }
+    public DbSet<BannedUserList> BannedUserLists { get; set; }
+    public DbSet<RoleGroup> RoleGroups { get; set; }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(SocialNetworkDbContext).Assembly);

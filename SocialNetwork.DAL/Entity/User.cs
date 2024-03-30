@@ -29,4 +29,6 @@ public class User : BaseEntity
     public IEnumerable<BlackList>? BlackLists { get; set; }
     
     public IEnumerable<BaseNotificationEntity>? Notifications { get; set; }
+    public IEnumerable<GroupMember>? GroupMembers { get; set; }
+    public IEnumerable<BannedUserList>? BansByGroups { get; set; }
 }
