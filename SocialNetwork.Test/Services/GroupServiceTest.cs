@@ -522,14 +522,14 @@ public class GroupServiceTest : BaseMessageTestService<IGroupService, GroupServi
         Assert.That(group.GroupMembers!.Count == 2);
 
         await Service.BanGroupMember(user1.Id, group.Id, user2.Id, "toxic");
-        Assert.That((await Service.GetAllBannedUser(group.Id, paginationModel)).Data.Count() == 1);
+        Assert.That((await Service.GetAllBannedUser(user1.Id,group.Id, paginationModel)).Data.Count() == 1);
 
         group = (await Service.FindGroupByName(user1.Id, paginationModel, "Group1")).Data.First();
         Assert.That(group.GroupMembers!.Count == 1);
 
         await Service.UnBanGroupMember(user1.Id, group.Id, user2.Id);
 
-        Assert.That((await Service.GetAllBannedUser(group.Id, paginationModel)).Data.Count() == 0);
+        Assert.That((await Service.GetAllBannedUser(user1.Id, group.Id, paginationModel)).Data.Count() == 0);
     }
 
 }
