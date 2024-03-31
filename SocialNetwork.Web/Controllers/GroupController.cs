@@ -45,7 +45,7 @@ public class GroupController : ControllerBase
         return Ok();
     }
 
-    [HttpPost("edit-group")]
+    [HttpPut]
     public async Task<IActionResult> EditGroup([FromBody] GroupEditModel groupEditModel, CancellationToken cancellationToken)
     {
         var userId = User.GetUserId();
@@ -53,7 +53,7 @@ public class GroupController : ControllerBase
         return Ok(_mapper.Map<GroupViewModel>(chat));
     }
 
-    [HttpPost("join-group-member")]
+    [HttpPost("join")]
     public async Task<IActionResult> AddGroupMember([FromBody] AddUserInGroupModel addUserInGroupModel, CancellationToken cancellationToken)
     {
         _logger.LogInformation("Start to join user the group");
@@ -63,7 +63,7 @@ public class GroupController : ControllerBase
         return Ok();
     }
 
-    [HttpDelete("leave-group-member")]
+    [HttpDelete("leave")]
     public async Task<IActionResult> DelGroupMember([FromBody] AddUserInGroupModel addUserInGroupModel, CancellationToken cancellationToken)
     {
         _logger.LogInformation("Start to delete groupMember from group");
@@ -89,55 +89,6 @@ public class GroupController : ControllerBase
         var userId = User.GetUserId();
         await _groupService.MakeHost(userId, groupId, groupMemberId, cancellationToken);
         return Ok();
-    }
-
-    [HttpPost("role")]
-    public async Task<IActionResult> AddRole([FromBody] CreateRoleGroupModel createRoleGroupModel, CancellationToken cancellationToken)
-    {
-        _logger.LogInformation("Start to add role");
-        var userId = User.GetUserId();
-        await _groupService.AddRole(userId, createRoleGroupModel.GroupId, _mapper.Map<RoleGroupModel>(createRoleGroupModel), cancellationToken);
-        return Ok();
-    }
-
-    [HttpDelete("role")]
-
-    public async Task<IActionResult> DelRole([FromBody] ForRoleGroupModel forRoleGroupModel, CancellationToken cancellationToken)
-    {
-        _logger.LogInformation("Start to delete role");
-        var userId = User.GetUserId();
-        await _groupService.DelRole(userId, forRoleGroupModel.GroupId, forRoleGroupModel.RoleId, cancellationToken);
-        _logger.LogInformation("Role was deleted");
-        return Ok();
-    }
-
-    [HttpPost("set-role")]
-    public async Task<IActionResult> SetRole([FromBody] ForRoleGroupModel forRoleGroupModel, CancellationToken cancellationToken)
-    {
-        _logger.LogInformation("Start to set role");
-        var userId = User.GetUserId();
-        await _groupService.SetRole(userId, forRoleGroupModel.GroupId, forRoleGroupModel.RoleId, forRoleGroupModel.MemberIds!, cancellationToken);
-        _logger.LogInformation("The role has been set");
-        return Ok();
-    }
-
-    [HttpDelete("unset-role")]
-    public async Task<IActionResult> UnSetRole([FromBody] ForRoleGroupModel forRoleGroupModel, CancellationToken cancellationToken)
-    {
-        _logger.LogInformation("Start to unsset role");
-        var userId = User.GetUserId();
-        await _groupService.UnSetRole(userId, forRoleGroupModel.GroupId, forRoleGroupModel.RoleId, forRoleGroupModel.MemberIds!, cancellationToken);
-        _logger.LogInformation("The role has been unset");
-        return Ok();
-    }
-
-    [HttpPost("edit-role")]
-    public async Task<IActionResult> EditRole([FromBody] RoleGroupUpdateModel roleGroupUpdateModel, CancellationToken cancellationToken)
-    {
-        var userId = User.GetUserId();
-        var role = await _groupService.EditRole(userId, roleGroupUpdateModel.GroupId, roleGroupUpdateModel.RoleId,
-            _mapper.Map<RoleGroupModel>(roleGroupUpdateModel.RoleGroupModel), cancellationToken);
-        return Ok(_mapper.Map<RoleGroupViewModel>(role));
     }
 
     [HttpDelete("ban-member")]
@@ -168,14 +119,6 @@ public class GroupController : ControllerBase
         return Ok(_mapper.Map<PaginationResultViewModel<BannedUsersInGroupViewModel>>(userModels));
     }
 
-    [HttpGet("roles")]
-    public async Task<IActionResult> GetAllGroupRoles([FromQuery] PaginationModel pagination, [FromQuery] int groupId, CancellationToken cancellationToken)
-    {
-        var userId = User.GetUserId();
-        var roles = await _groupService.GetAllGroupRoles(userId, pagination, groupId, cancellationToken);
-        return Ok(_mapper.Map<PaginationResultViewModel<RoleGroupViewModel>>(roles));
-    }
-
     [HttpGet("groups-by-name")]
     public async Task<IActionResult> FindGroupByName([FromQuery] PaginationModel pagination, [FromQuery] string groupName, CancellationToken cancellationToken)
     {
@@ -192,7 +135,7 @@ public class GroupController : ControllerBase
         return Ok(_mapper.Map<PaginationResultViewModel<GroupViewModel>>(chat));
     }
 
-    [HttpGet("group-members")]
+    [HttpGet("members")]
     public async Task<IActionResult> GetGroupMembers([FromQuery] PaginationModel pagination, [FromQuery] int groupId, [FromQuery] int roleGroupId, CancellationToken cancellationToken)
     {
         var userId = User.GetUserId();
