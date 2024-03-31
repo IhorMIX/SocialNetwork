@@ -33,7 +33,7 @@ public class MessageController : ControllerBase
         return Ok(_mapper.Map<MessageViewModel>(lastMessage));
     }
     
-    [HttpGet("messages")]
+    [HttpGet]
     public async Task<IActionResult> GetMessages([FromQuery] int chatId, [FromQuery] PaginationModel pagination, CancellationToken cancellationToken)
     {
         var userId = User.GetUserId();

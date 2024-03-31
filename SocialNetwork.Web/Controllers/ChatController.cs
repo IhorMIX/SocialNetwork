@@ -103,60 +103,6 @@ public class ChatController : ControllerBase
         return Ok(_mapper.Map<PaginationResultViewModel<ChatViewModel>>(chat));
     }
     
-    [HttpPost("role")]
-    public async Task<IActionResult> AddRole([FromBody] CreateRoleModel createRoleModel, CancellationToken cancellationToken)
-    {
-        _logger.LogInformation("Start to add role");
-        var userId = User.GetUserId();
-        await _chatService.AddRole(userId, createRoleModel.ChatId, _mapper.Map<RoleModel>(createRoleModel), cancellationToken);
-       
-        return Ok();
-    }
-    
-    [HttpDelete("role")]
-    public async Task<IActionResult> DelRole([FromBody] IdsForRoleModel idsForRoleModel, CancellationToken cancellationToken)
-    {
-        _logger.LogInformation("Start to delete role");
-        var userId = User.GetUserId();
-        await _chatService.DelRole(userId, idsForRoleModel.ChatId, idsForRoleModel.RoleId, cancellationToken);
-        _logger.LogInformation("Role was deleted");
-        return Ok();
-    }
-    
-    [HttpPost("set-role")]
-    public async Task<IActionResult> SetRole([FromBody] IdsForRoleModel idsForRoleModel, CancellationToken cancellationToken)
-    {
-        _logger.LogInformation("Start to set role");
-        var userId = User.GetUserId();
-        await _chatService.SetRole(userId, idsForRoleModel.ChatId, idsForRoleModel.RoleId, idsForRoleModel.MemberIds!, cancellationToken);
-        _logger.LogInformation("Role was set");
-        return Ok();
-    }
-    
-    [HttpGet("roles")]
-    public async Task<IActionResult> GetAllRoles([FromQuery] PaginationModel pagination, [FromQuery] int chatId, CancellationToken cancellationToken)
-    {
-        var userId = User.GetUserId();
-        var roles = await _chatService.GetAllChatRoles(userId, pagination, chatId, cancellationToken);
-        return Ok(_mapper.Map<PaginationResultViewModel<RoleViewModel>>(roles));
-    }
-    
-    [HttpGet("role")]
-    public async Task<IActionResult> GetRole([FromQuery] int chatId, [FromQuery] int roleId, CancellationToken cancellationToken)
-    {
-        var userId = User.GetUserId();
-        var roles = await _chatService.GetRoleById(userId, chatId, roleId, cancellationToken);
-        return Ok(_mapper.Map<List<RoleViewModel>>(roles));
-    }
-    
-    [HttpPost("edit-role")]
-    public async Task<IActionResult> EditRole([FromBody] RoleUpdateModel roleUpdateModel, CancellationToken cancellationToken)
-    {
-        var userId = User.GetUserId();
-        var role = await _chatService.EditRole(userId, roleUpdateModel.ChatId, roleUpdateModel.RoleId, 
-            _mapper.Map<RoleModel>(roleUpdateModel.RoleModel), cancellationToken);
-        return Ok(_mapper.Map<RoleViewModel>(role));
-    }
 
     [HttpGet("chat-members")]
     public async Task<IActionResult> GetChatMembers([FromQuery] PaginationModel pagination, [FromQuery] int chatId, [FromQuery] int roleId, CancellationToken cancellationToken)
@@ -168,15 +114,6 @@ public class ChatController : ControllerBase
         
         return Ok(_mapper.Map<PaginationResultViewModel<ChatMemberViewModel>>
             (await _chatService.GetChatMembers(userId, pagination, chatId, cancellationToken)));
-    }
-
-    [HttpPost("edit-roles-rank")]
-    public async Task<IActionResult> EditRolesRank([FromBody] RoleRankUpdateModel roleEditModel, CancellationToken cancellationToken)
-    {
-        var userId = User.GetUserId();
-        var roles = await _chatService.EditRolesRank(userId, roleEditModel.ChatId, _mapper.Map<List<RoleModel>>(roleEditModel.RoleRanksModel),
-            cancellationToken);
-        return Ok(_mapper.Map<List<RoleViewModel>>(roles));
     }
 
     [HttpPost("leave")]
