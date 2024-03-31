@@ -278,7 +278,7 @@ public class MessageService : IMessageService
                 .Pagination(pagination.CurrentPage, pagination.PageSize)
                 .ToListAsync(cancellationToken);
         }
-        
+        // send only unread
         var messageModels = await ReadMessages(userId, chatId, _mapper.Map<List<MessageModel>>(messagesDb), cancellationToken);
         
         var messages = new PaginationResultModel<MessageModel>
