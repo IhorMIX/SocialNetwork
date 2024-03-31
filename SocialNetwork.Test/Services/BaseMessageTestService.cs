@@ -35,12 +35,6 @@ public class BaseMessageTestService<T, V> : DefaultServiceTest<T, V>
         services.AddScoped<INotificationService, NotificationService>();
         services.AddScoped<IMessageReadStatusRepository, MessageReadStatusRepository>();
 
-        services.AddScoped<IGroupService, GroupService>();
-        services.AddScoped<IGroupRepository, GroupRepository>();
-        services.AddScoped<IGroupMemberRepository, GroupMemberRepository>();
-        services.AddScoped<IRoleGroupRepository, RoleGroupRepository>();
-        services.AddScoped<IBannedUserListRepository, BannedUserListRepository>();
-
         base.SetUpAdditionalDependencies(services);
     }
     

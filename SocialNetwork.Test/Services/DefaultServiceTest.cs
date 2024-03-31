@@ -7,6 +7,8 @@ using SocialNetwork.BLL.Services.Interfaces;
 using SocialNetwork.BLL.Settings;
 using SocialNetwork.DAL;
 using SocialNetwork.DAL.Options;
+using SocialNetwork.DAL.Repository.Interfaces;
+using SocialNetwork.DAL.Repository;
 using SocialNetwork.Web;
 
 namespace SocialNetwork.Test.Services
@@ -30,6 +32,12 @@ namespace SocialNetwork.Test.Services
             services.Configure<HexKeyConfig>(Configuration.GetSection("HexKeyConfig"));
             services.Configure<LinkConfig>(Configuration.GetSection("HexKeyConfig"));
             services.AddScoped<IMailService, FakeMailService>();
+
+            services.AddScoped<IGroupService, GroupService>();
+            services.AddScoped<IGroupRepository, GroupRepository>();
+            services.AddScoped<IGroupMemberRepository, GroupMemberRepository>();
+            services.AddScoped<IRoleGroupRepository, RoleGroupRepository>();
+            services.AddScoped<IBannedUserListRepository, BannedUserListRepository>();
         }
 
         private void SetUpConfiguration()
