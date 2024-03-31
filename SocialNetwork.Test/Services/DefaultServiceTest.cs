@@ -33,11 +33,6 @@ namespace SocialNetwork.Test.Services
             services.Configure<LinkConfig>(Configuration.GetSection("HexKeyConfig"));
             services.AddScoped<IMailService, FakeMailService>();
 
-            services.AddScoped<IGroupService, GroupService>();
-            services.AddScoped<IGroupRepository, GroupRepository>();
-            services.AddScoped<IGroupMemberRepository, GroupMemberRepository>();
-            services.AddScoped<IRoleGroupRepository, RoleGroupRepository>();
-            services.AddScoped<IBannedUserListRepository, BannedUserListRepository>();
         }
 
         private void SetUpConfiguration()

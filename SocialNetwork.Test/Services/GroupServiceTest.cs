@@ -13,7 +13,17 @@ namespace SocialNetwork.Test.Services;
 
 public class GroupServiceTest : BaseMessageTestService<IGroupService, GroupService>
 {
-
+    protected override void SetUpAdditionalDependencies(IServiceCollection services)
+    {
+        services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<IUserService, UserService>();
+        services.AddScoped<IGroupService, GroupService>();
+        services.AddScoped<IGroupRepository, GroupRepository>();
+        services.AddScoped<IGroupMemberRepository, GroupMemberRepository>();
+        services.AddScoped<IRoleGroupRepository, RoleGroupRepository>();
+        services.AddScoped<IBannedUserListRepository, BannedUserListRepository>();
+        base.SetUpAdditionalDependencies(services);
+    }
     [Test]
     public async Task CreateGroup_Ok_GroupCreated()
     {
