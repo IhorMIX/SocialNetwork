@@ -278,7 +278,6 @@ public class MessageService : IMessageService
                 .Pagination(pagination.CurrentPage, pagination.PageSize)
                 .ToListAsync(cancellationToken);
         }
-        // send only unread
         var messageModels = await ReadMessages(userId, chatId, _mapper.Map<List<MessageModel>>(messagesDb), cancellationToken);
         
         var messages = new PaginationResultModel<MessageModel>
@@ -369,10 +368,13 @@ public class MessageService : IMessageService
     {
         var chatMemberDb = await _chatMemberRepository.GetByUserIdAndChatId(userId, chatId, cancellationToken);
         _logger.LogAndThrowErrorIfNull(chatMemberDb, new UserNotFoundException($"Chat member with id-{userId} not found"));
-
-        List<MessageReadStatusModel> messageReadStatuses = messageModels.Where(i => i.Sender.Id != chatMemberDb!.Id && i.MessageReadStatuses!.Any())
+        
+        var messageReadStatuses = messageModels
+            .Where(i => i.Sender.Id != chatMemberDb!.Id && 
+                        i.MessageReadStatuses!.Where(r => r.ChatMemberId == chatMemberDb.Id).Select(r => r.IsRead).Contains(false))
             .Select(i => i.MessageReadStatuses!.SingleOrDefault(i => i.ChatMemberId == chatMemberDb!.Id))
             .ToList();
+        
         messageReadStatuses = messageReadStatuses.Select(messageStatus =>
         {
             messageStatus.IsRead = true;

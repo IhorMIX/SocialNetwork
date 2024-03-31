@@ -132,12 +132,25 @@ public class MessageServiceTest : BaseMessageTestService<IMessageService, Messag
             }
         });
 
-        var messages = await Service.GetMessagesAsync(user2.Id, chat.Id);
+        var messages = await Service.GetMessagesAsync(user2.Id, chat.Id, new PaginationModel
+        {
+            CurrentPage = 1,
+            PageSize = 1
+        });
 
-        Assert.That(messages.Count() == 3);
-        Assert.That(messages.Any(c => c.Text == "Test message 1"));
-        Assert.That(messages.Any(c => c.Text == "Test message 2"));
-        Assert.That(messages.Any(c => c.Text == "Test message 3"));
+        Assert.That(messages.Data.Count() == 1);
+        Assert.That(messages.Data.Any(c => c.Text == "Test message 1"));
+        
+        messages = await Service.GetMessagesAsync(user2.Id, chat.Id, new PaginationModel
+        {
+            CurrentPage = 1,
+            PageSize = 3
+        });
+        
+        Assert.That(messages.Data.Count() == 3);
+        Assert.That(messages.Data.Any(c => c.Text == "Test message 1"));
+        Assert.That(messages.Data.Any(c => c.Text == "Test message 2"));
+        Assert.That(messages.Data.Any(c => c.Text == "Test message 3"));
     }
 
     [Test]
