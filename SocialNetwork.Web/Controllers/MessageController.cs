@@ -38,8 +38,6 @@ public class MessageController : ControllerBase
     {
         var userId = User.GetUserId();
         var messages = await _messageService.GetMessagesAsync(userId, chatId, pagination, cancellationToken);
-        // await _messageService.ReadMessages(userId, chatId, messages.Data, CancellationToken.None);
-        // messages = await _messageService.GetMessagesAsync(userId, chatId, pagination, cancellationToken);
         return Ok(_mapper.Map<PaginationResultViewModel<MessageViewModel>>(messages));
     }
     
