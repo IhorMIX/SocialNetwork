@@ -13,27 +13,10 @@ public class BaseMessageTestService<T, V> : DefaultServiceTest<T, V>
 {
     protected override void SetUpAdditionalDependencies(IServiceCollection services)
     {
-        services.AddScoped<IFriendRequestRepository, FriendRequestRepository>();
-        services.AddScoped<IUserRepository, UserRepository>();
-        services.AddScoped<IUserService, UserService>();
-        services.AddScoped<IFriendshipService, FriendshipService>();
-        services.AddScoped<IFriendshipRepository, FriendshipRepository>();
-        services.AddScoped<IBlackListService, BlackListService>();
-        services.AddScoped<IBlackListRepository, BlackListRepository>();
-
         services.AddScoped<IChatService, ChatService>();
         services.AddScoped<IRoleRepository, RoleRepository>();
         services.AddScoped<IChatRepository, ChatRepository>();
         services.AddScoped<IChatMemberRepository, ChatMemberRepository>();
-        
-        services.AddScoped<IMessageService, MessageService>();
-        services.AddScoped<IMessageRepository, MessageRepository>();
-        services.AddScoped<IReactionRepository, ReactionRepository>();
-        services.AddScoped<IReactionService, ReactionService>();
-        
-        services.AddScoped<INotificationRepository, NotificationRepository>();
-        services.AddScoped<INotificationService, NotificationService>();
-        services.AddScoped<IMessageReadStatusRepository, MessageReadStatusRepository>();
         
         base.SetUpAdditionalDependencies(services);
     }

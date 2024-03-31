@@ -17,21 +17,26 @@ namespace SocialNetwork.Test.Services
 {
     public class PaginationServiceTest : BaseMessageTestService<IBlackListService, BlackListService> 
     {
+        
         protected override void SetUpAdditionalDependencies(IServiceCollection services)
         {
-            services.AddScoped<IBlackListService, BlackListService>();
-            services.AddScoped<IBlackListRepository, BlackListRepository>();
-            services.AddScoped<IFriendshipService, FriendshipService>();
-            services.AddScoped<IFriendshipRepository, FriendshipRepository>();
-            services.AddScoped<IFriendRequestService, FriendRequestService>();
-            services.AddScoped<IFriendRequestRepository, FriendRequestRepository>();
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IUserService, UserService>();
-            services.AddScoped<IChatService, ChatService>();
+        
+            services.AddScoped<IFriendshipService, FriendshipService>();
+            services.AddScoped<IFriendRequestService, FriendRequestService>();
+            services.AddScoped<IFriendshipRepository, FriendshipRepository>();
+            services.AddScoped<IFriendRequestRepository, FriendRequestRepository>();
+
+            services.AddScoped<IBlackListService, BlackListService>();
+            services.AddScoped<IBlackListRepository, BlackListRepository>();
+        
+            services.AddScoped<INotificationRepository, NotificationRepository>();
+            services.AddScoped<INotificationService, NotificationService>();
+            
             base.SetUpAdditionalDependencies(services);
-
         }
-
+        
         [Test]
         public async Task AddUsersToBlackList_UsersAddAndMakePaginationModel_SuccessReturned()
         {

@@ -1,6 +1,6 @@
 ﻿namespace SocialNetwork.DAL.Entity;
 
-public class BaseNotificationEntity : BaseEntity
+public class NotificationEntity : BaseEntity
 {
     public string NotificationMessage { get; set; } = null!;
     public DateTime CreatedAt { get; set; }

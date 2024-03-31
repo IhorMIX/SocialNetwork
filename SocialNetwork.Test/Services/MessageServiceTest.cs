@@ -2,12 +2,39 @@
 using SocialNetwork.BLL.Models;
 using SocialNetwork.BLL.Services;
 using SocialNetwork.BLL.Services.Interfaces;
+using SocialNetwork.DAL.Repository;
+using SocialNetwork.DAL.Repository.Interfaces;
 using SocialNetwork.Test.Helpers;
 
 namespace SocialNetwork.Test.Services;
 
 public class MessageServiceTest : BaseMessageTestService<IMessageService, MessageService>
 {
+    
+    protected override void SetUpAdditionalDependencies(IServiceCollection services)
+    {
+        services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<IUserService, UserService>();
+        
+        services.AddScoped<IFriendshipService, FriendshipService>();
+        services.AddScoped<IFriendRequestService, FriendRequestService>();
+        services.AddScoped<IFriendshipRepository, FriendshipRepository>();
+        services.AddScoped<IFriendRequestRepository, FriendRequestRepository>();
+        
+        services.AddScoped<IMessageService, MessageService>();
+        services.AddScoped<IMessageRepository, MessageRepository>();
+        services.AddScoped<IReactionRepository, ReactionRepository>();
+        services.AddScoped<IReactionService, ReactionService>();
+        services.AddScoped<IMessageReadStatusRepository, MessageReadStatusRepository>();
+        
+        services.AddScoped<INotificationRepository, NotificationRepository>();
+        services.AddScoped<INotificationService, NotificationService>();
+        
+        services.AddScoped<IBlackListService, BlackListService>();
+        services.AddScoped<IBlackListRepository, BlackListRepository>();
+        
+        base.SetUpAdditionalDependencies(services);
+    }
     
     [Test]
     public async Task CreateMessage_MessageCreated_returnLastMessage()

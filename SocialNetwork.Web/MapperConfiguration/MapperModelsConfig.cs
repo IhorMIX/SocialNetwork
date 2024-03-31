@@ -184,10 +184,10 @@ namespace SocialNetwork.Web.MapperConfiguration
                 .ForMember(dest => dest.Role, opt => opt.Ignore())
                 .ReverseMap();
             
-            CreateMap<BaseNotificationEntity, BaseNotificationModel>().ReverseMap();
+            CreateMap<NotificationEntity, BaseNotificationModel>().ReverseMap();
            
             CreateMap<FriendRequestNotification, FriendRequestNotificationModel>()
-                .IncludeBase<BaseNotificationEntity, BaseNotificationModel>();
+                .IncludeBase<NotificationEntity, BaseNotificationModel>();
 
             CreateMap<MessageReadStatusModel, MessageReadStatus>()
                 .ForMember(dest => dest.Message, opt => opt.Ignore())
@@ -198,23 +198,23 @@ namespace SocialNetwork.Web.MapperConfiguration
                 .ReverseMap();
             
             CreateMap<ChatNotification, ChatNotificationModel>()
-                .IncludeBase<BaseNotificationEntity, BaseNotificationModel>()
+                .IncludeBase<NotificationEntity, BaseNotificationModel>()
                 .ReverseMap();
             
             CreateMap<FriendRequestNotification, FriendRequestNotificationModel>()
-                .IncludeBase<BaseNotificationEntity, BaseNotificationModel>();
+                .IncludeBase<NotificationEntity, BaseNotificationModel>();
 
             CreateMap<BaseNotificationViewModel, BaseNotificationModel>()
                 .ReverseMap();
             
             CreateMap<MessageNotification, MessageNotificationModel>()
                 .IncludeBase<ChatNotification, ChatNotificationModel>()
-                .IncludeBase<BaseNotificationEntity, BaseNotificationModel>()
+                .IncludeBase<NotificationEntity, BaseNotificationModel>()
                 .ReverseMap();
             
             CreateMap<ReactionNotification, ReactionNotificationModel>()
                 .IncludeBase<ChatNotification, ChatNotificationModel>()
-                .IncludeBase<BaseNotificationEntity, BaseNotificationModel>()
+                .IncludeBase<NotificationEntity, BaseNotificationModel>()
                 .ReverseMap();
             
             CreateMap<ChatNotificationViewModel, ChatNotificationModel>()

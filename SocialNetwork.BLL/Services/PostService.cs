@@ -6,18 +6,19 @@ using SocialNetwork.BLL.Models;
 using SocialNetwork.BLL.Services.Interfaces;
 using SocialNetwork.DAL.Entity;
 using SocialNetwork.DAL.Repository;
+using SocialNetwork.DAL.Repository.Interfaces;
 
 namespace SocialNetwork.BLL.Services;
 
 public class PostService : IPostService
 {
-    private readonly PostRepository _postRepository;
-    private readonly UserRepository _userRepository;
+    private readonly IPostRepository _postRepository;
+    private readonly IUserRepository _userRepository;
     private readonly IMapper _mapper;
     private readonly ILogger<BasePostModel> _logger;
 
 
-    public PostService(PostRepository postRepository, UserRepository userRepository, IMapper mapper, ILogger<BasePostModel> logger)
+    public PostService(IPostRepository postRepository, IUserRepository userRepository, IMapper mapper, ILogger<BasePostModel> logger)
     {
         _postRepository = postRepository;
         _userRepository = userRepository;

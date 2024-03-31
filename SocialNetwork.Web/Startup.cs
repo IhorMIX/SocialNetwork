@@ -87,6 +87,9 @@ public class Startup
         services.AddScoped<INotificationService, NotificationService>();
         services.AddScoped<IMessageReadStatusRepository, MessageReadStatusRepository>();
         
+        services.AddScoped<IPostRepository, PostRepository>();
+        services.AddScoped<IPostService, PostService>();
+        
         services.AddSingleton<IDbReadySignal, DbContextReadySignal>();
         services.AddSingleton<DelayedWriter>();
         services.AddSingleton<IUserInChatTracker, UserInChatTracker>();

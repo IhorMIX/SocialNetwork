@@ -10,28 +10,28 @@ using SocialNetwork.Test.Helpers;
 
 namespace SocialNetwork.Test.Services;
 
-public class BaseNotificationEntityTest : BaseMessageTestService<INotificationService, NotificationService>
+public class NotificationEntityTest : BaseMessageTestService<INotificationService, NotificationService>
 {
+
     protected override void SetUpAdditionalDependencies(IServiceCollection services)
     {
-        services.AddScoped<IBlackListService, BlackListService>();
-        services.AddScoped<IBlackListRepository, BlackListRepository>();
-        services.AddScoped<IFriendshipService, FriendshipService>();
-        services.AddScoped<IFriendshipRepository, FriendshipRepository>();
-        services.AddScoped<IFriendRequestRepository, FriendRequestRepository>();
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IUserService, UserService>();
+        
+        services.AddScoped<IFriendshipService, FriendshipService>();
         services.AddScoped<IFriendRequestService, FriendRequestService>();
-        services.AddScoped<IChatService, ChatService>();
-        services.AddScoped<IChatRepository, ChatRepository>();
-        services.AddScoped<IRoleRepository, RoleRepository>();
-        services.AddScoped<IChatMemberRepository, ChatMemberRepository>();
+        services.AddScoped<IFriendshipRepository, FriendshipRepository>();
+        services.AddScoped<IFriendRequestRepository, FriendRequestRepository>();
+
+        services.AddScoped<IBlackListService, BlackListService>();
+        services.AddScoped<IBlackListRepository, BlackListRepository>();
         
         services.AddScoped<INotificationRepository, NotificationRepository>();
         services.AddScoped<INotificationService, NotificationService>();
+
         base.SetUpAdditionalDependencies(services);
     }
-
+    
     [Test]
     public async Task CreateNewFriendRequest_CheckFriendRequestNotificationEntity_OK()
     {
