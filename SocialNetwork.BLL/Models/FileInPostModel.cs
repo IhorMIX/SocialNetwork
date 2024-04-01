@@ -3,5 +3,5 @@
 public class FileInPostModel : BaseFileModel
 {
     public int PostId { get; set; }
-    public BaseFileModel Post { get; set; }
+    public BasePostModel Post { get; set; } = null!;
 }

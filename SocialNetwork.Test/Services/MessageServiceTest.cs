@@ -251,6 +251,17 @@ public class MessageServiceTest : BaseMessageTestService<IMessageService, Messag
         await Service.EditMessageAsync(user3.Id, chat.Id, replyMessage.Id, new MessageModel
         {
             Text = "editedMessage",
+            FileModels = new List<FileInMessageModel>
+            {
+                new FileInMessageModel
+                {
+                    FilePath = "test3.png",
+                },
+                new FileInMessageModel
+                {
+                    FilePath = "test4.png",
+                }
+            }
         });
         
         messages = await Service.GetMessagesAsync(user2.Id, chat.Id);

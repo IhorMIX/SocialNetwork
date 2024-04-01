@@ -23,10 +23,11 @@ public class PostRepository : IPostRepository
         return await _socialNetworkDbContext.Posts.FirstOrDefaultAsync(r => r.Id == id, cancellationToken);
     }
 
-    public async Task CreatePost(BasePostEntity post, CancellationToken cancellationToken = default)
+    public async Task<BasePostEntity> CreatePost(BasePostEntity post, CancellationToken cancellationToken = default)
     {
-        await _socialNetworkDbContext.Posts.AddAsync(post, cancellationToken);
+        var postDb = await _socialNetworkDbContext.Posts.AddAsync(post, cancellationToken);
         await _socialNetworkDbContext.SaveChangesAsync(cancellationToken);
+        return postDb.Entity;
     }
 
     public async Task DeletePost(BasePostEntity post, CancellationToken cancellationToken = default)

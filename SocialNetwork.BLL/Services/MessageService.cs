@@ -152,7 +152,11 @@ public class MessageService : IMessageService
             var messageSourceValue = messageProperty.GetValue(messageModel);
             var messageTargetValue = messageDbProperty.GetValue(messageDb);
 
-            if (messageSourceValue != null && !messageSourceValue.Equals(0) && !ReferenceEquals(messageSourceValue, "") && !messageSourceValue.Equals(messageTargetValue))
+            if (messageSourceValue != null 
+                && messageSourceValue!.GetType()!=typeof(DateTime) 
+                && !messageSourceValue.Equals(0) 
+                && !ReferenceEquals(messageSourceValue, "") 
+                && !messageSourceValue.Equals(messageTargetValue))
             {
                 messageDbProperty.SetValue(messageDb, messageSourceValue);
             }

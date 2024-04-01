@@ -142,7 +142,15 @@ namespace SocialNetwork.Web.MapperConfiguration
             CreateMap<Reaction, ReactionModel>()
                 .ReverseMap();
             
+            CreateMap<BaseFileModel, BaseFileEntity>()
+                .ReverseMap();
+            
+            CreateMap<FileInPostModel, FileInPost>()
+                .IncludeBase<BaseFileModel, BaseFileEntity>()
+                .ReverseMap();
+            
             CreateMap<FileInMessageModel, FileInMessage>()
+                .IncludeBase<BaseFileModel, BaseFileEntity>()
                 .ReverseMap();
             
             CreateMap<FileInMessageViewModel, FileInMessageModel>()
@@ -234,7 +242,12 @@ namespace SocialNetwork.Web.MapperConfiguration
                 .IncludeBase<ChatNotificationViewModel, ChatNotificationModel>()
                 .IncludeBase<BaseNotificationViewModel, BaseNotificationModel>()
                 .ReverseMap();
-            
+
+            CreateMap<BasePostEntity, BasePostModel>().ReverseMap();
+                
+            CreateMap<UserPost, UserPostModel>()
+                .IncludeBase<BasePostEntity, BasePostModel>()
+                .ReverseMap();
         }
     }
 }
