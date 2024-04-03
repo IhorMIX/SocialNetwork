@@ -167,7 +167,6 @@ namespace SocialNetwork.Web.MapperConfiguration
             
             CreateMap<MessageViewModel, MessageModel>()
                 .ForMember(dest => dest.Files, opt => opt.MapFrom(d => d.FileModels))
-                .ForMember(dest => dest.Author, opt => opt.Ignore())
                 .ForMember(dest => dest.ToReplyMessage, opt => opt.Ignore())
                 .ForMember(dest => dest.Chat, opt => opt.Ignore())
                 .ReverseMap();

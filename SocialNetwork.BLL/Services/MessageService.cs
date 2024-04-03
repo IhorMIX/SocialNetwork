@@ -425,7 +425,7 @@ public class MessageService : IMessageService
         {
             ChatAccess.SendMessages
         };
-        if (messageModel.FileModels?.Any() == true)
+        if (messageModel.Files?.Any() == true)
         {
             access.Add(ChatAccess.SendFiles);
         }
@@ -450,12 +450,12 @@ public class MessageService : IMessageService
             });
         }
         
-        List<string> filePaths = messageModel.FileModels!.Select(fe => fe.FilePath).ToList();
+        List<string> filePaths = messageModel.Files!.Select(fe => fe.FilePath).ToList();
 
-        List<FileEntity> sharedFiles = new ();
+        List<FileInMessage> sharedFiles = new ();
         foreach (string filePath in filePaths)
         {
-            sharedFiles.Add(new FileEntity
+            sharedFiles.Add(new FileInMessage
             {
                 FilePath = filePath
             });

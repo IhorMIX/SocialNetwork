@@ -433,9 +433,9 @@ public class MessageServiceTest : BaseMessageTestService<IMessageService, Messag
         var createdMessage = await messageService.CreateMessage(user1.Id, chat1.Id, new MessageModel()
         {
             Text = "chat1 mess",
-            FileModels = new List<FileModel>
+            Files = new List<FileInMessageModel>
             {
-                new FileModel
+                new FileInMessageModel
                 {
                     FilePath = "test.png",
                 }
@@ -444,7 +444,7 @@ public class MessageServiceTest : BaseMessageTestService<IMessageService, Messag
 
         Assert.That(createdMessage, Is.Not.EqualTo(null));
         Assert.That(createdMessage.Text, Is.EqualTo("chat1 mess"));
-        Assert.That(createdMessage.FileModels!.Any(f => f.FilePath == "test.png"));
+        Assert.That(createdMessage.Files!.Any(f => f.FilePath == "test.png"));
 
         var createdMessage2 = await Service.ShareWithMessage(user2.Id, createdMessage.Id, chat2!.Id, true);
         chatList = await chatService.FindChatByName(user1.Id,paginationModel, "ChatShare");
