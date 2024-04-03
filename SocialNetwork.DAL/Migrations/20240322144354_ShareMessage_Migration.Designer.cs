@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SocialNetwork.DAL;
 
@@ -11,9 +12,11 @@ using SocialNetwork.DAL;
 namespace SocialNetwork.DAL.Migrations
 {
     [DbContext(typeof(SocialNetworkDbContext))]
-    partial class SocialNetworkDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240322144354_ShareMessage_Migration")]
+    partial class ShareMessage_Migration
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -105,34 +108,6 @@ namespace SocialNetwork.DAL.Migrations
                     b.UseTphMappingStrategy();
                 });
 
-            modelBuilder.Entity("SocialNetwork.DAL.Entity.BasePostEntity", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Discriminator")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Text")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Posts");
-
-                    b.HasDiscriminator<string>("Discriminator").HasValue("BasePostEntity");
-
-                    b.UseTphMappingStrategy();
-                });
-
             modelBuilder.Entity("SocialNetwork.DAL.Entity.BlackList", b =>
                 {
                     b.Property<int>("UserId")
@@ -206,21 +181,18 @@ namespace SocialNetwork.DAL.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("Discriminator")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("FilePath")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("MessageId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
+                    b.HasIndex("MessageId");
+
                     b.ToTable("Files");
-
-                    b.HasDiscriminator<string>("Discriminator").HasValue("FileEntity");
-
-                    b.UseTphMappingStrategy();
                 });
 
             modelBuilder.Entity("SocialNetwork.DAL.Entity.FriendRequest", b =>
@@ -511,42 +483,6 @@ namespace SocialNetwork.DAL.Migrations
                     b.HasDiscriminator().HasValue("FriendRequestNotification");
                 });
 
-            modelBuilder.Entity("SocialNetwork.DAL.Entity.UserPost", b =>
-                {
-                    b.HasBaseType("SocialNetwork.DAL.Entity.BasePostEntity");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
-                    b.HasIndex("UserId");
-
-                    b.HasDiscriminator().HasValue("UserPost");
-                });
-
-            modelBuilder.Entity("SocialNetwork.DAL.Entity.FileInMessage", b =>
-                {
-                    b.HasBaseType("SocialNetwork.DAL.Entity.FileEntity");
-
-                    b.Property<int>("MessageId")
-                        .HasColumnType("int");
-
-                    b.HasIndex("MessageId");
-
-                    b.HasDiscriminator().HasValue("FileInMessage");
-                });
-
-            modelBuilder.Entity("SocialNetwork.DAL.Entity.FileInPost", b =>
-                {
-                    b.HasBaseType("SocialNetwork.DAL.Entity.FileEntity");
-
-                    b.Property<int>("PostId")
-                        .HasColumnType("int");
-
-                    b.HasIndex("PostId");
-
-                    b.HasDiscriminator().HasValue("FileInPost");
-                });
-
             modelBuilder.Entity("SocialNetwork.DAL.Entity.MessageNotification", b =>
                 {
                     b.HasBaseType("SocialNetwork.DAL.Entity.ChatNotification");
@@ -646,6 +582,17 @@ namespace SocialNetwork.DAL.Migrations
                     b.Navigation("Chat");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("SocialNetwork.DAL.Entity.FileEntity", b =>
+                {
+                    b.HasOne("SocialNetwork.DAL.Entity.Message", "Message")
+                        .WithMany("Files")
+                        .HasForeignKey("MessageId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Message");
                 });
 
             modelBuilder.Entity("SocialNetwork.DAL.Entity.FriendRequest", b =>
@@ -800,39 +747,6 @@ namespace SocialNetwork.DAL.Migrations
                     b.Navigation("Chat");
                 });
 
-            modelBuilder.Entity("SocialNetwork.DAL.Entity.UserPost", b =>
-                {
-                    b.HasOne("SocialNetwork.DAL.Entity.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("SocialNetwork.DAL.Entity.FileInMessage", b =>
-                {
-                    b.HasOne("SocialNetwork.DAL.Entity.Message", "Message")
-                        .WithMany("Files")
-                        .HasForeignKey("MessageId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Message");
-                });
-
-            modelBuilder.Entity("SocialNetwork.DAL.Entity.FileInPost", b =>
-                {
-                    b.HasOne("SocialNetwork.DAL.Entity.BasePostEntity", "Post")
-                        .WithMany("Files")
-                        .HasForeignKey("PostId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Post");
-                });
-
             modelBuilder.Entity("SocialNetwork.DAL.Entity.MessageNotification", b =>
                 {
                     b.HasOne("SocialNetwork.DAL.Entity.Message", "Message")
@@ -853,11 +767,6 @@ namespace SocialNetwork.DAL.Migrations
                         .IsRequired();
 
                     b.Navigation("Reaction");
-                });
-
-            modelBuilder.Entity("SocialNetwork.DAL.Entity.BasePostEntity", b =>
-                {
-                    b.Navigation("Files");
                 });
 
             modelBuilder.Entity("SocialNetwork.DAL.Entity.Chat", b =>

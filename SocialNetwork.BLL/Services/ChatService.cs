@@ -69,12 +69,20 @@ public class ChatService : IChatService
     public async Task CreateP2PChat(int userId, int user2Id, ChatModel chatModel,
         CancellationToken cancellationToken = default)
     {
+        var alreadyP2PChat = await _chatRepository.GetAll().Where(r => 
+            r.ChatMembers.Select(r => r.User.Id).Contains(userId) &&  r.ChatMembers.Select(r => r.User.Id).Contains(user2Id))
+            .SingleOrDefaultAsync(cancellationToken); 
+        
+        if(alreadyP2PChat is not null)
+            throw new P2PChatIsExistsException($"chat between this users are already exists");
+        
         var userDb = await _userRepository.GetByIdAsync(userId, cancellationToken);
         var user2Db = await _userRepository.GetByIdAsync(user2Id, cancellationToken);
         _logger.LogAndThrowErrorIfNull(userDb, new UserNotFoundException($"User with this Id {userId} not found"));
         _logger.LogAndThrowErrorIfNull(user2Db, new UserNotFoundException($"User with this Id {userId} not found"));
+        
         if (await _friendshipService.IsFriends(userDb!.Id, user2Db!.Id, cancellationToken) is false)
-            return;
+            throw new UsersAreNotFriendsException($"Users with this Ids {userId} and {userId} are not friends");
 
         chatModel.IsGroup = false;
         var chatId = await _chatRepository.CreateChat(_mapper.Map<Chat>(chatModel), cancellationToken);
@@ -480,7 +488,7 @@ public class ChatService : IChatService
                 roleDbProperty.SetValue(roleDb, roleSourceValue);
             }
 
-            else if (roleSourceValue is List<ChatAccess> chatAccesses && chatAccesses.Any())
+            else if (roleSourceValue is List<ChatAccess> chatAccesses)
             {
                 roleDbProperty.SetValue(roleDb, chatAccesses.Select(i => new RoleChatAccess()
                 {

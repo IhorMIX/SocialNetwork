@@ -14,10 +14,12 @@ public class MessageViewModel
     public bool IsDeleted { get; set; }
     
     public int AuthorId { get; set; }
+    public int SenderId { get; set; }
     public int ChatId { get; set; }
     public int ToReplyMessageId { get; set; }
 
-    public ChatMemberViewModel Author { get; set; } = null!;
+    public UserViewModel Author { get; set; } = null!;
+    public ChatMemberViewModel Sender { get; set; } = null!;
     
     public ICollection<ReactionViewModel> Reactions { get; set; } = null!;
     public ICollection<MessageReadStatusViewModel> MessageReadStatuses { get; set; } = null!;

@@ -11,6 +11,10 @@ public class RoleConfiguration :  IEntityTypeConfiguration<Role>
         builder.HasMany(i => i.RoleAccesses)
             .WithOne(i => i.Role)
             .HasForeignKey(i => i.RoleId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasOne(r => r.Chat)
+            .WithMany(r => r.Roles)
             .OnDelete(DeleteBehavior.ClientCascade);
     }
 }

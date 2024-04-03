@@ -8,14 +8,16 @@ public class MessageModel : BaseModel
     public DateTime CreatedAt { get; set; }
     
     public bool IsEdited { get; set; }
+    
     public bool IsDeleted { get; set; }
     
-    
-    public int AuthorId { get; set; }
+    public int CreatorId { get; set; }
+    public int SenderId { get; set; }
     public int ChatId { get; set; }
     public int? ToReplyMessageId { get; set; }
-    
-    public ChatMemberModel? Author { get; set; }
+
+    public UserModel Creator { get; set; } = null!;
+    public ChatMemberModel Sender { get; set; } = null!;
     public ChatModel Chat { get; set; } = null!;
     public MessageModel? ToReplyMessage { get; set; }
     

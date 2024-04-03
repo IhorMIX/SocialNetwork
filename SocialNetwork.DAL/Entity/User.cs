@@ -29,4 +29,5 @@ public class User : BaseEntity
     public IEnumerable<BlackList>? BlackLists { get; set; }
     
     public IEnumerable<NotificationEntity>? Notifications { get; set; }
+    public ICollection<Message>? CreatedMessages { get; set; }
 }
