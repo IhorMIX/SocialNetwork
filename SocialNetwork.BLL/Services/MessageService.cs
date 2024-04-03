@@ -47,7 +47,7 @@ public class MessageService : IMessageService
         {
             ChatAccess.SendMessages
         };
-        if (messageModel.FileModels?.Any() == true)
+        if (messageModel.Files?.Any() == true)
         {
             access.Add(ChatAccess.SendFiles);
         }
@@ -76,7 +76,7 @@ public class MessageService : IMessageService
         var messageDb = await _messageRepository.CreateMessageAsync(new Message
         {
             Text = messageModel.Text,
-            Files = _mapper.Map<List<FileInMessage>>(messageModel.FileModels),
+            Files = _mapper.Map<List<FileInMessage>>(messageModel.Files),
             CreatedAt = DateTime.Now,
             AuthorId = chatMemberDb!.Id,
             ChatId = chatId,
@@ -127,7 +127,7 @@ public class MessageService : IMessageService
         {
             ChatAccess.SendMessages
         };
-        if (messageModel.FileModels?.Any() == true)
+        if (messageModel.Files?.Any() == true)
         {
             access.Add(ChatAccess.SendFiles);
         }
@@ -152,13 +152,22 @@ public class MessageService : IMessageService
             var messageSourceValue = messageProperty.GetValue(messageModel);
             var messageTargetValue = messageDbProperty.GetValue(messageDb);
 
+
             if (messageSourceValue != null 
                 && messageSourceValue!.GetType()!=typeof(DateTime) 
                 && !messageSourceValue.Equals(0) 
                 && !ReferenceEquals(messageSourceValue, "") 
                 && !messageSourceValue.Equals(messageTargetValue))
             {
-                messageDbProperty.SetValue(messageDb, messageSourceValue);
+                if (messageSourceValue!.GetType() == typeof(List<FileInMessageModel>))
+                {
+                    messageDb!.Files = _mapper.Map<List<FileInMessage>>(messageSourceValue);
+                }
+                
+                else
+                {
+                    messageDbProperty.SetValue(messageDb, messageSourceValue);
+                }
             }
         }
         
@@ -176,7 +185,7 @@ public class MessageService : IMessageService
         {
             ChatAccess.SendMessages
         };
-        if (messageModel.FileModels?.Any() == true)
+        if (messageModel.Files?.Any() == true)
         {
             access.Add(ChatAccess.SendFiles);
         }
@@ -206,7 +215,7 @@ public class MessageService : IMessageService
         var messageDb = await _messageRepository.CreateMessageAsync(new Message
         {
             Text = messageModel.Text,
-            Files = _mapper.Map<List<FileInMessage>>(messageModel.FileModels),
+            Files = _mapper.Map<List<FileInMessage>>(messageModel.Files),
             CreatedAt = DateTime.Now,
             AuthorId = chatMemberDb!.Id,
             ChatId = chatId,

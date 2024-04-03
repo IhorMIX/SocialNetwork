@@ -8,5 +8,5 @@ public interface IPostRepository : IBasicRepository<BasePostEntity>
 
     public Task DeletePost(BasePostEntity post, CancellationToken cancellationToken = default);
 
-    public Task UpdatePost(BasePostEntity post, CancellationToken cancellationToken = default);
+    public Task<BasePostEntity> UpdatePost(BasePostEntity post, CancellationToken cancellationToken = default);
 }

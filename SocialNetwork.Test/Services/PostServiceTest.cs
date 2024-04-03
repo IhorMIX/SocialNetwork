@@ -110,11 +110,15 @@ public class PostServiceTest : DefaultServiceTest<IPostService, PostService>
         Assert.That(await Service.GetByIdAsync(post.Id) != null);
         Assert.That(post.UserId == user1.Id);
 
-        await Service.UpdatePost(user1.Id, post.Id, new BasePostModel
+        var editedPost = await Service.UpdatePost(user1.Id, post.Id, new BasePostModel
         {
             Text = "Updated desc",
             Files = new List<FileInPostModel>
             {
+                new FileInPostModel
+                {
+                    FilePath = "testPath1"
+                },
                 new FileInPostModel
                 {
                     FilePath = "testPath2"
@@ -122,7 +126,7 @@ public class PostServiceTest : DefaultServiceTest<IPostService, PostService>
             },
         });
         
-        Assert.ThrowsAsync<PostNotFoundException>(async() => await Service.GetByIdAsync(post.Id));
+        Assert.That(editedPost.Files.Count>post.Files.Count);
     }
     
 }

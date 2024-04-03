@@ -36,9 +36,10 @@ public class PostRepository : IPostRepository
         await _socialNetworkDbContext.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task UpdatePost(BasePostEntity post, CancellationToken cancellationToken = default)
+    public async Task<BasePostEntity> UpdatePost(BasePostEntity post, CancellationToken cancellationToken = default)
     {
-        _socialNetworkDbContext.Posts.Update(post);
+        var postDb = _socialNetworkDbContext.Posts.Update(post);
         await _socialNetworkDbContext.SaveChangesAsync(cancellationToken);
+        return postDb.Entity;
     }
 }

@@ -69,7 +69,7 @@ public class MessageServiceTest : BaseMessageTestService<IMessageService, Messag
         var createdMessage = await messageService.CreateMessage(user1.Id, chat.Id, new MessageModel()
         {
             Text = "Test message",
-            FileModels = new List<FileInMessageModel>
+            Files = new List<FileInMessageModel>
             {
                 new FileInMessageModel
                 {
@@ -80,7 +80,7 @@ public class MessageServiceTest : BaseMessageTestService<IMessageService, Messag
 
         Assert.That(createdMessage, Is.Not.EqualTo(null));
         Assert.That(createdMessage.Text, Is.EqualTo("Test message"));
-        Assert.That(createdMessage.FileModels!.Any(f => f.FilePath == "test.png"));
+        Assert.That(createdMessage.Files!.Any(f => f.FilePath == "test.png"));
 
     }
 
@@ -128,7 +128,7 @@ public class MessageServiceTest : BaseMessageTestService<IMessageService, Messag
         await messageService.CreateMessage(user1.Id, chat.Id, new MessageModel()
         {
             Text = "Test message 1",
-            FileModels = new List<FileInMessageModel>
+            Files = new List<FileInMessageModel>
             {
                 new FileInMessageModel
                 {
@@ -139,7 +139,7 @@ public class MessageServiceTest : BaseMessageTestService<IMessageService, Messag
         await messageService.CreateMessage(user1.Id, chat.Id, new MessageModel()
         {
             Text = "Test message 2",
-            FileModels = new List<FileInMessageModel>
+            Files = new List<FileInMessageModel>
             {
                 new FileInMessageModel
                 {
@@ -150,7 +150,7 @@ public class MessageServiceTest : BaseMessageTestService<IMessageService, Messag
         await messageService.CreateMessage(user1.Id, chat.Id, new MessageModel()
         {
             Text = "Test message 3",
-            FileModels = new List<FileInMessageModel>
+            Files = new List<FileInMessageModel>
             {
                 new FileInMessageModel
                 {
@@ -209,7 +209,7 @@ public class MessageServiceTest : BaseMessageTestService<IMessageService, Messag
         await Service.CreateMessage(user1.Id, chat.Id, new MessageModel()
         {
             Text = "Test message 1",
-            FileModels = new List<FileInMessageModel>
+            Files = new List<FileInMessageModel>
             {
                 new FileInMessageModel
                 {
@@ -220,7 +220,7 @@ public class MessageServiceTest : BaseMessageTestService<IMessageService, Messag
         var messageToReply = await Service.CreateMessage(user2.Id, chat.Id, new MessageModel()
         {
             Text = "Test message 2",
-            FileModels = new List<FileInMessageModel>
+            Files = new List<FileInMessageModel>
             {
                 new FileInMessageModel
                 {
@@ -231,7 +231,7 @@ public class MessageServiceTest : BaseMessageTestService<IMessageService, Messag
         var replyMessage = await Service.ReplyMessageAsync(user3.Id, chat.Id, messageToReply.Id, new MessageModel()
         {
             Text = "Test message 3",
-            FileModels = new List<FileInMessageModel>
+            Files = new List<FileInMessageModel>
             {
                 new FileInMessageModel
                 {
@@ -251,7 +251,7 @@ public class MessageServiceTest : BaseMessageTestService<IMessageService, Messag
         await Service.EditMessageAsync(user3.Id, chat.Id, replyMessage.Id, new MessageModel
         {
             Text = "editedMessage",
-            FileModels = new List<FileInMessageModel>
+            Files = new List<FileInMessageModel>
             {
                 new FileInMessageModel
                 {
@@ -322,7 +322,7 @@ public class MessageServiceTest : BaseMessageTestService<IMessageService, Messag
         await Service.CreateMessage(user1.Id, chat.Id, new MessageModel()
         {
             Text = "Test message 1",
-            FileModels = new List<FileInMessageModel>
+            Files = new List<FileInMessageModel>
             {
                 new FileInMessageModel
                 {
@@ -333,7 +333,7 @@ public class MessageServiceTest : BaseMessageTestService<IMessageService, Messag
         var messageToReply = await Service.CreateMessage(user2.Id, chat.Id, new MessageModel()
         {
             Text = "Test message 2",
-            FileModels = new List<FileInMessageModel>
+            Files = new List<FileInMessageModel>
             {
                 new FileInMessageModel
                 {
@@ -344,7 +344,7 @@ public class MessageServiceTest : BaseMessageTestService<IMessageService, Messag
         var replyMessage = await Service.ReplyMessageAsync(user3.Id, chat.Id, messageToReply.Id, new MessageModel()
         {
             Text = "Test message 3",
-            FileModels = new List<FileInMessageModel>
+            Files = new List<FileInMessageModel>
             {
                 new FileInMessageModel
                 {

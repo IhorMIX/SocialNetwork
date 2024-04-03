@@ -86,11 +86,18 @@ public class PostService : IPostService
                 && !ReferenceEquals(roleSourceValue, "") 
                 && !roleSourceValue.Equals(roleTargetValue))
             {
-                roleDbProperty.SetValue(postDb, roleSourceValue);
+                if (roleSourceValue!.GetType() == typeof(List<FileInPostModel>))
+                {
+                    postDb!.Files = _mapper.Map<List<FileInPost>>(roleSourceValue);
+                }
+                else
+                { 
+                    roleDbProperty.SetValue(postDb, roleSourceValue);
+                }
             }
         }
 
-        await _postRepository.UpdatePost(postDb!, cancellationToken);
+        postDb = await _postRepository.UpdatePost(postDb!, cancellationToken);
 
         return _mapper.Map<UserPostModel>(postDb);
     }
