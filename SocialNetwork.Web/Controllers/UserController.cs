@@ -82,50 +82,7 @@ public class UserController : ControllerBase
 
         return Ok("User was deleted");
     }
-
-    [AllowAnonymous]
-    [HttpPost("login")]
-    public async Task<ActionResult> AuthorizeUser([FromBody] UserAuthorizeModel model, CancellationToken cancellationToken)
-    {
-        var user = await _userService.GetUserByLoginAndPasswordAsync(model.Login, model.Password, cancellationToken);
-        var token = _tokenHelper.GetToken(user!.Id);
-        var refreshToken = TokenHelper.GenerateRefreshToken(token);
-        DateTime? expiredDate = model.IsNeedToRemember ? null : DateTime.Now;
-        
-        await _userService.AddAuthorizationValueAsync(
-            user, 
-            refreshToken, 
-            LoginType.LocalSystem, 
-            expiredDate, 
-            cancellationToken);
-
-        _logger.LogInformation("User was logined");
-
-        return Ok(new { accessKey = token, refresh_token = refreshToken, expiredDate = expiredDate });
-    }
-   
-    [AllowAnonymous]
-    [HttpPost("new-token")]
-    public async Task<IActionResult> UpdateTokenAsync([FromQuery] string refreshToken, CancellationToken cancellationToken)
-    {
-
-        refreshToken = refreshToken.Replace(" ", "+"); 
-        var user = await _userService.GetUserByRefreshTokenAsync(refreshToken, cancellationToken);
-        var token = _tokenHelper.GetToken(user.Id);
-        return Ok(new { accessKey = token, refresh_token = refreshToken, expiredDate = user.AuthorizationInfo.ExpiredDate });
-    }
-
-   
-    [HttpPost]
-    [Route(("logout"))]
-    public async Task<IActionResult> LogOutAsync(CancellationToken cancellationToken)
-    {
-        var userId = User.GetUserId();
-        await _userService.LogOutAsync(userId, cancellationToken);
-        return Ok();
-
-    }
-
+    
     [AllowAnonymous]
     [HttpGet("activation/{activationKey}")]
     public async Task<IActionResult> ActivateAccount(string activationKey, CancellationToken cancellationToken)
