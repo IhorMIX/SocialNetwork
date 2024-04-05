@@ -15,7 +15,9 @@ public class PostRepository : IPostRepository
     
     public IQueryable<BasePostEntity> GetAll()
     {
-        return _socialNetworkDbContext.Posts.AsQueryable();
+        return _socialNetworkDbContext.Posts
+            .Include(r => r.Files)
+            .AsQueryable();
     }
 
     public async Task<BasePostEntity?> GetByIdAsync(int id, CancellationToken cancellationToken = default)

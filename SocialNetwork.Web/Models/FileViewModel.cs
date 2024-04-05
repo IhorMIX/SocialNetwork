@@ -1,6 +1,6 @@
 ﻿namespace SocialNetwork.Web.Models;
 
-public class FileInMessageViewModel
+public class FileViewModel
 {
     public int Id { get; set; }
     public string FilePath { get; set; } = null!;

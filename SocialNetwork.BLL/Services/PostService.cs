@@ -43,7 +43,7 @@ public class PostService : IPostService
         var userPost = new UserPostModel()
         {
             Text = post.Text,
-            CreatedAt = post.CreatedAt,
+            CreatedAt = DateTime.Now,
             Files = post.Files,
             UserId = userDb!.Id,
         };
@@ -96,9 +96,7 @@ public class PostService : IPostService
                 }
             }
         }
-
-        postDb = await _postRepository.UpdatePost(postDb!, cancellationToken);
-
-        return _mapper.Map<UserPostModel>(postDb);
+        
+        return _mapper.Map<UserPostModel>(await _postRepository.UpdatePost(postDb!, cancellationToken));
     }
 }
