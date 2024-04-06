@@ -1,6 +1,6 @@
 namespace SocialNetwork.Web.Models;
 
-public class PostViewModel
+public class UserPostViewModel
 {
     public int Id { get; set; }
     public string Text { get; set; } = null!;

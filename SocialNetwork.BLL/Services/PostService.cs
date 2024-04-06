@@ -35,7 +35,7 @@ public class PostService : IPostService
         return _mapper.Map<BasePostModel>(post);
     }
 
-    public async Task<UserPostModel> CreateUserPost(int userId, BasePostModel post, CancellationToken cancellationToken = default)
+    public async Task<BasePostModel> CreateUserPost(int userId, BasePostModel post, CancellationToken cancellationToken = default)
     {
         var userDb = await _userRepository.GetByIdAsync(userId, cancellationToken);
         _logger.LogAndThrowErrorIfNull(userDb, new UserNotFoundException($"User with this Id {userId} not found"));
@@ -53,18 +53,29 @@ public class PostService : IPostService
         return _mapper.Map<UserPostModel>(postDb);
     }
 
-    public async Task DeletePost(int userId, int postId, CancellationToken cancellationToken = default)
+    /// <param name="creatorId"> userId or GroupId</param>
+    public async Task DeleteUserPost(int creatorId, int postId, CancellationToken cancellationToken = default)
     {
-        var userDb = await _userRepository.GetByIdAsync(userId, cancellationToken);
-        _logger.LogAndThrowErrorIfNull(userDb, new UserNotFoundException($"User with this Id {userId} not found"));
-
-        var post = await _postRepository.GetAll().Where(r => r.Id == postId && (r as UserPost)!.UserId == userId).SingleOrDefaultAsync(cancellationToken);
+        var post = await _postRepository.GetAll().Where(r => r.Id == postId).SingleOrDefaultAsync(cancellationToken);
         _logger.LogAndThrowErrorIfNull(post, new PostNotFoundException($"Post with id {postId} not found"));
-        
-        await _postRepository.DeletePost(post!, cancellationToken);
+
+        if (post is UserPost userPost)
+        {
+            var userDb = await _userRepository.GetByIdAsync(creatorId, cancellationToken);
+            _logger.LogAndThrowErrorIfNull(userDb, new UserNotFoundException($"User with this Id {creatorId} not found"));
+            
+            if (userPost.UserId == userDb!.Id)
+                await _postRepository.DeletePost(post!, cancellationToken);
+        }
+
+        // if (post is GroupPost groupPost)
+        // {
+        //     if (groupPost.GroupId == group.Id)
+        //     await _postRepository.DeletePost(post!, cancellationToken);
+        // }
     }
 
-    public async Task<UserPostModel> UpdatePost(int userId, int postId, BasePostModel post, CancellationToken cancellationToken = default)
+    public async Task<BasePostModel> UpdatePost(int userId, int postId, BasePostModel post, CancellationToken cancellationToken = default)
     {
         var userDb = await _userRepository.GetByIdAsync(userId, cancellationToken);
         _logger.LogAndThrowErrorIfNull(userDb, new UserNotFoundException($"User with this Id {userId} not found"));
@@ -98,5 +109,23 @@ public class PostService : IPostService
         }
         
         return _mapper.Map<UserPostModel>(await _postRepository.UpdatePost(postDb!, cancellationToken));
+    }
+
+    public async Task<PaginationResultModel<UserPostModel>> GetUserPosts(int userId, PaginationModel paginationModel, CancellationToken cancellationToken = default)
+    {
+        var userDb = await _userRepository.GetByIdAsync(userId, cancellationToken);
+        _logger.LogAndThrowErrorIfNull(userDb, new UserNotFoundException($"User with this Id {userId} not found"));
+
+        var postsDb = await _postRepository.GetAll()
+            .Where(r => (r as UserPost)!.UserId == userId)
+            .Pagination(paginationModel.CurrentPage, paginationModel.PageSize).ToListAsync(cancellationToken);
+        
+        return new PaginationResultModel<UserPostModel>
+        {
+            Data = _mapper.Map<IEnumerable<UserPostModel>>(postsDb),
+            CurrentPage = paginationModel!.CurrentPage,
+            PageSize = paginationModel.PageSize,
+            TotalItems = postsDb.Count,
+        };
     }
 }

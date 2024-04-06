@@ -268,7 +268,7 @@ namespace SocialNetwork.Web.MapperConfiguration
                 .ForMember(dest => dest.PostId, opt => opt.Ignore())
                 .ReverseMap();
 
-            CreateMap<PostViewModel, UserPostModel>()
+            CreateMap<UserPostViewModel, UserPostModel>()
                 .ReverseMap();
             
         }
