@@ -17,12 +17,18 @@ public class PostRepository : IPostRepository
     {
         return _socialNetworkDbContext.Posts
             .Include(r => r.Files)
+            .Include(r => (r as UserPost)!.User).ThenInclude(r => r.Profile)
+            //.Include(r => (r as GroupPost)!.Group)
             .AsQueryable();
     }
 
     public async Task<BasePostEntity?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
     {
-        return await _socialNetworkDbContext.Posts.FirstOrDefaultAsync(r => r.Id == id, cancellationToken);
+        return await _socialNetworkDbContext.Posts
+            .Include(r => r.Files)
+            .Include(r => (r as UserPost)!.User).ThenInclude(r => r.Profile)
+            //.Include(r => (r as GroupPost)!.Group)
+            .FirstOrDefaultAsync(r => r.Id == id, cancellationToken);
     }
 
     public async Task<BasePostEntity> CreatePost(BasePostEntity post, CancellationToken cancellationToken = default)

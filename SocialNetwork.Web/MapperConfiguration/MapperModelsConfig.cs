@@ -26,6 +26,8 @@ namespace SocialNetwork.Web.MapperConfiguration
             CreatePaginationResultMapping<RoleViewModel, RoleModel>();
             CreatePaginationResultMapping<ChatMemberViewModel, ChatMemberModel>();
             CreatePaginationResultMapping<MessageViewModel, MessageModel>();
+            CreatePaginationResultMapping<BasePostViewModel, BasePostModel>();
+            CreatePaginationResultMapping<UserPostViewModel, UserPostModel>();
             
             void CreatePaginationResultMapping<TViewModel, TModel>()
             {
@@ -269,6 +271,10 @@ namespace SocialNetwork.Web.MapperConfiguration
                 .ReverseMap();
 
             CreateMap<UserPostViewModel, UserPostModel>()
+                .IncludeBase<BasePostViewModel, BasePostModel>()
+                .ReverseMap();
+            
+            CreateMap<BasePostViewModel, BasePostModel>()
                 .ReverseMap();
             
         }
