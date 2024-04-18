@@ -38,14 +38,14 @@ public class NotificationService : INotificationService
         CancellationToken cancellationToken = default)
     {
         var notificationId = await _notificationRepository.CreateNotification(
-            _mapper.Map<BaseNotificationEntity>(baseNotificationModel), cancellationToken);
+            _mapper.Map<NotificationEntity>(baseNotificationModel), cancellationToken);
         return _mapper.Map<BaseNotificationModel>(await _notificationRepository.GetByIdAsync(notificationId, cancellationToken));
     }
    
     public async Task CreateNotifications(IEnumerable<BaseNotificationModel> baseNotificationModel,
         CancellationToken cancellationToken = default)
     {
-        var notificationEntities = _mapper.Map<IEnumerable<BaseNotificationEntity>>(baseNotificationModel);
+        var notificationEntities = _mapper.Map<IEnumerable<NotificationEntity>>(baseNotificationModel);
         await _notificationRepository.CreateNotifications(notificationEntities, cancellationToken);
     }
    

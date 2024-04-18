@@ -10,28 +10,28 @@ using SocialNetwork.Test.Helpers;
 
 namespace SocialNetwork.Test.Services;
 
-public class BaseNotificationEntityTest : BaseMessageTestService<INotificationService, NotificationService>
+public class NotificationEntityTest : BaseMessageTestService<INotificationService, NotificationService>
 {
+
     protected override void SetUpAdditionalDependencies(IServiceCollection services)
     {
-        services.AddScoped<IBlackListService, BlackListService>();
-        services.AddScoped<IBlackListRepository, BlackListRepository>();
-        services.AddScoped<IFriendshipService, FriendshipService>();
-        services.AddScoped<IFriendshipRepository, FriendshipRepository>();
-        services.AddScoped<IFriendRequestRepository, FriendRequestRepository>();
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IUserService, UserService>();
+        
+        services.AddScoped<IFriendshipService, FriendshipService>();
         services.AddScoped<IFriendRequestService, FriendRequestService>();
-        services.AddScoped<IChatService, ChatService>();
-        services.AddScoped<IChatRepository, ChatRepository>();
-        services.AddScoped<IRoleRepository, RoleRepository>();
-        services.AddScoped<IChatMemberRepository, ChatMemberRepository>();
+        services.AddScoped<IFriendshipRepository, FriendshipRepository>();
+        services.AddScoped<IFriendRequestRepository, FriendRequestRepository>();
+
+        services.AddScoped<IBlackListService, BlackListService>();
+        services.AddScoped<IBlackListRepository, BlackListRepository>();
         
         services.AddScoped<INotificationRepository, NotificationRepository>();
         services.AddScoped<INotificationService, NotificationService>();
+
         base.SetUpAdditionalDependencies(services);
     }
-
+    
     [Test]
     public async Task CreateNewFriendRequest_CheckFriendRequestNotificationEntity_OK()
     {
@@ -91,13 +91,13 @@ public class BaseNotificationEntityTest : BaseMessageTestService<INotificationSe
             IsGroup = false,
         });
         await chatService.AddUsers(createdUser1!.Id, chat.Id, new List<int>{ createdUser2!.Id });
-        var notifications = await Service.GetByUserId(createdUser2.Id);
+        var notifications = (await Service.GetByUserId(createdUser2.Id)).ToList();
         Assert.That(notifications.Count() == 1
             && notifications.First().GetType() == typeof(ChatNotificationModel));
         
         await chatService.DelMembers(createdUser1.Id, chat.Id, new List<int> { createdUser2.Id });
-        notifications = await Service.GetByUserId(createdUser2.Id);
+        notifications = (await Service.GetByUserId(createdUser2.Id)).ToList();
         Assert.That(notifications.Count() == 2 
-                    && notifications.Skip(1).FirstOrDefault().GetType() == typeof(ChatNotificationModel));
+                    && notifications.Skip(1).FirstOrDefault()?.GetType() == typeof(ChatNotificationModel));
     }
 }

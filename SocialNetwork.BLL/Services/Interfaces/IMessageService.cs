@@ -23,7 +23,7 @@ public interface IMessageService : IBaseService<MessageModel>, INotificationCrea
     public Task<IEnumerable<MessageModel>> GetMessagesByTextAsync(int userId, int chatId, string text, CancellationToken cancellationToken = default);
     public Task<PaginationResultModel<MessageModel>> GetMessagesByTextAsync(int userId, int chatId, string text, PaginationModel? pagination, CancellationToken cancellationToken = default);
 
-    public Task<IEnumerable<MessageModel>>  ReadMessages(int userId, int chatId, IEnumerable<MessageModel> messageModels, CancellationToken cancellationToken = default);
+    public Task<IEnumerable<MessageModel>>  ReadMessages(int userId, int chatId, List<MessageModel> messageModels, CancellationToken cancellationToken = default);
     
     public Task<MessageModel> ShareWithMessage(int userId, int messageId, int chatId, bool showCreator,
         CancellationToken cancellationToken = default);

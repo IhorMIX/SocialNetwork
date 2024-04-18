@@ -310,7 +310,7 @@ public class ChatService : IChatService
             {
                 roleDbProperty.SetValue(chatDb, roleSourceValue);
             }
-        }
+        } 
 
         await _chatRepository.EditChat(chatDb!, cancellationToken);
 

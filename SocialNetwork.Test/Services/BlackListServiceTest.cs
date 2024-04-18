@@ -14,18 +14,23 @@ public class BlackListServiceTest : BaseMessageTestService<IBlackListService, Bl
 {
     protected override void SetUpAdditionalDependencies(IServiceCollection services)
     {
-        services.AddScoped<IBlackListService, BlackListService>();
-        services.AddScoped<IBlackListRepository, BlackListRepository>();
-        services.AddScoped<IFriendshipService, FriendshipService>();
-        services.AddScoped<IFriendshipRepository, FriendshipRepository>();
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IUserService, UserService>();
-        services.AddScoped<IChatService, ChatService>();
+        
+        services.AddScoped<IFriendshipService, FriendshipService>();
+        services.AddScoped<IFriendRequestService, FriendRequestService>();
+        services.AddScoped<IFriendshipRepository, FriendshipRepository>();
+        services.AddScoped<IFriendRequestRepository, FriendRequestRepository>();
+        
         services.AddScoped<INotificationRepository, NotificationRepository>();
         services.AddScoped<INotificationService, NotificationService>();
+        
+        services.AddScoped<IBlackListService, BlackListService>();
+        services.AddScoped<IBlackListRepository, BlackListRepository>();
+        
         base.SetUpAdditionalDependencies(services);
-
     }
+    
     [Test]
     public async Task AddUserToBlackList_UserFound_AddedToBlackList()
     {
