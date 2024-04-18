@@ -91,13 +91,13 @@ public class NotificationEntityTest : BaseMessageTestService<INotificationServic
             IsGroup = false,
         });
         await chatService.AddUsers(createdUser1!.Id, chat.Id, new List<int>{ createdUser2!.Id });
-        var notifications = await Service.GetByUserId(createdUser2.Id);
+        var notifications = (await Service.GetByUserId(createdUser2.Id)).ToList();
         Assert.That(notifications.Count() == 1
             && notifications.First().GetType() == typeof(ChatNotificationModel));
         
         await chatService.DelMembers(createdUser1.Id, chat.Id, new List<int> { createdUser2.Id });
-        notifications = await Service.GetByUserId(createdUser2.Id);
+        notifications = (await Service.GetByUserId(createdUser2.Id)).ToList();
         Assert.That(notifications.Count() == 2 
-                    && notifications.Skip(1).FirstOrDefault().GetType() == typeof(ChatNotificationModel));
+                    && notifications.Skip(1).FirstOrDefault()?.GetType() == typeof(ChatNotificationModel));
     }
 }

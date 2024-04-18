@@ -117,7 +117,7 @@ public class MessageService : IMessageService
             await _messageRepository.DeleteAsync(messageDb!, cancellationToken);
             
             var notifications = await _notificationRepository.GetAll()
-                .Where(r => r is MessageNotification && (r as MessageNotification).Message.Id == messageId)
+                .Where(r => r is MessageNotification && ((MessageNotification)r).Message.Id == messageId)
                 .ToListAsync(cancellationToken);
 
             await _notificationRepository.RemoveNotification(notifications, cancellationToken);
@@ -373,23 +373,24 @@ public class MessageService : IMessageService
         };
     }
 
-    public async Task<IEnumerable<MessageModel>> ReadMessages(int userId, int chatId, IEnumerable<MessageModel> messageModels, CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<MessageModel>> ReadMessages(int userId, int chatId, List<MessageModel> messageModels, CancellationToken cancellationToken = default)
     {
         var chatMemberDb = await _chatMemberRepository.GetByUserIdAndChatId(userId, chatId, cancellationToken);
         _logger.LogAndThrowErrorIfNull(chatMemberDb, new UserNotFoundException($"Chat member with id-{userId} not found"));
         
-        var messageReadStatuses = messageModels
+        List<MessageReadStatusModel> messageReadStatuses = messageModels
             .Where(i => i.Sender.Id != chatMemberDb!.Id && 
                         i.MessageReadStatuses!.Where(r => r.ChatMemberId == chatMemberDb.Id).Select(r => r.IsRead).Contains(false))
             .Select(i => i.MessageReadStatuses!.SingleOrDefault(i => i.ChatMemberId == chatMemberDb!.Id))
             .ToList();
-        
+
         messageReadStatuses = messageReadStatuses.Select(messageStatus =>
         {
             messageStatus.IsRead = true;
             messageStatus.ReadAt = DateTime.Now;
             return messageStatus;
         }).ToList();
+
 
         var messageIds = messageModels!.Select(m => m.Id);
         

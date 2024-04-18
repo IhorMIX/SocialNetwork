@@ -54,25 +54,27 @@ public class PostService : IPostService
     }
 
     /// <param name="creatorId"> userId or GroupId</param>
-    public async Task DeleteUserPost(int creatorId, int postId, CancellationToken cancellationToken = default)
+    public async Task DeletePost(int creatorId, int postId, CancellationToken cancellationToken = default)
     {
         var post = await _postRepository.GetAll().Where(r => r.Id == postId).SingleOrDefaultAsync(cancellationToken);
         _logger.LogAndThrowErrorIfNull(post, new PostNotFoundException($"Post with id {postId} not found"));
 
-        if (post is UserPost userPost)
+        switch (post)
         {
-            var userDb = await _userRepository.GetByIdAsync(creatorId, cancellationToken);
-            _logger.LogAndThrowErrorIfNull(userDb, new UserNotFoundException($"User with this Id {creatorId} not found"));
+            case UserPost userPost:
+            {
+                var userDb = await _userRepository.GetByIdAsync(creatorId, cancellationToken);
+                _logger.LogAndThrowErrorIfNull(userDb, new UserNotFoundException($"User with this Id {creatorId} not found"));
             
-            if (userPost.UserId == userDb!.Id)
-                await _postRepository.DeletePost(post!, cancellationToken);
+                if (userPost.UserId == userDb!.Id)
+                    await _postRepository.DeletePost(userPost!, cancellationToken);
+                break;
+            }
+            
+            // the same with group post, check group by groupId instead of user
+            
+            default: throw new Exception("Invalid post type");
         }
-
-        // if (post is GroupPost groupPost)
-        // {
-        //     if (groupPost.GroupId == group.Id)
-        //     await _postRepository.DeletePost(post!, cancellationToken);
-        // }
     }
 
     public async Task<BasePostModel> UpdatePost(int userId, int postId, BasePostModel post, CancellationToken cancellationToken = default)

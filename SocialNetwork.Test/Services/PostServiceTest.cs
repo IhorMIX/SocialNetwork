@@ -82,7 +82,7 @@ public class PostServiceTest : DefaultServiceTest<IPostService, PostService>
         Assert.That(await Service.GetByIdAsync(post.Id) != null);
         Assert.That((post as UserPostModel)!.UserId == user1.Id);
 
-        await Service.DeleteUserPost(user1.Id, post.Id);
+        await Service.DeletePost(user1.Id, post.Id);
         
         Assert.ThrowsAsync<PostNotFoundException>(async() => await Service.GetByIdAsync(post.Id));
     }

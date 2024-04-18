@@ -64,7 +64,7 @@ public class UserPostController : ControllerBase
 
         _logger.LogInformation("Start to deleting post");
 
-        await _postService.DeleteUserPost(userId, postId, cancellationToken);
+        await _postService.DeletePost(userId, postId, cancellationToken);
 
         _logger.LogInformation("Post deleted");
 

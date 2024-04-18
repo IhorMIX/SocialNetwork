@@ -420,11 +420,11 @@ public class MessageServiceTest : BaseMessageTestService<IMessageService, Messag
         var chat1 = chatList.Data.FirstOrDefault(r => r.Name == "ChatShare1");
         var chat2 = chatList.Data.FirstOrDefault(r => r.Name == "ChatShare2");
 
-        await chatService.AddUsers(user1.Id, chat1.Id, new List<int>
+        await chatService.AddUsers(user1.Id, chat1!.Id, new List<int>
         {
             user2.Id,
         });
-        await chatService.AddUsers(user1.Id, chat2.Id, new List<int>
+        await chatService.AddUsers(user1.Id, chat2!.Id, new List<int>
         {
             user2.Id,
         });
