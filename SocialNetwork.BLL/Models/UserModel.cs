@@ -20,6 +20,8 @@ public class UserModel : BaseModel
 
     public IEnumerable<BlackListModel> BlackList { get; set; } = null!;
 
+    public ICollection<LikePostModel>? LikedPosts { get; set; }
+    
     public IScriptObject ToScriptObject() {
 
         IScriptObject data = new ScriptObject();

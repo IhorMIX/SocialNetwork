@@ -39,6 +39,8 @@ public class SocialNetworkDbContext : DbContext
     public DbSet<ReactionNotification> ReactionNotifications { get; set; }
     public DbSet<NotificationEntity> Notifications { get; set; }
     public DbSet<MessageReadStatus> MessageReadStatuses { get; set; }
+    public DbSet<LikePost> LikePost { get; set; }
+    public DbSet<CommentPost> CommentPost { get; set; }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(SocialNetworkDbContext).Assembly);

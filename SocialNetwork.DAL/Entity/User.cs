@@ -29,5 +29,11 @@ public class User : BaseEntity
     public IEnumerable<BlackList>? BlackLists { get; set; }
     
     public IEnumerable<NotificationEntity>? Notifications { get; set; }
-    public ICollection<Message>? CreatedMessages { get; set; }
+    public IEnumerable<Message> CreatedMessages { get; set; } = null!;
+    
+    public IEnumerable<UserPost> Posts { get; set; } = null!;
+
+    public IEnumerable<LikePost> LikedPosts { get; set; } = null!;
+    
+    public IEnumerable<CommentPost> CommentedPost { get; set; } = null!;
 }

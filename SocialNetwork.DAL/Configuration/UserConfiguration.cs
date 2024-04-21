@@ -25,5 +25,13 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         builder.HasMany(u => u.Requests)
             .WithOne(f => f.Sender)
             .HasForeignKey(f => f.SenderId);
+        
+        builder.HasMany(u => u.LikedPosts)
+            .WithOne(f => f.User)
+            .HasForeignKey(f => f.UserId);
+        
+        builder.HasMany(u => u.Posts)
+            .WithOne(f => f.User)
+            .HasForeignKey(f => f.UserId);
     }
 } 
