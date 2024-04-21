@@ -378,15 +378,15 @@ public class MessageService : IMessageService
         var chatMemberDb = await _chatMemberRepository.GetByUserIdAndChatId(userId, chatId, cancellationToken);
         _logger.LogAndThrowErrorIfNull(chatMemberDb, new UserNotFoundException($"Chat member with id-{userId} not found"));
         
-        List<MessageReadStatusModel> messageReadStatuses = messageModels
+        var messageReadStatuses = messageModels
             .Where(i => i.Sender.Id != chatMemberDb!.Id && 
                         i.MessageReadStatuses!.Where(r => r.ChatMemberId == chatMemberDb.Id).Select(r => r.IsRead).Contains(false))
             .Select(i => i.MessageReadStatuses!.SingleOrDefault(i => i.ChatMemberId == chatMemberDb!.Id))
             .ToList();
 
-        messageReadStatuses = messageReadStatuses.Select(messageStatus =>
+        var messageTrueReadStatuses = messageReadStatuses.Select(messageStatus =>
         {
-            messageStatus.IsRead = true;
+            messageStatus!.IsRead = true;
             messageStatus.ReadAt = DateTime.Now;
             return messageStatus;
         }).ToList();
@@ -400,7 +400,7 @@ public class MessageService : IMessageService
             .ToListAsync(cancellationToken);
         
         await _notificationRepository.RemoveNotification(messNotifications, cancellationToken);
-        await _messageReadStatusRepository.UpdateStatus(_mapper.Map<IEnumerable<MessageReadStatus>>(messageReadStatuses), cancellationToken);
+        await _messageReadStatusRepository.UpdateStatus(_mapper.Map<IEnumerable<MessageReadStatus>>(messageTrueReadStatuses), cancellationToken);
        
         var updatedMessages = await _messageRepository.GetAll().Where(r => messageIds.Contains(r.Id))
             .ToListAsync(cancellationToken);
