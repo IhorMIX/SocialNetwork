@@ -106,16 +106,16 @@ public class CommentPostServiceTest : DefaultServiceTest<ICommentPostService, Co
         var user2 = await UserModelHelper.CreateTestDataAsync(userService);
 
         string comment = "test_Comment";
-        var commentDb = await Service.CommentPostAsync(user2.Id, post.Id, comment);
+        await Service.CommentPostAsync(user2.Id, post.Id, comment);
 
         post = await postService.GetByIdAsync(post.Id);
         
         Assert.That(post!.Comments.Count == 1);
         Assert.That(post!.Comments.SingleOrDefault(r => r.Text == comment && r.UserId == user2.Id) != null);
 
-        
+        var commentId = post.Comments.Where(r => r.Text == comment).Select(r => r.Id).SingleOrDefault();
         comment = "reply on comment";
-        var commentDb2 = await Service.ReplyOnCommentAsync(user1.Id, commentDb.Id, comment);
+        await Service.ReplyOnCommentAsync(user1.Id, commentId, comment);
 
         post = await postService.GetByIdAsync(post.Id);
         
@@ -123,7 +123,7 @@ public class CommentPostServiceTest : DefaultServiceTest<ICommentPostService, Co
         Assert.That(post!.Comments
             .SingleOrDefault(r => r.Text == comment && 
                                   r.UserId == user1.Id && 
-                                  r.ToReplyCommentId == commentDb.Id) != null);
+                                  r.ToReplyCommentId == commentId) != null);
     }
     
     [Test]
@@ -160,7 +160,9 @@ public class CommentPostServiceTest : DefaultServiceTest<ICommentPostService, Co
         Assert.That(post!.Comments.Count == 1);
         Assert.That(post!.Comments.SingleOrDefault(r => r.Text == comment && r.UserId == user2.Id) != null);
         
-        await Service.RemoveCommentAsync(user1.Id, commentDb.Id);
+        var commentId = post.Comments.Where(r => r.Text == comment).Select(r => r.Id).SingleOrDefault();
+        
+        await Service.RemoveCommentAsync(user1.Id, commentId);
         post = await postService.GetByIdAsync(post.Id);
         
         Assert.That(post!.Comments.Count == 0);

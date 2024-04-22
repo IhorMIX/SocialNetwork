@@ -11,5 +11,5 @@ public interface ILikePostService : IBaseService<LikePostModel>
     
     public Task<PaginationResultModel<LikePostModel>> GetPostLikesAsync(int userId, int postId, PaginationModel paginationModel,
         CancellationToken cancellationToken = default);
-    public Task LikePostAsync(int userId, int postId, CancellationToken cancellationToken = default);
+    public Task<int?> LikePostAsync(int userId, int postId, CancellationToken cancellationToken = default);
 }

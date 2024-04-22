@@ -17,15 +17,17 @@ public class CommentPostService : ICommentPostService
     private readonly ILogger<ICommentPostService> _logger;
     private readonly IUserRepository _userRepository;
     private readonly IPostRepository _postRepository;
-
+    private readonly INotificationRepository _notificationRepository;
+    
     public CommentPostService(ICommentPostRepository commentPostRepository, ILogger<ICommentPostService> logger,
-        IPostRepository postRepository, IUserRepository userRepository, IMapper mapper)
+        IPostRepository postRepository, IUserRepository userRepository, IMapper mapper, INotificationRepository notificationRepository)
     {
         _commentPostRepository = commentPostRepository;
         _logger = logger;
         _postRepository = postRepository;
         _userRepository = userRepository;
         _mapper = mapper;
+        _notificationRepository = notificationRepository;
     }
 
     public async Task<CommentPostModel?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
@@ -33,15 +35,16 @@ public class CommentPostService : ICommentPostService
         return _mapper.Map<CommentPostModel>(await _commentPostRepository.GetByIdAsync(id, cancellationToken));
     }
 
-    public async Task<CommentPostModel> CommentPostAsync(int userId, int postId, string text, CancellationToken cancellationToken = default)
+    /// <returns>Notification ID</returns>
+    public async Task<int?> CommentPostAsync(int userId, int postId, string text, CancellationToken cancellationToken = default)
     {
         var userDb = await _userRepository.GetByIdAsync(userId, cancellationToken);
         _logger.LogAndThrowErrorIfNull(userDb, new UserNotFoundException($"User with this Id {userId} not found"));
 
         var postDb = await _postRepository.GetByIdAsync(postId, cancellationToken);
         _logger.LogAndThrowErrorIfNull(postDb, new PostNotFoundException($"Post with this Id {postDb} not found"));
-
-        var comment = new CommentPost
+        
+        var commentDb = await _commentPostRepository.CommentPostAsync(new CommentPost
         {
             PostId = postDb!.Id,
             UserId = userDb!.Id,
@@ -49,10 +52,23 @@ public class CommentPostService : ICommentPostService
             Text = text,
             ToReplyCommentId = null,
             ToReplyComment = null
-        };
-
-        var commentDb = await _commentPostRepository.CommentPostAsync(comment, cancellationToken);
-        return _mapper.Map<CommentPostModel>(commentDb);
+        }, cancellationToken);
+        
+        if (commentDb.Post is UserPost userPost)
+        {
+            return await _notificationRepository.CreateNotification(new LikeNotification()
+            {
+                NotificationMessage =
+                    $"{userPost.User.Profile.Name} {userPost.User.Profile.Surname} liked your post {userPost.Files.FirstOrDefault()}",
+                CreatedAt = DateTime.Now,
+                IsRead = false,
+                ToUserId = userPost.UserId,
+                InitiatorId = commentDb.UserId,
+                LikePostId = commentDb.Id
+            }, cancellationToken);
+        }
+        
+        return null;
     }
 
     public async Task RemoveCommentAsync(int userId, int commentId, CancellationToken cancellationToken = default)
@@ -71,7 +87,8 @@ public class CommentPostService : ICommentPostService
             throw new Exception("You have no rights");
     }
 
-    public async Task<CommentPostModel> ReplyOnCommentAsync(int userId, int commentId, string text,
+    /// <returns>Notification ID</returns>
+    public async Task<int?> ReplyOnCommentAsync(int userId, int commentId, string text,
         CancellationToken cancellationToken = default)
     {
         var userDb = await _userRepository.GetByIdAsync(userId, cancellationToken);
@@ -79,18 +96,31 @@ public class CommentPostService : ICommentPostService
 
         var commentDb = await _commentPostRepository.GetByIdAsync(commentId, cancellationToken);
         _logger.LogAndThrowErrorIfNull(commentDb, new CommentNotFoundException($"Comment with this Id {commentId} not found"));
-
-        var comment = new CommentPost
+        
+        var comment = await _commentPostRepository.CommentPostAsync(new CommentPost
         {
             PostId = commentDb!.PostId,
             UserId = userDb!.Id,
             CreatedAt = DateTime.Now,
             Text = text,
             ToReplyCommentId = commentDb.Id
-        };
-
-        commentDb = await _commentPostRepository.CommentPostAsync(comment, cancellationToken);
-        return _mapper.Map<CommentPostModel>(commentDb);
+        }, cancellationToken);
+        
+        if (comment.Post is UserPost userPost)
+        {
+            return await _notificationRepository.CreateNotification(new LikeNotification()
+            {
+                NotificationMessage =
+                    $"{userPost.User.Profile.Name} {userPost.User.Profile.Surname} liked your post {userPost.Files.FirstOrDefault()}",
+                CreatedAt = DateTime.Now,
+                IsRead = false,
+                ToUserId = userPost.UserId,
+                InitiatorId = comment.UserId,
+                LikePostId = comment.Id
+            }, cancellationToken);
+        }
+        
+        return null;
     }
 
     public async Task<PaginationResultModel<CommentPostModel>> GetCommentsAsync(int userId, int postId, PaginationModel paginationModel, CancellationToken cancellationToken = default)

@@ -598,6 +598,18 @@ namespace SocialNetwork.DAL.Migrations
                     b.HasDiscriminator().HasValue("ChatNotification");
                 });
 
+            modelBuilder.Entity("SocialNetwork.DAL.Entity.CommentNotification", b =>
+                {
+                    b.HasBaseType("SocialNetwork.DAL.Entity.NotificationEntity");
+
+                    b.Property<int>("CommentPostId")
+                        .HasColumnType("int");
+
+                    b.HasIndex("CommentPostId");
+
+                    b.HasDiscriminator().HasValue("CommentNotification");
+                });
+
             modelBuilder.Entity("SocialNetwork.DAL.Entity.FriendRequestNotification", b =>
                 {
                     b.HasBaseType("SocialNetwork.DAL.Entity.NotificationEntity");
@@ -606,6 +618,18 @@ namespace SocialNetwork.DAL.Migrations
                         .HasColumnType("int");
 
                     b.HasDiscriminator().HasValue("FriendRequestNotification");
+                });
+
+            modelBuilder.Entity("SocialNetwork.DAL.Entity.LikeNotification", b =>
+                {
+                    b.HasBaseType("SocialNetwork.DAL.Entity.NotificationEntity");
+
+                    b.Property<int>("LikePostId")
+                        .HasColumnType("int");
+
+                    b.HasIndex("LikePostId");
+
+                    b.HasDiscriminator().HasValue("LikeNotification");
                 });
 
             modelBuilder.Entity("SocialNetwork.DAL.Entity.MessageNotification", b =>
@@ -936,6 +960,28 @@ namespace SocialNetwork.DAL.Migrations
                         .IsRequired();
 
                     b.Navigation("Chat");
+                });
+
+            modelBuilder.Entity("SocialNetwork.DAL.Entity.CommentNotification", b =>
+                {
+                    b.HasOne("SocialNetwork.DAL.Entity.CommentPost", "CommentPost")
+                        .WithMany()
+                        .HasForeignKey("CommentPostId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("CommentPost");
+                });
+
+            modelBuilder.Entity("SocialNetwork.DAL.Entity.LikeNotification", b =>
+                {
+                    b.HasOne("SocialNetwork.DAL.Entity.LikePost", "LikePost")
+                        .WithMany()
+                        .HasForeignKey("LikePostId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("LikePost");
                 });
 
             modelBuilder.Entity("SocialNetwork.DAL.Entity.MessageNotification", b =>

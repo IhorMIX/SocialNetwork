@@ -30,10 +30,11 @@ public class LikePostRepository : ILikePostRepository
             .FirstOrDefaultAsync(i => i.Id == id, cancellationToken);
     }
 
-    public async Task LikePostAsync(LikePost likePost, CancellationToken cancellationToken = default)
+    public async Task<LikePost> LikePostAsync(LikePost likePost, CancellationToken cancellationToken = default)
     {
-        await _socialNetworkDbContext.LikePost.AddAsync(likePost, cancellationToken);
+        var entityEntry = await _socialNetworkDbContext.LikePost.AddAsync(likePost, cancellationToken);
         await _socialNetworkDbContext.SaveChangesAsync(cancellationToken);
+        return entityEntry.Entity;
     }
 
     public async Task DeleteLikePostAsync(LikePost likePost, CancellationToken cancellationToken = default)
