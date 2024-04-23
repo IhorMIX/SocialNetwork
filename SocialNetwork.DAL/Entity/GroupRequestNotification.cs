@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace SocialNetwork.DAL.Entity
 {
-    public class GroupRequestNotification : BaseNotificationEntity
+    public class GroupRequestNotification : NotificationEntity
     {
         public int GroupRequestId { get; set; }
     }

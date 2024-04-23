@@ -36,6 +36,14 @@ namespace SocialNetwork.Test.Services
             services.AddScoped<IRoleGroupRepository, RoleGroupRepository>();
             services.AddScoped<IGroupMemberRepository, GroupMemberRepository>();
             services.AddScoped<IChatMemberRepository, ChatMemberRepository>();
+            services.AddScoped<IGroupRepository, GroupRepository>();
+            services.AddScoped<IGroupService, GroupService>();
+ 
+            services.AddScoped<IChatService, ChatService>();
+            services.AddScoped<IChatRepository, ChatRepository>();
+
+            services.AddScoped<IRequestRepository, RequestRepository>();
+            services.AddScoped<IRequestService, RequestService>();
 
             services.AddScoped<IBannedUserListRepository, BannedUserListRepository>();
 

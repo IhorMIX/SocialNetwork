@@ -17,9 +17,7 @@ public class ReactionServiceTest : BaseMessageTestService<IReactionService, Reac
         services.AddScoped<IUserService, UserService>();
         
         services.AddScoped<IFriendshipService, FriendshipService>();
-        services.AddScoped<IFriendRequestService, FriendRequestService>();
         services.AddScoped<IFriendshipRepository, FriendshipRepository>();
-        services.AddScoped<IFriendRequestRepository, FriendRequestRepository>();
 
         services.AddScoped<IBlackListService, BlackListService>();
         services.AddScoped<IBlackListRepository, BlackListRepository>();
@@ -32,6 +30,8 @@ public class ReactionServiceTest : BaseMessageTestService<IReactionService, Reac
         services.AddScoped<IMessageRepository, MessageRepository>();
         services.AddScoped<IReactionRepository, ReactionRepository>();
         services.AddScoped<IReactionService, ReactionService>();
+
+        services.AddScoped<IRequestRepository, RequestRepository>();
 
         services.AddScoped<IGroupRepository, GroupRepository>();
         services.AddScoped<IGroupService, GroupService>();

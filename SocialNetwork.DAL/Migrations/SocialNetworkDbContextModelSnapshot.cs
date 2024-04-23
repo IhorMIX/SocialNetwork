@@ -908,7 +908,7 @@ namespace SocialNetwork.DAL.Migrations
                     b.Navigation("FriendUser");
 
                     b.Navigation("User");
-                });
+                }));
 
             modelBuilder.Entity("SocialNetwork.DAL.Entity.GroupMember", b =>
                 {

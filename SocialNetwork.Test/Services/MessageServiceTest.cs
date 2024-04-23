@@ -17,9 +17,7 @@ public class MessageServiceTest : BaseMessageTestService<IMessageService, Messag
         services.AddScoped<IUserService, UserService>();
         
         services.AddScoped<IFriendshipService, FriendshipService>();
-        services.AddScoped<IFriendRequestService, FriendRequestService>();
         services.AddScoped<IFriendshipRepository, FriendshipRepository>();
-        services.AddScoped<IFriendRequestRepository, FriendRequestRepository>();
         
         services.AddScoped<IMessageService, MessageService>();
         services.AddScoped<IMessageRepository, MessageRepository>();
@@ -33,12 +31,16 @@ public class MessageServiceTest : BaseMessageTestService<IMessageService, Messag
         services.AddScoped<IRoleGroupRepository, RoleGroupRepository>();
         services.AddScoped<IBannedUserListRepository, BannedUserListRepository>();
 
+        services.AddScoped<IChatService, ChatService>();
+
         services.AddScoped<INotificationRepository, NotificationRepository>();
         services.AddScoped<INotificationService, NotificationService>();
         
         services.AddScoped<IBlackListService, BlackListService>();
         services.AddScoped<IBlackListRepository, BlackListRepository>();
-        
+
+        services.AddScoped<IRequestRepository, RequestRepository>();
+        services.AddScoped<IRequestService, RequestService>();
         base.SetUpAdditionalDependencies(services);
     }
     

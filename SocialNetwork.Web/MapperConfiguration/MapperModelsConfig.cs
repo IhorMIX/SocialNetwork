@@ -242,7 +242,7 @@ namespace SocialNetwork.Web.MapperConfiguration
                 .ForMember(dest => dest.RoleGroup, opt => opt.Ignore())
                 .ReverseMap();
 
-            CreateMap<BaseNotificationEntity, BaseNotificationModel>().ReverseMap();
+            CreateMap<NotificationEntity, BaseNotificationModel>().ReverseMap();
             CreateMap<BaseRequestEntity, BaseRequestModel>().ReverseMap();
 
             CreateMap<FriendRequestNotification, FriendRequestNotificationModel>()
