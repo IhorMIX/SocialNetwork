@@ -53,6 +53,13 @@ public class ChatServiceTest : BaseMessageTestService<IChatService, ChatService>
             Logo = "null",
             IsGroup = true,
         });
+        
+        Assert.ThrowsAsync<P2PChatIsExistsException>(async() =>  await Service.CreateP2PChat(user1.Id, user2.Id, new ChatModel
+        {
+            Name = "Chat2",
+            Logo = "null",
+            IsGroup = true,
+        })) ;
 
         var paginationModel = new PaginationModel
         {

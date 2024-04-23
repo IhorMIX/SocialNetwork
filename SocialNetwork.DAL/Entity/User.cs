@@ -31,4 +31,5 @@ public class User : BaseEntity
     public IEnumerable<BaseNotificationEntity>? Notifications { get; set; }
     public IEnumerable<GroupMember>? GroupMembers { get; set; }
     public IEnumerable<BannedUserList>? BansByGroups { get; set; }
+    public ICollection<Message>? CreatedMessages { get; set; }
 }

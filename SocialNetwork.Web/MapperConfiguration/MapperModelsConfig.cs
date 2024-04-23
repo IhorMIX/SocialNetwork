@@ -17,8 +17,7 @@ namespace SocialNetwork.Web.MapperConfiguration
             CreateMap<FriendshipModel, Friendship>().ReverseMap();
             CreateMap<FriendRequestModel, FriendRequest>().ReverseMap();
             CreateMap<BlackListModel, BlackList>().ReverseMap();
-            //CreateMap<FriendRequestModel, FriendRequestViewModel>().ReverseMap();
-            //CreateMap<GroupRequestModel, GroupRequestViewModel>().ReverseMap();
+
             CreateMap<BaseRequestViewModel, BaseRequestModel>()
                 .ForMember(dest => dest.SenderId, opt => opt.Ignore())
                 .ReverseMap();
@@ -26,8 +25,7 @@ namespace SocialNetwork.Web.MapperConfiguration
             CreatePaginationResultMapping<BannedUserViewModel, UserModel>();
             CreatePaginationResultMapping<FriendViewModel, UserModel>();
             CreatePaginationResultMapping<BaseRequestViewModel, BaseRequestModel>();
-            //CreatePaginationResultMapping<FriendRequestViewModel, FriendRequestModel>();
-            //CreatePaginationResultMapping<GroupRequestViewModel, GroupRequestModel>();
+
             CreatePaginationResultMapping<ChatViewModel, ChatModel>();
             CreatePaginationResultMapping<RoleViewModel, RoleModel>();
             CreatePaginationResultMapping<ChatMemberViewModel, ChatMemberModel>();
@@ -44,7 +42,7 @@ namespace SocialNetwork.Web.MapperConfiguration
                     .ForMember(dest => dest.PageSize, opt => opt.Ignore())
                     .ReverseMap();
             }
-
+            
             CreateMap<ProfileFriendViewModel, ProfileModel>()
                 .ForMember(dest =>dest.Birthday, opt=> opt.Ignore())
                 .ForMember(dest =>dest.Description, opt=> opt.Ignore())
@@ -194,12 +192,8 @@ namespace SocialNetwork.Web.MapperConfiguration
                 .ReverseMap();
             
             CreateMap<MessageViewModel, MessageModel>()
-                .ForMember(dest => dest.FileModels, opt => opt.MapFrom(d => d.FileModels))
-                .ForMember(dest => dest.Author, opt => opt.Ignore())
                 .ForMember(dest => dest.ToReplyMessage, opt => opt.Ignore())
                 .ForMember(dest => dest.Chat, opt => opt.Ignore())
-                .ForMember(dest => dest.Reactions, opt => opt.MapFrom(src => src.Reactions))
-                .ForMember(dest => dest.MessageReadStatuses, opt => opt.MapFrom(src => src.MessageReadStatuses))
                 .ReverseMap();
             
             CreateMap<ReactionViewModel, ReactionModel>()

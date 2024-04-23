@@ -99,7 +99,7 @@ public class ReactionService : IReactionService
         {
             NotificationMessage = reactionModel.Message.Text,
             CreatedAt = DateTime.Now,
-            ToUserId = reactionModel.Message.AuthorId,
+            ToUserId = reactionModel.Message.SenderId,
             InitiatorId = reactionModel.Author!.User.Id,
             ChatId = reactionModel.Message.ChatId,
             ReactionId = reactionModel.Id
@@ -116,7 +116,7 @@ public class ReactionService : IReactionService
         {
             NotificationMessage = model.Message.Text,
             CreatedAt = DateTime.Now,
-            ToUserId = model.Message.AuthorId,
+            ToUserId = model.Message.SenderId,
             InitiatorId = model.Author!.User.Id,
             ChatId = model.Message.ChatId,
             ReactionId = model.Id

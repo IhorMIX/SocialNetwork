@@ -135,17 +135,15 @@ public class ChatHub : Hub
         await base.OnDisconnectedAsync(exception);
     }
 
-    //need pagination
-    public async Task OpenChat(int chatId)
+
+    public async Task OpenChat(int chatId, PaginationModel paginationModel)
     {
         var userId = Context.GetHttpContext()!.User.GetUserId();
-        // optimize
-        var messages = await _messageService.GetMessagesAsync(userId, chatId, CancellationToken.None);
-        await _messageService.ReadMessages(userId, chatId, messages, CancellationToken.None);
-        messages = await _messageService.GetMessagesAsync(userId, chatId, CancellationToken.None);
+        
+        var messages = await _messageService.GetMessagesAsync(userId, chatId, paginationModel, CancellationToken.None);
 
         await Clients.Caller.SendAsync("GetMessages",
-            JsonSerializer.Serialize(_mapper.Map<List<MessageViewModel>>(messages)));
+            JsonSerializer.Serialize(_mapper.Map<PaginationResultViewModel<MessageViewModel>>(messages)));
     }
     
     public async Task AddReaction(int chatId, int messageId, AddReactionModel reaction)
@@ -208,4 +206,24 @@ public class ChatHub : Hub
         await Clients.Caller.SendAsync("GetMessagesByText", JsonSerializer.Serialize(_mapper.Map<List<MessageViewModel>>(messages)));
     }
 
+    public async Task ShareWithMessage(int chatId, int messageId, bool showCreator)
+    {
+        var userId = Context.GetHttpContext()!.User.GetUserId();
+        var connectedUsers = (_userTracker.GetUsersInGroup(chatId.ToString())).ConvertAll(int.Parse);
+        
+        var messageModel = await _messageService.ShareWithMessage(userId, messageId, chatId, showCreator);
+        
+        await Clients.Group(chatId.ToString()).SendAsync("ReceiveReplyOnMessage",
+            JsonSerializer.Serialize(_mapper.Map<MessageViewModel>(messageModel)));
+
+        var notifications = await _messageService.CreateNotification(messageModel, connectedUsers);
+        foreach (var notification in notifications)
+        {
+            await _notificationHubContext.Clients.Group(notification!.ToUserId.ToString())
+                .SendAsync("ReceivedNotification", JsonSerializer.Serialize(_mapper.Map<BaseNotificationViewModel>(notification)));
+        }
+        
+        await Clients.GroupExcept(chatId.ToString(), Context.ConnectionId).SendAsync("UserTyping", userId);
+    }
+    
 }
