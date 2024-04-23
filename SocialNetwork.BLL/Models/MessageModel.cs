@@ -3,7 +3,7 @@
 public class MessageModel : BaseModel
 {
     public string Text { get; set; } = null!;
-    public ICollection<FileModel>? FileModels { get; set; }
+    public ICollection<FileInMessageModel>? Files { get; set; }
 
     public DateTime CreatedAt { get; set; }
     
@@ -22,5 +22,5 @@ public class MessageModel : BaseModel
     public MessageModel? ToReplyMessage { get; set; }
     
     public ICollection<ReactionModel> Reactions { get; set; } = null!;
-    public ICollection<MessageReadStatusModel>? MessageReadStatuses { get; set; }
+    public ICollection<MessageReadStatusModel> MessageReadStatuses { get; set; } = null!;
 }

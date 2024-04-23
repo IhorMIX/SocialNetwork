@@ -19,13 +19,11 @@ public class UserController : ControllerBase
     private readonly ILogger<UserController> _logger;
 
     private readonly IUserService _userService;
-    private readonly TokenHelper _tokenHelper;
     private readonly IMapper _mapper;
 
-    public UserController(IUserService userService, TokenHelper tokenHelper, ILogger<UserController> logger, IMapper mapper)
+    public UserController(IUserService userService, ILogger<UserController> logger, IMapper mapper)
     {
         _userService = userService;
-        _tokenHelper = tokenHelper;
         _logger = logger;
         _mapper = mapper;
     }

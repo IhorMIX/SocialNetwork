@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SocialNetwork.DAL;
 
@@ -11,9 +12,11 @@ using SocialNetwork.DAL;
 namespace SocialNetwork.DAL.Migrations
 {
     [DbContext(typeof(SocialNetworkDbContext))]
-    partial class SocialNetworkDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240327215753_Post_Migration")]
+    partial class Post_Migration
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -35,21 +38,6 @@ namespace SocialNetwork.DAL.Migrations
                     b.HasIndex("RoleId");
 
                     b.ToTable("ChatMemberRole");
-                });
-
-            modelBuilder.Entity("GroupMemberRoleGroup", b =>
-                {
-                    b.Property<int>("GroupMembersId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("RoleGroupId")
-                        .HasColumnType("int");
-
-                    b.HasKey("GroupMembersId", "RoleGroupId");
-
-                    b.HasIndex("RoleGroupId");
-
-                    b.ToTable("GroupMemberRoleGroup");
                 });
 
             modelBuilder.Entity("SocialNetwork.DAL.Entity.AuthorizationInfo", b =>
@@ -79,33 +67,6 @@ namespace SocialNetwork.DAL.Migrations
                         .IsUnique();
 
                     b.ToTable("AuthorizationInfo");
-                });
-
-            modelBuilder.Entity("SocialNetwork.DAL.Entity.BannedUserList", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("GroupId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Reason")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("GroupId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("BannedUserLists");
                 });
 
             modelBuilder.Entity("SocialNetwork.DAL.Entity.BaseNotificationEntity", b =>
@@ -143,35 +104,6 @@ namespace SocialNetwork.DAL.Migrations
                     b.ToTable("Notifications");
 
                     b.HasDiscriminator<string>("Discriminator").HasValue("BaseNotificationEntity");
-
-                    b.UseTphMappingStrategy();
-                });
-
-            modelBuilder.Entity("SocialNetwork.DAL.Entity.BaseRequestEntity", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Discriminator")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("SenderId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("SenderId");
-
-                    b.ToTable("Requests");
-
-                    b.HasDiscriminator<string>("Discriminator").HasValue("BaseRequestEntity");
 
                     b.UseTphMappingStrategy();
                 });
@@ -294,6 +226,29 @@ namespace SocialNetwork.DAL.Migrations
                     b.UseTphMappingStrategy();
                 });
 
+            modelBuilder.Entity("SocialNetwork.DAL.Entity.FriendRequest", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("SenderId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ReceiverId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id", "SenderId", "ReceiverId");
+
+                    b.HasIndex("ReceiverId");
+
+                    b.HasIndex("SenderId");
+
+                    b.ToTable("FriendRequests");
+                });
+
             modelBuilder.Entity("SocialNetwork.DAL.Entity.Friendship", b =>
                 {
                     b.Property<int>("UserId")
@@ -312,60 +267,6 @@ namespace SocialNetwork.DAL.Migrations
                     b.ToTable("Friends");
                 });
 
-            modelBuilder.Entity("SocialNetwork.DAL.Entity.Group", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("IsPrivate")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Logo")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Groups");
-                });
-
-            modelBuilder.Entity("SocialNetwork.DAL.Entity.GroupMember", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("GroupId")
-                        .HasColumnType("int");
-
-                    b.Property<bool>("IsCreator")
-                        .HasColumnType("bit");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("GroupId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("GroupMembers");
-                });
-
             modelBuilder.Entity("SocialNetwork.DAL.Entity.Message", b =>
                 {
                     b.Property<int>("Id")
@@ -374,23 +275,20 @@ namespace SocialNetwork.DAL.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<int>("AuthorId")
+                        .HasColumnType("int");
+
                     b.Property<int>("ChatId")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("CreatorId")
-                        .HasColumnType("int");
-
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
                     b.Property<bool>("IsEdited")
                         .HasColumnType("bit");
-
-                    b.Property<int>("SenderId")
-                        .HasColumnType("int");
 
                     b.Property<string>("Text")
                         .IsRequired()
@@ -401,11 +299,9 @@ namespace SocialNetwork.DAL.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("AuthorId");
+
                     b.HasIndex("ChatId");
-
-                    b.HasIndex("CreatorId");
-
-                    b.HasIndex("SenderId");
 
                     b.HasIndex("ToReplyMessageId");
 
@@ -558,56 +454,6 @@ namespace SocialNetwork.DAL.Migrations
                     b.ToTable("RoleChatAccess");
                 });
 
-            modelBuilder.Entity("SocialNetwork.DAL.Entity.RoleGroup", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("GroupId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Rank")
-                        .HasColumnType("int");
-
-                    b.Property<string>("RoleColor")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("RoleName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("GroupId");
-
-                    b.ToTable("RoleGroups");
-                });
-
-            modelBuilder.Entity("SocialNetwork.DAL.Entity.RoleGroupAccess", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("GroupAccess")
-                        .HasColumnType("int");
-
-                    b.Property<int>("RoleId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("RoleId");
-
-                    b.ToTable("RoleGroupAccess");
-                });
-
             modelBuilder.Entity("SocialNetwork.DAL.Entity.User", b =>
                 {
                     b.Property<int>("Id")
@@ -661,40 +507,6 @@ namespace SocialNetwork.DAL.Migrations
                         .HasColumnType("int");
 
                     b.HasDiscriminator().HasValue("FriendRequestNotification");
-                });
-
-            modelBuilder.Entity("SocialNetwork.DAL.Entity.GroupRequestNotification", b =>
-                {
-                    b.HasBaseType("SocialNetwork.DAL.Entity.BaseNotificationEntity");
-
-                    b.Property<int>("GroupRequestId")
-                        .HasColumnType("int");
-
-                    b.HasDiscriminator().HasValue("GroupRequestNotification");
-                });
-
-            modelBuilder.Entity("SocialNetwork.DAL.Entity.FriendRequest", b =>
-                {
-                    b.HasBaseType("SocialNetwork.DAL.Entity.BaseRequestEntity");
-
-                    b.Property<int>("ToUserId")
-                        .HasColumnType("int");
-
-                    b.HasIndex("ToUserId");
-
-                    b.HasDiscriminator().HasValue("FriendRequest");
-                });
-
-            modelBuilder.Entity("SocialNetwork.DAL.Entity.GroupRequest", b =>
-                {
-                    b.HasBaseType("SocialNetwork.DAL.Entity.BaseRequestEntity");
-
-                    b.Property<int>("ToGroupId")
-                        .HasColumnType("int");
-
-                    b.HasIndex("ToGroupId");
-
-                    b.HasDiscriminator().HasValue("GroupRequest");
                 });
 
             modelBuilder.Entity("SocialNetwork.DAL.Entity.UserPost", b =>
@@ -774,21 +586,6 @@ namespace SocialNetwork.DAL.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("GroupMemberRoleGroup", b =>
-                {
-                    b.HasOne("SocialNetwork.DAL.Entity.GroupMember", null)
-                        .WithMany()
-                        .HasForeignKey("GroupMembersId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("SocialNetwork.DAL.Entity.RoleGroup", null)
-                        .WithMany()
-                        .HasForeignKey("RoleGroupId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("SocialNetwork.DAL.Entity.AuthorizationInfo", b =>
                 {
                     b.HasOne("SocialNetwork.DAL.Entity.User", "User")
@@ -796,25 +593,6 @@ namespace SocialNetwork.DAL.Migrations
                         .HasForeignKey("SocialNetwork.DAL.Entity.AuthorizationInfo", "UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("SocialNetwork.DAL.Entity.BannedUserList", b =>
-                {
-                    b.HasOne("SocialNetwork.DAL.Entity.Group", "Group")
-                        .WithMany("BannedUsers")
-                        .HasForeignKey("GroupId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("SocialNetwork.DAL.Entity.User", "User")
-                        .WithMany("BansByGroups")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Group");
 
                     b.Navigation("User");
                 });
@@ -828,17 +606,6 @@ namespace SocialNetwork.DAL.Migrations
                         .IsRequired();
 
                     b.Navigation("Initiator");
-                });
-
-            modelBuilder.Entity("SocialNetwork.DAL.Entity.BaseRequestEntity", b =>
-                {
-                    b.HasOne("SocialNetwork.DAL.Entity.User", "Sender")
-                        .WithMany("Requests")
-                        .HasForeignKey("SenderId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.Navigation("Sender");
                 });
 
             modelBuilder.Entity("SocialNetwork.DAL.Entity.BlackList", b =>
@@ -879,19 +646,26 @@ namespace SocialNetwork.DAL.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("SocialNetwork.DAL.Entity.FileEntity", b =>
+            modelBuilder.Entity("SocialNetwork.DAL.Entity.FriendRequest", b =>
                 {
-                    b.HasOne("SocialNetwork.DAL.Entity.Message", "Message")
-                        .WithMany("Files")
-                        .HasForeignKey("MessageId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                    b.HasOne("SocialNetwork.DAL.Entity.User", "Receiver")
+                        .WithMany()
+                        .HasForeignKey("ReceiverId")
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.Navigation("Message");
+                    b.HasOne("SocialNetwork.DAL.Entity.User", "Sender")
+                        .WithMany("Requests")
+                        .HasForeignKey("SenderId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Receiver");
+
+                    b.Navigation("Sender");
                 });
 
             modelBuilder.Entity("SocialNetwork.DAL.Entity.Friendship", b =>
-            modelBuilder.Entity("SocialNetwork.DAL.Entity.FriendRequest", b =>
                 {
                     b.HasOne("SocialNetwork.DAL.Entity.User", "FriendUser")
                         .WithMany()
@@ -910,42 +684,17 @@ namespace SocialNetwork.DAL.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("SocialNetwork.DAL.Entity.GroupMember", b =>
-                {
-                    b.HasOne("SocialNetwork.DAL.Entity.Group", "Group")
-                        .WithMany("GroupMembers")
-                        .HasForeignKey("GroupId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("SocialNetwork.DAL.Entity.User", "User")
-                        .WithMany("GroupMembers")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Group");
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("SocialNetwork.DAL.Entity.Message", b =>
                 {
+                    b.HasOne("SocialNetwork.DAL.Entity.ChatMember", "Author")
+                        .WithMany("MessagesSent")
+                        .HasForeignKey("AuthorId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("SocialNetwork.DAL.Entity.Chat", "Chat")
                         .WithMany("Messages")
                         .HasForeignKey("ChatId")
-                        .OnDelete(DeleteBehavior.ClientCascade)
-                        .IsRequired();
-
-                    b.HasOne("SocialNetwork.DAL.Entity.User", "Creator")
-                        .WithMany("CreatedMessages")
-                        .HasForeignKey("CreatorId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.HasOne("SocialNetwork.DAL.Entity.ChatMember", "Sender")
-                        .WithMany("MessagesSent")
-                        .HasForeignKey("SenderId")
                         .OnDelete(DeleteBehavior.ClientCascade)
                         .IsRequired();
 
@@ -953,11 +702,9 @@ namespace SocialNetwork.DAL.Migrations
                         .WithMany()
                         .HasForeignKey("ToReplyMessageId");
 
+                    b.Navigation("Author");
+
                     b.Navigation("Chat");
-
-                    b.Navigation("Creator");
-
-                    b.Navigation("Sender");
 
                     b.Navigation("ToReplyMessage");
                 });
@@ -1015,8 +762,7 @@ namespace SocialNetwork.DAL.Migrations
                 {
                     b.HasOne("SocialNetwork.DAL.Entity.Chat", "Chat")
                         .WithMany("Roles")
-                        .HasForeignKey("ChatId")
-                        .OnDelete(DeleteBehavior.ClientCascade);
+                        .HasForeignKey("ChatId");
 
                     b.Navigation("Chat");
                 });
@@ -1026,32 +772,10 @@ namespace SocialNetwork.DAL.Migrations
                     b.HasOne("SocialNetwork.DAL.Entity.Role", "Role")
                         .WithMany("RoleAccesses")
                         .HasForeignKey("RoleId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Role");
-                });
-
-            modelBuilder.Entity("SocialNetwork.DAL.Entity.RoleGroup", b =>
-                {
-                    b.HasOne("SocialNetwork.DAL.Entity.Group", "Group")
-                        .WithMany("RoleGroups")
-                        .HasForeignKey("GroupId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Group");
-                });
-
-            modelBuilder.Entity("SocialNetwork.DAL.Entity.RoleGroupAccess", b =>
-                {
-                    b.HasOne("SocialNetwork.DAL.Entity.RoleGroup", "RoleGroup")
-                        .WithMany("RoleAccesses")
-                        .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.ClientCascade)
                         .IsRequired();
 
-                    b.Navigation("RoleGroup");
+                    b.Navigation("Role");
                 });
 
             modelBuilder.Entity("SocialNetwork.DAL.Entity.ChatNotification", b =>
@@ -1063,28 +787,6 @@ namespace SocialNetwork.DAL.Migrations
                         .IsRequired();
 
                     b.Navigation("Chat");
-                });
-
-            modelBuilder.Entity("SocialNetwork.DAL.Entity.FriendRequest", b =>
-                {
-                    b.HasOne("SocialNetwork.DAL.Entity.User", "ToUser")
-                        .WithMany()
-                        .HasForeignKey("ToUserId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.Navigation("ToUser");
-                });
-
-            modelBuilder.Entity("SocialNetwork.DAL.Entity.GroupRequest", b =>
-                {
-                    b.HasOne("SocialNetwork.DAL.Entity.Group", "ToGroup")
-                        .WithMany()
-                        .HasForeignKey("ToGroupId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.Navigation("ToGroup");
                 });
 
             modelBuilder.Entity("SocialNetwork.DAL.Entity.UserPost", b =>
@@ -1163,15 +865,6 @@ namespace SocialNetwork.DAL.Migrations
                     b.Navigation("Reactions");
                 });
 
-            modelBuilder.Entity("SocialNetwork.DAL.Entity.Group", b =>
-                {
-                    b.Navigation("BannedUsers");
-
-                    b.Navigation("GroupMembers");
-
-                    b.Navigation("RoleGroups");
-                });
-
             modelBuilder.Entity("SocialNetwork.DAL.Entity.Message", b =>
                 {
                     b.Navigation("Files");
@@ -1191,26 +884,15 @@ namespace SocialNetwork.DAL.Migrations
                     b.Navigation("RoleAccesses");
                 });
 
-            modelBuilder.Entity("SocialNetwork.DAL.Entity.RoleGroup", b =>
-                {
-                    b.Navigation("RoleAccesses");
-                });
-
             modelBuilder.Entity("SocialNetwork.DAL.Entity.User", b =>
                 {
                     b.Navigation("AuthorizationInfo");
-
-                    b.Navigation("BansByGroups");
 
                     b.Navigation("BlackLists");
 
                     b.Navigation("ChatMembers");
 
-                    b.Navigation("CreatedMessages");
-
                     b.Navigation("Friends");
-
-                    b.Navigation("GroupMembers");
 
                     b.Navigation("Notifications");
 

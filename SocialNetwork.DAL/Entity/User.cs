@@ -28,7 +28,7 @@ public class User : BaseEntity
     public IEnumerable<ChatMember>? ChatMembers { get; set; }
     public IEnumerable<BlackList>? BlackLists { get; set; }
     
-    public IEnumerable<BaseNotificationEntity>? Notifications { get; set; }
+    public IEnumerable<NotificationEntity>? Notifications { get; set; }
     public IEnumerable<GroupMember>? GroupMembers { get; set; }
     public IEnumerable<BannedUserList>? BansByGroups { get; set; }
     public ICollection<Message>? CreatedMessages { get; set; }

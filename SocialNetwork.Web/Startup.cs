@@ -83,6 +83,10 @@ public class Startup
         services.AddScoped<INotificationRepository, NotificationRepository>();
         services.AddScoped<INotificationService, NotificationService>();
         services.AddScoped<IMessageReadStatusRepository, MessageReadStatusRepository>();
+        
+        services.AddScoped<IPostRepository, PostRepository>();
+        services.AddScoped<IPostService, PostService>();
+
 
         services.AddScoped<IGroupService, GroupService>();
         services.AddScoped<IGroupRepository, GroupRepository>();

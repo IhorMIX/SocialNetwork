@@ -10,22 +10,20 @@ using SocialNetwork.Test.Helpers;
 
 namespace SocialNetwork.Test.Services;
 
-public class BaseNotificationEntityTest : BaseMessageTestService<INotificationService, NotificationService>
+public class NotificationEntityTest : BaseMessageTestService<INotificationService, NotificationService>
 {
+
     protected override void SetUpAdditionalDependencies(IServiceCollection services)
     {
-        services.AddScoped<IBlackListService, BlackListService>();
-        services.AddScoped<IBlackListRepository, BlackListRepository>();
+        services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<IUserService, UserService>();
+        
         services.AddScoped<IFriendshipService, FriendshipService>();
         services.AddScoped<IFriendshipRepository, FriendshipRepository>();
 
-        services.AddScoped<IUserRepository, UserRepository>();
-        services.AddScoped<IUserService, UserService>();
+        services.AddScoped<IBlackListService, BlackListService>();
+        services.AddScoped<IBlackListRepository, BlackListRepository>();
 
-        services.AddScoped<IChatService, ChatService>();
-        services.AddScoped<IChatRepository, ChatRepository>();
-        services.AddScoped<IRoleRepository, RoleRepository>();
-        services.AddScoped<IChatMemberRepository, ChatMemberRepository>();
         services.AddScoped<IGroupRepository, GroupRepository>();
         services.AddScoped<IGroupService, GroupService>();
         services.AddScoped<IGroupMemberRepository, GroupMemberRepository>();
@@ -34,10 +32,11 @@ public class BaseNotificationEntityTest : BaseMessageTestService<INotificationSe
         services.AddScoped<IRequestRepository, RequestRepository>();
         services.AddScoped<IRequestService, RequestService>();
 
+        services.AddScoped<IBannedUserListRepository, BannedUserListRepository>();
+
         services.AddScoped<INotificationRepository, NotificationRepository>();
         services.AddScoped<INotificationService, NotificationService>();
 
-        services.AddScoped<IBannedUserListRepository, BannedUserListRepository>();
         base.SetUpAdditionalDependencies(services);
     }
 
@@ -111,12 +110,12 @@ public class BaseNotificationEntityTest : BaseMessageTestService<INotificationSe
             IsGroup = false,
         });
         await chatService.AddUsers(createdUser1!.Id, chat.Id, new List<int>{ createdUser2!.Id });
-        var notifications = await Service.GetByUserId(createdUser2.Id);
+        var notifications = (await Service.GetByUserId(createdUser2.Id)).ToList();
         Assert.That(notifications.Count() == 1
             && notifications.First().GetType() == typeof(ChatNotificationModel));
         
         await chatService.DelMembers(createdUser1.Id, chat.Id, new List<int> { createdUser2.Id });
-        notifications = await Service.GetByUserId(createdUser2.Id);
+        notifications = (await Service.GetByUserId(createdUser2.Id)).ToList();
         Assert.That(notifications.Count() == 2 
                     && notifications.Skip(1).FirstOrDefault()!.GetType() == typeof(ChatNotificationModel));
     }

@@ -29,6 +29,10 @@ namespace SocialNetwork.Web.MapperConfiguration
             CreatePaginationResultMapping<ChatViewModel, ChatModel>();
             CreatePaginationResultMapping<RoleViewModel, RoleModel>();
             CreatePaginationResultMapping<ChatMemberViewModel, ChatMemberModel>();
+            CreatePaginationResultMapping<MessageViewModel, MessageModel>();
+            CreatePaginationResultMapping<BasePostViewModel, BasePostModel>();
+            CreatePaginationResultMapping<UserPostViewModel, UserPostModel>();
+            
             CreatePaginationResultMapping<BannedUsersInGroupViewModel, BannedUserInGroupModel>();
             CreatePaginationResultMapping<BannedUserList, BannedUserInGroupModel>();
             
@@ -171,27 +175,42 @@ namespace SocialNetwork.Web.MapperConfiguration
                 .ReverseMap();
             
             CreateMap<Message, MessageModel>()
-                .ForMember(dest => dest.FileModels, opt => opt.MapFrom(d => d.Files))
+                .ForMember(dest => dest.Files, opt => opt.MapFrom(d => d.Files))
                 .ReverseMap();
             
             CreateMap<Reaction, ReactionModel>()
                 .ReverseMap();
             
-            CreateMap<FileModel, FileEntity>()
+            CreateMap<BaseFileModel, BaseFileEntity>()
                 .ReverseMap();
             
-            CreateMap<FileViewModel, FileModel>()
+            CreateMap<FileInPostModel, FileInPost>()
+                .IncludeBase<BaseFileModel, BaseFileEntity>()
+                .ReverseMap();
+            
+            CreateMap<FileInMessageModel, FileInMessage>()
+                .IncludeBase<BaseFileModel, BaseFileEntity>()
+                .ReverseMap();
+            
+            CreateMap<FileViewModel, FileInMessageModel>()
                 .ForMember(dest => dest.Message, opt => opt.Ignore())
                 .ForMember(dest => dest.MessageId, opt => opt.Ignore())
                 .ReverseMap();
             
-            CreateMap<FileSend, FileModel>()
+                        
+            CreateMap<FileViewModel, FileInPostModel>()
+                .ForMember(dest => dest.PostId, opt => opt.Ignore())
+                .ForMember(dest => dest.Post, opt => opt.Ignore())
+                .ReverseMap();
+            
+            CreateMap<FileSend, FileInMessageModel>()
                 .ForMember(dest => dest.Id, opt => opt.Ignore())
                 .ForMember(dest => dest.Message, opt => opt.Ignore())
                 .ForMember(dest => dest.MessageId, opt => opt.Ignore())
                 .ReverseMap();
             
             CreateMap<MessageViewModel, MessageModel>()
+                .ForMember(dest => dest.Files, opt => opt.MapFrom(d => d.FileModels))
                 .ForMember(dest => dest.ToReplyMessage, opt => opt.Ignore())
                 .ForMember(dest => dest.Chat, opt => opt.Ignore())
                 .ReverseMap();
@@ -214,6 +233,9 @@ namespace SocialNetwork.Web.MapperConfiguration
                 .ForMember(dest => dest.Chat, opt => opt.Ignore())
                 .ForMember(dest => dest.Role, opt => opt.Ignore())
                 .ReverseMap();
+            
+            CreateMap<NotificationEntity, BaseNotificationModel>().ReverseMap();
+           
 
             CreateMap<UserViewModel, GroupMemberModel>()
                 .ForMember(dest => dest.Group, opt => opt.Ignore())
@@ -224,7 +246,7 @@ namespace SocialNetwork.Web.MapperConfiguration
             CreateMap<BaseRequestEntity, BaseRequestModel>().ReverseMap();
 
             CreateMap<FriendRequestNotification, FriendRequestNotificationModel>()
-                .IncludeBase<BaseNotificationEntity, BaseNotificationModel>();
+                .IncludeBase<NotificationEntity, BaseNotificationModel>();
 
             CreateMap<MessageReadStatusModel, MessageReadStatus>()
                 .ForMember(dest => dest.Message, opt => opt.Ignore())
@@ -235,23 +257,23 @@ namespace SocialNetwork.Web.MapperConfiguration
                 .ReverseMap();
             
             CreateMap<ChatNotification, ChatNotificationModel>()
-                .IncludeBase<BaseNotificationEntity, BaseNotificationModel>()
+                .IncludeBase<NotificationEntity, BaseNotificationModel>()
                 .ReverseMap();
             
             CreateMap<FriendRequestNotification, FriendRequestNotificationModel>()
-                .IncludeBase<BaseNotificationEntity, BaseNotificationModel>();
+                .IncludeBase<NotificationEntity, BaseNotificationModel>();
 
             CreateMap<BaseNotificationViewModel, BaseNotificationModel>()
                 .ReverseMap();
             
             CreateMap<MessageNotification, MessageNotificationModel>()
                 .IncludeBase<ChatNotification, ChatNotificationModel>()
-                .IncludeBase<BaseNotificationEntity, BaseNotificationModel>()
+                .IncludeBase<NotificationEntity, BaseNotificationModel>()
                 .ReverseMap();
             
             CreateMap<ReactionNotification, ReactionNotificationModel>()
                 .IncludeBase<ChatNotification, ChatNotificationModel>()
-                .IncludeBase<BaseNotificationEntity, BaseNotificationModel>()
+                .IncludeBase<NotificationEntity, BaseNotificationModel>()
                 .ReverseMap();
             
             CreateMap<ChatNotificationViewModel, ChatNotificationModel>()
@@ -271,6 +293,35 @@ namespace SocialNetwork.Web.MapperConfiguration
                 .IncludeBase<ChatNotificationViewModel, ChatNotificationModel>()
                 .IncludeBase<BaseNotificationViewModel, BaseNotificationModel>()
                 .ReverseMap();
+
+            CreateMap<BasePostEntity, BasePostModel>().ReverseMap();
+                
+            CreateMap<UserPost, UserPostModel>()
+                .IncludeBase<BasePostEntity, BasePostModel>()
+                .ReverseMap();
+
+            CreateMap<CreateUserPostModel, UserPostModel>()
+                .ForMember(dest => dest.Files, opt => opt.MapFrom(d => d.FilePaths))
+                .ForMember(dest => dest.User, opt => opt.Ignore())
+                .ForMember(dest => dest.UserId, opt => opt.Ignore())
+                .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
+                .ForMember(dest => dest.Id, opt => opt.Ignore())
+                .ReverseMap();
+
+            CreateMap<FileSend, FileInPostModel>()
+                .ForMember(dest => dest.FilePath, opt => opt.MapFrom(d => d.FilePath))
+                .ForMember(dest => dest.Id, opt => opt.Ignore())
+                .ForMember(dest => dest.Post, opt => opt.Ignore())
+                .ForMember(dest => dest.PostId, opt => opt.Ignore())
+                .ReverseMap();
+
+            CreateMap<UserPostViewModel, UserPostModel>()
+                .IncludeBase<BasePostViewModel, BasePostModel>()
+                .ReverseMap();
+            
+            CreateMap<BasePostViewModel, BasePostModel>()
+                .ReverseMap();
+            
 
             CreateMap<GroupMember, User>().ReverseMap();
 

@@ -25,14 +25,19 @@ public class SocialNetworkDbContext : DbContext
     public DbSet<Message> Messages { get; set; }
 
     public DbSet<Reaction> Reactions { get; set; }
-    public DbSet<FileEntity> Files { get; set; }
+    public DbSet<BaseFileEntity> Files { get; set; }
+    public DbSet<FileInMessage> FilesInMassages { get; set; }
+    public DbSet<FileInPost> FilesInPost { get; set; }
+    
+    public DbSet<BasePostEntity> Posts { get; set; }
+    public DbSet<UserPost> UserPosts { get; set; }
 
     public DbSet<BlackList> BlackLists { get; set; }
     public DbSet<FriendRequestNotification> FriendRequestNotifications { get; set; }
     public DbSet<ChatNotification> ChatFriendRequestNotifications { get; set; }
     public DbSet<MessageNotification> MessageNotifications { get; set; }
     public DbSet<ReactionNotification> ReactionNotifications { get; set; }
-    public DbSet<BaseNotificationEntity> Notifications { get; set; }
+    public DbSet<NotificationEntity> Notifications { get; set; }
     public DbSet<MessageReadStatus> MessageReadStatuses { get; set; }
     public DbSet<Group> Groups { get; set; }
     public DbSet<GroupMember> GroupMembers { get; set; }

@@ -17,32 +17,34 @@ namespace SocialNetwork.Test.Services
 {
     public class PaginationServiceTest : DefaultServiceTest<IBlackListService, BlackListService> 
     {
+        
         protected override void SetUpAdditionalDependencies(IServiceCollection services)
         {
-            services.AddScoped<IBlackListService, BlackListService>();
-            services.AddScoped<IBlackListRepository, BlackListRepository>();
+            services.AddScoped<IUserRepository, UserRepository>();
+            services.AddScoped<IUserService, UserService>();
+        
             services.AddScoped<IFriendshipService, FriendshipService>();
             services.AddScoped<IFriendshipRepository, FriendshipRepository>();
 
+            services.AddScoped<IBlackListService, BlackListService>();
+            services.AddScoped<IBlackListRepository, BlackListRepository>();
+
             services.AddScoped<IRequestService, RequestService>();
             services.AddScoped<IRequestRepository, RequestRepository>();
-            services.AddScoped<IUserRepository, UserRepository>();
-            services.AddScoped<IUserService, UserService>();
-            services.AddScoped<IChatService, ChatService>();
-            services.AddScoped<IChatRepository, ChatRepository>();
-            services.AddScoped<IGroupRepository, GroupRepository>();
-            services.AddScoped<IGroupService, GroupService>();
-            services.AddScoped<INotificationRepository, NotificationRepository>();
 
-            services.AddScoped<IBannedUserListRepository, BannedUserListRepository>();
             services.AddScoped<IRoleRepository, RoleRepository>();
             services.AddScoped<IRoleGroupRepository, RoleGroupRepository>();
             services.AddScoped<IGroupMemberRepository, GroupMemberRepository>();
             services.AddScoped<IChatMemberRepository, ChatMemberRepository>();
+
+            services.AddScoped<IBannedUserListRepository, BannedUserListRepository>();
+
+            services.AddScoped<INotificationRepository, NotificationRepository>();
+            services.AddScoped<INotificationService, NotificationService>();
+            
             base.SetUpAdditionalDependencies(services);
-
         }
-
+        
         [Test]
         public async Task AddUsersToBlackList_UsersAddAndMakePaginationModel_SuccessReturned()
         {
