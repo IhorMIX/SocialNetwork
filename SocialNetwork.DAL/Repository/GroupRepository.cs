@@ -53,14 +53,12 @@ namespace SocialNetwork.DAL.Repository
         }
 
 
-        public async Task DelGroupMemberAsync(int userId, Group group, CancellationToken cancellationToken = default)
+        public async Task DelGroupMemberAsync(int groupMemberId, Group group, CancellationToken cancellationToken = default)
         {
-            var groupMembers = await _socialNetworkDbContext.GroupMembers
-                .Include(c => c.Group)
-                .Include(i => i.RoleGroup)
-                .FirstOrDefaultAsync(i => i.User.Id == userId && i.Group.Id == group.Id, cancellationToken);
+            var groupMember = await _socialNetworkDbContext.GroupMembers
+                .FirstOrDefaultAsync(i => i.Id == groupMemberId, cancellationToken);
 
-            group.GroupMembers?.Remove(groupMembers!);
+            group.GroupMembers?.Remove(groupMember!);
             _socialNetworkDbContext.Groups.Update(group);
             await _socialNetworkDbContext.SaveChangesAsync(cancellationToken);
         }

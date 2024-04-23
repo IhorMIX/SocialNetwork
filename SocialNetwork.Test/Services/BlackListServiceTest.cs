@@ -23,6 +23,12 @@ public class BlackListServiceTest : BaseMessageTestService<IBlackListService, Bl
         services.AddScoped<IChatService, ChatService>();
         services.AddScoped<INotificationRepository, NotificationRepository>();
         services.AddScoped<INotificationService, NotificationService>();
+
+        services.AddScoped<IGroupRepository, GroupRepository>();
+        services.AddScoped<IGroupService, GroupService>();
+        services.AddScoped<IGroupMemberRepository, GroupMemberRepository>();
+        services.AddScoped<IRoleGroupRepository, RoleGroupRepository>();
+        services.AddScoped<IBannedUserListRepository, BannedUserListRepository>();
         base.SetUpAdditionalDependencies(services);
 
     }

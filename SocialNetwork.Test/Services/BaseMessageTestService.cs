@@ -13,11 +13,13 @@ public class BaseMessageTestService<T, V> : DefaultServiceTest<T, V>
 {
     protected override void SetUpAdditionalDependencies(IServiceCollection services)
     {
-        services.AddScoped<IFriendRequestRepository, FriendRequestRepository>();
+
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<IFriendshipService, FriendshipService>();
         services.AddScoped<IFriendshipRepository, FriendshipRepository>();
+        services.AddScoped<IRequestService, RequestService>();
+        services.AddScoped<IRequestRepository, RequestRepository>();
         services.AddScoped<IBlackListService, BlackListService>();
         services.AddScoped<IBlackListRepository, BlackListRepository>();
 

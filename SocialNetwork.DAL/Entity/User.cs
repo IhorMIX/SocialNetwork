@@ -22,9 +22,9 @@ public class User : BaseEntity
     public AuthorizationInfo? AuthorizationInfo { get; set; }
 
     public IEnumerable<Friendship>? Friends { get; set; }
-    
-    public IEnumerable<FriendRequest>? Requests { get; set; }
-    
+
+    public IEnumerable<BaseRequestEntity>? Requests { get; set; }
+
     public IEnumerable<ChatMember>? ChatMembers { get; set; }
     public IEnumerable<BlackList>? BlackLists { get; set; }
     

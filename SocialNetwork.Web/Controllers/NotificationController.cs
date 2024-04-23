@@ -15,11 +15,11 @@ namespace SocialNetwork.Web.Controllers;
 public class NotificationController : ControllerBase
 {
     
-    private readonly ILogger<FriendshipController> _logger;
+    private readonly ILogger<NotificationController> _logger;
     private readonly IMapper _mapper;
     private readonly INotificationService _notificationService;
 
-    public NotificationController(ILogger<FriendshipController> logger, IMapper mapper, INotificationService notificationService)
+    public NotificationController(ILogger<NotificationController> logger, IMapper mapper, INotificationService notificationService)
     {
         _logger = logger;
         _mapper = mapper;

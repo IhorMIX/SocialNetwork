@@ -18,53 +18,36 @@ public class GroupService : IGroupService
 {
     private readonly IGroupRepository _groupRepository;
     private readonly IGroupMemberRepository _groupMemberRepository;
-
-    private readonly IChatRepository _chatRepository;
     private readonly IUserRepository _userRepository;
-    private readonly IFriendshipService _friendshipService;
     private readonly IRoleGroupRepository _roleGroupRepository;
-    private readonly IBlackListRepository _blackListRepository;
-    private readonly IBlackListService _blackListService;
     private readonly ILogger<GroupService> _logger;
-    private readonly IChatMemberRepository _chatMemberRepository;
     private readonly IMapper _mapper;
     private readonly IBannedUserListRepository _bannedUserListRepository;
-    private readonly RoleOption _roleOptions;
+
 
     public GroupService(
         IGroupRepository groupRepository,
         IGroupMemberRepository groupMemberRepository,
-        IChatRepository chatRepository,
         ILogger<GroupService> logger,
         IMapper mapper,
         IUserRepository userRepository,
-        IFriendshipService friendshipService,
         IRoleGroupRepository roleGroupRepository,
-        IChatMemberRepository chatMemberRepository,
-        IOptions<RoleOption> roleOptions,
-        IBlackListRepository blackListRepository,
-        IBlackListService blackListService,
         IBannedUserListRepository bannedUserListRepository)
     {
         _groupRepository = groupRepository;
         _groupMemberRepository = groupMemberRepository;
-        _chatRepository = chatRepository;
         _logger = logger;
         _mapper = mapper;
         _userRepository = userRepository;
-        _friendshipService = friendshipService;
         _roleGroupRepository = roleGroupRepository;
-        _chatMemberRepository = chatMemberRepository;
-        _roleOptions = roleOptions.Value;
-        _blackListRepository = blackListRepository;
-        _blackListService = blackListService;
         _bannedUserListRepository = bannedUserListRepository;
     }
 
     private async Task<GroupMember?> GetUserInGroupAsync(int userId, int groupId, GroupAccess access,
     CancellationToken cancellationToken)
     {
-        var userDb = await _userRepository.GetByIdAsync(userId, cancellationToken);
+
+        var userDb = await _groupMemberRepository.GetByIdAsync(userId, cancellationToken);
         _logger.LogAndThrowErrorIfNull(userDb, new UserNotFoundException($"User with this Id {userId} not found"));
         var isCreator = await IsUserCreatorAsync(userId, groupId, cancellationToken);
         if (isCreator)
@@ -113,20 +96,16 @@ public class GroupService : IGroupService
 
     public async Task DeleteGroup(int userId, int groupId, CancellationToken cancellationToken = default)
     {
-        var userDb = await _userRepository.GetByIdAsync(userId, cancellationToken);
-        _logger.LogAndThrowErrorIfNull(userDb, new UserNotFoundException($"User with this Id {userId} not found"));
+        var groupMemberdb = await _groupMemberRepository.GetByIdAsync(userId, cancellationToken);
+        _logger.LogAndThrowErrorIfNull(groupMemberdb, new UserNotFoundException($"User with this Id {userId} not found"));
         var groupDb = await _groupRepository.GetByIdAsync(groupId, cancellationToken);
         _logger.LogAndThrowErrorIfNull(groupDb, new GroupNotFoundException($"Group with this Id {groupId} not found"));
 
-        var userInChat = await GetUserInGroupAsync(userId, groupId, GroupAccess.DelGroupMembers, cancellationToken);
-        _logger.LogAndThrowErrorIfNull(userInChat, new NoRightException($"You have no rights for it"));
-
-        var isMember = await _groupRepository.IsUserInGroupAsync(userId, groupDb!, cancellationToken);
-        if (!isMember)
+        if (!groupMemberdb!.IsCreator)
         {
-            throw new NoRightException($"User is not the creator of this group and cannot delete it.");
+            throw new NoRightException($"You have no rights for it");
         }
-       
+
         await _groupRepository.DeleteGroupAsync(groupDb!, cancellationToken);
     }
 
@@ -135,7 +114,7 @@ public class GroupService : IGroupService
         var userDb = await _userRepository.GetByIdAsync(userId, cancellationToken);
         _logger.LogAndThrowErrorIfNull(userDb, new UserNotFoundException($"User with this Id {userId} not found"));
         var groupDb = await _groupRepository.GetByIdAsync(groupId, cancellationToken);
-        _logger.LogAndThrowErrorIfNull(groupDb, new GroupNotFoundException($"Chat with this Id {groupId} not found")); 
+        _logger.LogAndThrowErrorIfNull(groupDb, new GroupNotFoundException($"Group with this Id {groupId} not found"));
         if (groupDb == null || userDb == null)
             throw new ArgumentException("Group or user not found");
 
@@ -148,9 +127,9 @@ public class GroupService : IGroupService
 
         var banneduser = await _bannedUserListRepository.GetAll()
             .Where(i => i.UserId == userId)
-            .Where(i=>i.GroupId == groupId)
+            .Where(i => i.GroupId == groupId)
             .FirstOrDefaultAsync(cancellationToken);
-        if(banneduser != null)
+        if (banneduser != null)
         {
             throw new BannedUserException($"You cannot to join in group with this ID {groupId} because you are banned");
         }
@@ -163,66 +142,78 @@ public class GroupService : IGroupService
         };
         await _groupRepository.AddGroupMemberAsync(member, groupDb!, cancellationToken);
 
-        //if private send to admin
+
 
     }
 
     public async Task LeaveGroup(int groupId, int userId, CancellationToken cancellationToken = default)
     {
-        var userDb = await _userRepository.GetByIdAsync(userId, cancellationToken);
-        _logger.LogAndThrowErrorIfNull(userDb, new GroupMemberException($"GroupMember with Id {userId} not found"));
+        var groupMemberDb = await _groupMemberRepository.GetByUserIdAndGroupId(userId, groupId, cancellationToken);
+        _logger.LogAndThrowErrorIfNull(groupMemberDb, new GroupMemberException($"GroupMember with Id {userId} not found"));
         var groupDb = await _groupRepository.GetByIdAsync(groupId, cancellationToken);
         _logger.LogAndThrowErrorIfNull(groupDb, new GroupNotFoundException($"Group with Id {groupId} not found"));
 
-        var IsCreator = await IsUserCreatorAsync(userId,groupId, cancellationToken);
-        if (IsCreator)
+        if (groupMemberDb!.IsCreator)
         {
             throw new CreatorCantLeaveException($"Creator can not leave group");
         }
-        
-        await _groupRepository.DelGroupMemberAsync(userId, groupDb!, cancellationToken);
+
+        await _groupRepository.DelGroupMemberAsync(groupMemberDb.Id, groupDb!, cancellationToken);
     }
     public async Task KickMember(int userId, int groupId, int kickedMemberId, CancellationToken cancellationToken = default)
     {
-       
-        var groupDb = await _groupRepository.GetByIdAsync(groupId, cancellationToken);
-        _logger.LogAndThrowErrorIfNull(groupDb, new GroupNotFoundException($"Group with this Id {groupId} not found"));
-       
-
-        var userInGroup = await GetUserInGroupAsync(userId, groupId, GroupAccess.DelGroupMembers, cancellationToken);
-        _logger.LogAndThrowErrorIfNull(userInGroup, new GroupMemberException($"You have no rights for it"));
-
-
-        var kickedmemberDb = await _groupMemberRepository.GetAll()
-        .Where(m => m.Group.Id == groupId && m.User.Id == kickedMemberId).SingleOrDefaultAsync(cancellationToken);
-        _logger.LogAndThrowErrorIfNull(kickedmemberDb, new GroupMemberException($"User with Id {kickedMemberId} is not a member of this group"));
-
-
-
-        if (kickedmemberDb!.IsCreator || (!userInGroup!.IsCreator &&  kickedmemberDb!.RoleGroup.Select(i => i.Rank).Any(i => i <= userInGroup!.RoleGroup.Min(r => r.Rank))))
-        {
-            throw new NoRightException($"You have no rights for it");
-        }
-
         if (userId == kickedMemberId)
         {
             throw new GroupMemberException($"You cannnot kick yourself");
         }
 
+        var groupMemberDb = await _groupMemberRepository.GetByUserIdAndGroupId(userId, groupId, cancellationToken);
+        _logger.LogAndThrowErrorIfNull(groupMemberDb, new GroupMemberException($"GroupMember with Id {userId} not found"));
+        var groupDb = await _groupRepository.GetByIdAsync(groupId, cancellationToken);
+        _logger.LogAndThrowErrorIfNull(groupDb, new GroupNotFoundException($"Group with this Id {groupId} not found"));
+
+        var kickedmemberDb = await _groupMemberRepository.GetAll()
+        .Where(m => m.Group.Id == groupId && m.Id == kickedMemberId).SingleOrDefaultAsync(cancellationToken);
+        _logger.LogAndThrowErrorIfNull(kickedmemberDb, new GroupMemberException($"User with Id {kickedMemberId} is not a member of this group"));
+
+        var access = new List<GroupAccess>
+        {
+            GroupAccess.DelGroupMembers
+        };
+        var hasUserAccess = groupMemberDb!.RoleGroup.HasAccess(access);
+
+        if (!hasUserAccess && !groupMemberDb.IsCreator)
+        {
+            throw new NoRightException($"You have no rights for it");
+        }
+
+        if (kickedmemberDb!.IsCreator || (!groupMemberDb!.IsCreator && kickedmemberDb!.RoleGroup.Select(i => i.Rank).Any(i => i <= groupMemberDb!.RoleGroup.Min(r => r.Rank))))
+        {
+            throw new NoRightException($"You have no rights for it");
+        }
 
         await _groupRepository.DelGroupMemberAsync(kickedMemberId, groupDb!, cancellationToken);
+        // notific
     }
     public async Task<GroupModel> EditGroup(int userId, int groupId, GroupModel groupModel,
        CancellationToken cancellationToken = default)
     {
-        var userDb = await _userRepository.GetByIdAsync(userId, cancellationToken);
-        _logger.LogAndThrowErrorIfNull(userDb, new UserNotFoundException($"User with this Id {userId} not found"));
+        var groupMemberDb = await _groupMemberRepository.GetByUserIdAndGroupId(userId, groupId, cancellationToken);
+        _logger.LogAndThrowErrorIfNull(groupMemberDb, new UserNotFoundException($"User with this Id {userId} not found"));
         var groupDb = await _groupRepository.GetByIdAsync(groupId, cancellationToken);
         _logger.LogAndThrowErrorIfNull(groupDb, new ChatNotFoundException($"Group with this Id {groupId} not found"));
 
-        var userInGroup = await GetUserInGroupAsync(userId, groupId, GroupAccess.EditGroup, cancellationToken);
-        _logger.LogAndThrowErrorIfNull(userInGroup, new NoRightException($"You have no rights for it"));
-        
+        var access = new List<GroupAccess>
+        {
+            GroupAccess.EditGroup
+        };
+        var hasUserAccess = groupMemberDb!.RoleGroup.HasAccess(access);
+
+        if (!hasUserAccess && !groupMemberDb.IsCreator)
+        {
+            throw new NoRightException($"You have no rights for it");
+        }
+
         foreach (var propertyMap in ReflectionHelper.WidgetUtil<GroupModel, Group>.PropertyMap)
         {
             var roleProperty = propertyMap.Item1;
@@ -242,36 +233,29 @@ public class GroupService : IGroupService
     }
     public async Task MakeHost(int userId, int groupId, int user2Id, CancellationToken cancellationToken = default)
     {
-        var userDb = await _userRepository.GetByIdAsync(userId, cancellationToken);
-        _logger.LogAndThrowErrorIfNull(userDb, new UserNotFoundException($"User with this Id {userId} not found"));
-        var user2Db = await _userRepository.GetByIdAsync(user2Id, cancellationToken);
-        _logger.LogAndThrowErrorIfNull(userDb, new UserNotFoundException($"User with this Id {user2Id} not found"));
+        var GroupMember1Db = await _groupMemberRepository.GetByUserIdAndGroupId(userId, groupId, cancellationToken);
+        _logger.LogAndThrowErrorIfNull(GroupMember1Db, new UserNotFoundException($"User with this Id {userId} not found"));
+        var GroupMember2Db = await _groupMemberRepository.GetByUserIdAndGroupId(user2Id, groupId, cancellationToken);
+        _logger.LogAndThrowErrorIfNull(GroupMember2Db, new UserNotFoundException($"User with this Id {user2Id} not found"));
 
         var groupDb = await _groupRepository.GetByIdAsync(groupId, cancellationToken);
         _logger.LogAndThrowErrorIfNull(groupDb, new ChatNotFoundException($"Group with this Id {groupId} not found"));
 
-        var userInGroup = await _groupMemberRepository.GetByUserIdAndGroupId(userId, groupId, cancellationToken);
-        _logger.LogAndThrowErrorIfNull(userInGroup, new UserNotFoundException($"GroupMember with this Id {userId} not found"));
-
-        var user2InGroup = await _groupMemberRepository.GetByUserIdAndGroupId(user2Id, groupId, cancellationToken);
-        _logger.LogAndThrowErrorIfNull(user2InGroup, new UserNotFoundException($"GroupMember with this Id {user2Id} not found"));
-
-        var CurrentMemberIsCreator = groupDb!.GroupMembers!.Any(m => m.User == userDb && m.IsCreator);
-        if (!CurrentMemberIsCreator)
+        if (!GroupMember1Db!.IsCreator)
         {
             throw new NoRightException($"User is not the creator on this group");
         }
-        userInGroup!.IsCreator = false;
-        await _groupMemberRepository.UpdateGroupMember(userInGroup, cancellationToken);
-        user2InGroup!.IsCreator = true;
-        await _groupMemberRepository.UpdateGroupMember(user2InGroup, cancellationToken);
+        GroupMember1Db!.IsCreator = false;
+        await _groupMemberRepository.UpdateGroupMember(GroupMember1Db, cancellationToken);
+        GroupMember2Db!.IsCreator = true;
+        await _groupMemberRepository.UpdateGroupMember(GroupMember2Db, cancellationToken);
 
     }
     public async Task AddRole(int userId, int groupId, RoleGroupModel roleGroupModel,
        CancellationToken cancellationToken = default)
     {
-        var userDb = await _userRepository.GetByIdAsync(userId, cancellationToken);
-        _logger.LogAndThrowErrorIfNull(userDb, new UserNotFoundException($"User with this Id {userId} not found"));
+        var groupMemberDb = await _groupMemberRepository.GetByUserIdAndGroupId(userId, groupId, cancellationToken);
+        _logger.LogAndThrowErrorIfNull(groupMemberDb, new UserNotFoundException($"User with this Id {userId} not found"));
         var groupDb = await _groupRepository.GetByIdAsync(groupId, cancellationToken);
         _logger.LogAndThrowErrorIfNull(groupDb, new GroupNotFoundException($"Group with this Id {groupId} not found"));
 
@@ -285,35 +269,51 @@ public class GroupService : IGroupService
             throw new Exception("Role with this name is already created");
         }
 
-        var userInGroup = await GetUserInGroupAsync(userId, groupId, GroupAccess.EditRoles, cancellationToken);
-        _logger.LogAndThrowErrorIfNull(userInGroup, new NoRightException($"You have no rights for it"));
+        var access = new List<GroupAccess>
+        {
+            GroupAccess.EditRoles
+        };
+        var hasUserAccess = groupMemberDb!.RoleGroup.HasAccess(access);
+
+        if (!hasUserAccess && !groupMemberDb.IsCreator)
+        {
+            throw new NoRightException($"You have no rights for it");
+        }
 
         var role = _mapper.Map<RoleGroup>(roleGroupModel);
         role.Group = groupDb!;
-        if(_roleGroupRepository.GetAll().Count(r=>r.Group.Id == groupId) != 0)
+        if (_roleGroupRepository.GetAll().Count(r => r.Group.Id == groupId) != 0)
             role.Rank = _roleGroupRepository.GetAll().Where(r => r.Group!.Id == groupId).Select(r => r.Rank).Max() + 10;
         _logger.LogInformation("Role was added in group");
         await _roleGroupRepository.CreateRole(role, cancellationToken);
     }
     public async Task DelRole(int userId, int groupId, int roleId, CancellationToken cancellationToken = default)
     {
-        var userDb = await _userRepository.GetByIdAsync(userId, cancellationToken);
-        _logger.LogAndThrowErrorIfNull(userDb, new UserNotFoundException($"User with this Id {userId} not found"));
+        var groupMemberDb = await _groupMemberRepository.GetByUserIdAndGroupId(userId, groupId, cancellationToken);
+        _logger.LogAndThrowErrorIfNull(groupMemberDb, new UserNotFoundException($"User with this Id {userId} not found"));
         var groupDb = await _groupRepository.GetByIdAsync(groupId, cancellationToken);
         _logger.LogAndThrowErrorIfNull(groupDb, new GroupNotFoundException($"Group with this Id {groupId} not found"));
         var role = await _roleGroupRepository.GetByIdAsync(roleId, cancellationToken);
         _logger.LogAndThrowErrorIfNull(role, new RoleNotFoundException($"Role not found"));
 
-        var userInGroup = await GetUserInGroupAsync(userId, groupId, GroupAccess.EditRoles, cancellationToken);
-        _logger.LogAndThrowErrorIfNull(userInGroup, new NoRightException($"You have no rights for it"));
-       
+        var access = new List<GroupAccess>
+        {
+            GroupAccess.EditRoles
+        };
+        var hasUserAccess = groupMemberDb!.RoleGroup.HasAccess(access);
+
+        if (!hasUserAccess && !groupMemberDb.IsCreator)
+        {
+            throw new NoRightException($"You have no rights for it");
+        }
+
         await _roleGroupRepository.DeleteRole(role!, cancellationToken);
     }
     public async Task<RoleGroupModel> EditRole(int userId, int groupId, int roleId, RoleGroupModel roleGroupModel,
         CancellationToken cancellationToken = default)
     {
-        var userDb = await _userRepository.GetByIdAsync(userId, cancellationToken);
-        _logger.LogAndThrowErrorIfNull(userDb, new UserNotFoundException($"User with this Id {userId} not found"));
+        var groupMemberDb = await _groupMemberRepository.GetByUserIdAndGroupId(userId, groupId, cancellationToken);
+        _logger.LogAndThrowErrorIfNull(groupMemberDb, new UserNotFoundException($"User with this Id {userId} not found"));
         var groupDb = await _groupRepository.GetByIdAsync(groupId, cancellationToken);
         _logger.LogAndThrowErrorIfNull(groupDb, new GroupNotFoundException($"Group with this Id {groupId} not found"));
 
@@ -321,13 +321,21 @@ public class GroupService : IGroupService
         _logger.LogAndThrowErrorIfNull(roleDb, new RoleNotFoundException($"Role with this Id {roleId} not found"));
 
         if (groupDb!.RoleGroups!.Contains(roleDb!) == false)
-            throw new RoleNotFoundException("This role is not in this chat");
+            throw new RoleNotFoundException("This role is not in this group");
 
-        var userInGroup = await GetUserInGroupAsync(userId, groupId, GroupAccess.EditRoles, cancellationToken);
-        _logger.LogAndThrowErrorIfNull(userInGroup, new NoRightException($"You have no rights for it"));
-        if (!userInGroup!.IsCreator)
+        var access = new List<GroupAccess>
         {
-            if (roleDb!.Rank <= userInGroup!.RoleGroup.Min(i => i.Rank))
+            GroupAccess.EditRoles
+        };
+        var hasUserAccess = groupMemberDb!.RoleGroup.HasAccess(access);
+
+        if (!hasUserAccess && !groupMemberDb.IsCreator)
+        {
+            throw new NoRightException($"You have no rights for it");
+        }
+        if (!groupMemberDb!.IsCreator)
+        {
+            if (roleDb!.Rank <= groupMemberDb!.RoleGroup.Min(i => i.Rank))
             {
                 throw new NoRightException($"You have no rights for it");
             }
@@ -373,17 +381,24 @@ public class GroupService : IGroupService
         _logger.LogAndThrowErrorIfNull(roleDb, new RoleNotFoundException($"Role with this Id {userId} not found"));
         return _mapper.Map<RoleGroupModel>(roleDb);
     }
-
     public async Task<RoleGroupModel> GetRoleById(int userId, int groupId, int roleId,
        CancellationToken cancellationToken = default)
     {
-        var userDb = await _userRepository.GetByIdAsync(userId, cancellationToken);
-        _logger.LogAndThrowErrorIfNull(userDb, new UserNotFoundException($"User with this Id {userId} not found"));
+        var groupMemberDb = await _groupMemberRepository.GetByUserIdAndGroupId(userId, groupId, cancellationToken);
+        _logger.LogAndThrowErrorIfNull(groupMemberDb, new UserNotFoundException($"User with this Id {userId} not found"));
         var groupDb = await _groupRepository.GetByIdAsync(groupId, cancellationToken);
         _logger.LogAndThrowErrorIfNull(groupDb, new GroupNotFoundException($"Group with this Id {groupId} not found"));
 
-        var userInGroup = await GetUserInGroupAsync(userId, groupId, GroupAccess.EditRoles, cancellationToken);
-        _logger.LogAndThrowErrorIfNull(userInGroup, new NoRightException($"You have no rights for it"));
+        var access = new List<GroupAccess>
+        {
+            GroupAccess.EditRoles
+        };
+        var hasUserAccess = groupMemberDb!.RoleGroup.HasAccess(access);
+
+        if (!hasUserAccess && !groupMemberDb.IsCreator)
+        {
+            throw new NoRightException($"You have no rights for it");
+        }
 
         var role = await _roleGroupRepository.GetAll()
             .Where(r => r.Id == roleId && r.Group == groupDb).SingleOrDefaultAsync(cancellationToken);
@@ -393,31 +408,39 @@ public class GroupService : IGroupService
     public async Task SetRole(int userId, int groupId, int roleId, List<int> userIds,
         CancellationToken cancellationToken = default)
     {
-        var userDb = await _userRepository.GetByIdAsync(userId, cancellationToken);
-        _logger.LogAndThrowErrorIfNull(userDb, new UserNotFoundException($"User with this Id {userId} not found"));
+        var groupMemberDb = await _groupMemberRepository.GetByUserIdAndGroupId(userId, groupId, cancellationToken);
+        _logger.LogAndThrowErrorIfNull(groupMemberDb, new UserNotFoundException($"User with this Id {userId} not found"));
         var groupDb = await _groupRepository.GetByIdAsync(groupId, cancellationToken);
         _logger.LogAndThrowErrorIfNull(groupDb, new GroupNotFoundException($"Group with this Id {groupId} not found"));
 
         var roleDb = await _roleGroupRepository.GetByIdAsync(roleId, cancellationToken);
         _logger.LogAndThrowErrorIfNull(roleDb, new RoleNotFoundException($"Role with this Id {roleId} not found"));
 
-        var userInGroup = await GetUserInGroupAsync(userId, groupId, GroupAccess.EditRoles, cancellationToken);
-        _logger.LogAndThrowErrorIfNull(userInGroup, new NoRightException($"You have no rights for it"));
+        var access = new List<GroupAccess>
+        {
+            GroupAccess.EditRoles
+        };
+        var hasUserAccess = groupMemberDb!.RoleGroup.HasAccess(access);
+
+        if (!hasUserAccess && !groupMemberDb.IsCreator)
+        {
+            throw new NoRightException($"You have no rights for it");
+        }
 
         var groupMembersDb = await _groupMemberRepository.GetAll().Where(i => i.Group.Id == groupId && userIds.Contains(i.User.Id))
             .ToListAsync(cancellationToken);
         if (groupMembersDb.Count == 0)
             _logger.LogAndThrowErrorIfNull(groupMembersDb, new GroupMemberException($"Group members not found"));
-        if (!userInGroup!.IsCreator)
+        if (!groupMemberDb!.IsCreator)
         {
-            if (groupMembersDb.Any(m => m.RoleGroup.Any(r => r.Rank <= userInGroup!.RoleGroup.Min(i => i.Rank))))
+            if (groupMembersDb.Any(m => m.RoleGroup.Any(r => r.Rank <= groupMemberDb!.RoleGroup.Min(i => i.Rank))))
             {
                 throw new NoRightException($"You have no rights for it");
             }
         }
-        if (!userInGroup!.IsCreator)
+        if (!groupMemberDb!.IsCreator)
         {
-            if (roleDb!.Rank <= userInGroup!.RoleGroup.Min(i => i.Rank))
+            if (roleDb!.Rank <= groupMemberDb!.RoleGroup.Min(i => i.Rank))
             {
                 throw new NoRightException($"You have no rights for it2");
             }
@@ -426,7 +449,7 @@ public class GroupService : IGroupService
 
         foreach (var groupMember in groupMembersDb)
         {
-                groupMember.RoleGroup.Add(roleDb!);
+            groupMember.RoleGroup.Add(roleDb!);
         }
 
         await _groupMemberRepository.SetRole(groupMembersDb, cancellationToken);
@@ -434,31 +457,39 @@ public class GroupService : IGroupService
     public async Task UnSetRole(int userId, int groupId, int roleId, List<int> userIds,
         CancellationToken cancellationToken = default)
     {
-        var userDb = await _userRepository.GetByIdAsync(userId, cancellationToken);
-        _logger.LogAndThrowErrorIfNull(userDb, new UserNotFoundException($"User with this Id {userId} not found"));
+        var groupMemberDb = await _groupMemberRepository.GetByUserIdAndGroupId(userId, groupId, cancellationToken);
+        _logger.LogAndThrowErrorIfNull(groupMemberDb, new UserNotFoundException($"User with this Id {userId} not found"));
         var groupDb = await _groupRepository.GetByIdAsync(groupId, cancellationToken);
-        _logger.LogAndThrowErrorIfNull(groupDb, new ChatNotFoundException($"Group with this Id {groupId} not found"));
+        _logger.LogAndThrowErrorIfNull(groupDb, new GroupNotFoundException($"Group with this Id {groupId} not found"));
         var roleDb = await _roleGroupRepository.GetByIdAsync(roleId, cancellationToken);
         _logger.LogAndThrowErrorIfNull(roleDb, new RoleNotFoundException($"Role with this Id {roleId} not found"));
 
-        var userInGroup = await GetUserInGroupAsync(userId, groupId, GroupAccess.EditRoles, cancellationToken);
-        _logger.LogAndThrowErrorIfNull(userInGroup, new NoRightException($"You have no rights for it"));
+        var access = new List<GroupAccess>
+        {
+            GroupAccess.EditRoles
+        };
+        var hasUserAccess = groupMemberDb!.RoleGroup.HasAccess(access);
+
+        if (!hasUserAccess && !groupMemberDb.IsCreator)
+        {
+            throw new NoRightException($"You have no rights for it");
+        }
 
         var groupMembersDb = await _groupMemberRepository.GetAll().Where(i => i.Group.Id == groupId && userIds.Contains(i.User.Id))
          .ToListAsync(cancellationToken);
 
-        if(groupMembersDb.Count == 0)
+        if (groupMembersDb.Count == 0)
             _logger.LogAndThrowErrorIfNull(groupMembersDb, new GroupMemberException($"Group members not found"));
-        if (!userInGroup!.IsCreator)
+        if (!groupMemberDb!.IsCreator)
         {
-            if (groupMembersDb.Any(m => m.RoleGroup.Any(r => r.Rank <= userInGroup!.RoleGroup.Min(i => i.Rank))))
+            if (groupMembersDb.Any(m => m.RoleGroup.Any(r => r.Rank <= groupMemberDb!.RoleGroup.Min(i => i.Rank))))
             {
                 throw new NoRightException($"You have no rights for it");
             }
         }
-        if (!userInGroup!.IsCreator)
+        if (!groupMemberDb!.IsCreator)
         {
-            if (roleDb!.Rank <= userInGroup!.RoleGroup.Min(i => i.Rank))
+            if (roleDb!.Rank <= groupMemberDb!.RoleGroup.Min(i => i.Rank))
             {
                 throw new NoRightException($"You have no rights for it2");
             }
@@ -471,23 +502,32 @@ public class GroupService : IGroupService
         await _groupMemberRepository.SetRole(groupMembersDb, cancellationToken);
     }
 
-    public async Task BanGroupMember(int userId, int groupId, int memberToBanId,string reason, CancellationToken cancellationToken = default)
+    public async Task BanGroupMember(int userId, int groupId, int memberToBanId, string reason, CancellationToken cancellationToken = default)
     {
-        var userDb = await _userRepository.GetByIdAsync(userId, cancellationToken);
-        _logger.LogAndThrowErrorIfNull(userDb, new UserNotFoundException($"User with this Id {userId} not found"));
-        var groupDb = await _groupRepository.GetByIdAsync(groupId, cancellationToken);
-        _logger.LogAndThrowErrorIfNull(groupDb, new ChatNotFoundException($"Group with this Id {groupId} not found"));
-        var bannedUserDb = await _userRepository.GetByIdAsync(memberToBanId, cancellationToken);
-        _logger.LogAndThrowErrorIfNull(bannedUserDb, new UserNotFoundException($"User with this Id {memberToBanId} not found"));
+        var groupMemberDb = await _groupMemberRepository.GetByUserIdAndGroupId(userId, groupId, cancellationToken);
+        _logger.LogAndThrowErrorIfNull(groupMemberDb, new UserNotFoundException($"User with this Id {userId} not found"));
 
-        var userInGroup = await GetUserInGroupAsync(userId, groupId, GroupAccess.BanGroupMembers, cancellationToken);
-        _logger.LogAndThrowErrorIfNull(userInGroup, new NoRightException($"You have no rights for it"));
+        var groupDb = await _groupRepository.GetByIdAsync(groupId, cancellationToken);
+        _logger.LogAndThrowErrorIfNull(groupDb, new GroupNotFoundException($"Group with this Id {groupId} not found"));
+        var bannedMemberDb = await _groupMemberRepository.GetByIdAsync(memberToBanId, cancellationToken);
+        _logger.LogAndThrowErrorIfNull(bannedMemberDb, new UserNotFoundException($"User with this Id {memberToBanId} not found"));
+
+        var access = new List<GroupAccess>
+        {
+            GroupAccess.BanGroupMembers
+        };
+        var hasUserAccess = groupMemberDb!.RoleGroup.HasAccess(access);
+
+        if (!hasUserAccess && !groupMemberDb.IsCreator)
+        {
+            throw new NoRightException($"You have no rights for it");
+        }
 
         var kickedmemberDb = await _groupMemberRepository.GetAll()
-        .Where(m => m.Group.Id == groupId && m.User.Id == memberToBanId).SingleOrDefaultAsync(cancellationToken);
+        .Where(m => m.Group.Id == groupId && m.Id == memberToBanId).SingleOrDefaultAsync(cancellationToken);
         _logger.LogAndThrowErrorIfNull(kickedmemberDb, new GroupMemberException($"User with Id {memberToBanId} is not a member of this group"));
 
-        if (kickedmemberDb!.IsCreator || (!userInGroup!.IsCreator && kickedmemberDb!.RoleGroup.Select(i => i.Rank).Any(i => i <= userInGroup!.RoleGroup.Min(r => r.Rank))))
+        if (kickedmemberDb!.IsCreator || (!groupMemberDb!.IsCreator && kickedmemberDb!.RoleGroup.Select(i => i.Rank).Any(i => i <= groupMemberDb!.RoleGroup.Min(r => r.Rank))))
         {
             throw new NoRightException($"You have no rights for it");
         }
@@ -501,36 +541,49 @@ public class GroupService : IGroupService
             throw new BannedUserException($"User with ID {memberToBanId} is already banned in group {groupId}");
         }
 
-        await _bannedUserListRepository.BanGroupMemberAsync(bannedUserDb!, groupDb!,reason);
+        await _bannedUserListRepository.BanGroupMemberAsync(bannedMemberDb!.User, groupDb!, reason);
         await KickMember(userId, groupId, memberToBanId);
+        // notific
     }
 
-    public async Task UnBanGroupMember(int userId, int groupId, int memberToUnBanId, CancellationToken cancellationToken = default)
+    public async Task UnBanGroupMember(int userId, int groupId, int userToUnBanId, CancellationToken cancellationToken = default)
     {
-        var userDb = await _userRepository.GetByIdAsync(userId, cancellationToken);
-        _logger.LogAndThrowErrorIfNull(userDb, new UserNotFoundException($"User with this Id {userId} not found"));
+        var groupMemberDb = await _groupMemberRepository.GetByUserIdAndGroupId(userId, groupId, cancellationToken);
+        _logger.LogAndThrowErrorIfNull(groupMemberDb, new UserNotFoundException($"User with this Id {userId} not found"));
+        var groupDb = await _groupRepository.GetByIdAsync(groupId, cancellationToken);
+        _logger.LogAndThrowErrorIfNull(groupDb, new GroupNotFoundException($"Group with this Id {groupId} not found"));
+
+        var unbannedUserDb = await _userRepository.GetByIdAsync(userToUnBanId, cancellationToken);
+        _logger.LogAndThrowErrorIfNull(unbannedUserDb, new UserNotFoundException($"User with this Id {userToUnBanId} not found"));
+
+        var access = new List<GroupAccess>
+        {
+            GroupAccess.BanGroupMembers
+        };
+        var hasUserAccess = groupMemberDb!.RoleGroup.HasAccess(access);
+
+        if (!hasUserAccess && !groupMemberDb.IsCreator)
+        {
+            throw new NoRightException($"You have no rights for it");
+        }
+
+        await _bannedUserListRepository.UnBanGroupMemberAsync(userToUnBanId, groupId);
+    }
+
+    public async Task<PaginationResultModel<BannedUserInGroupModel>> GetAllBannedUser(int userId, int groupId, PaginationModel pagination, CancellationToken cancellationToken = default)
+    {
+        var groupMemberDb = await _groupMemberRepository.GetByUserIdAndGroupId(userId, groupId, cancellationToken);
+        _logger.LogAndThrowErrorIfNull(groupMemberDb, new UserNotFoundException($"User with this Id {userId} not found"));
         var groupDb = await _groupRepository.GetByIdAsync(groupId, cancellationToken);
         _logger.LogAndThrowErrorIfNull(groupDb, new ChatNotFoundException($"Group with this Id {groupId} not found"));
 
-        var unbannedUserDb = await _userRepository.GetByIdAsync(memberToUnBanId, cancellationToken);
-        _logger.LogAndThrowErrorIfNull(unbannedUserDb, new UserNotFoundException($"User with this Id {memberToUnBanId} not found"));
+        var access = new List<GroupAccess>
+        {
+            GroupAccess.BanGroupMembers
+        };
+        var hasUserAccess = groupMemberDb!.RoleGroup.HasAccess(access);
 
-        var userInGroup = await GetUserInGroupAsync(userId, groupId, GroupAccess.BanGroupMembers, cancellationToken);
-        _logger.LogAndThrowErrorIfNull(userInGroup, new NoRightException($"You have no rights for it"));
-
-
-        await _bannedUserListRepository.UnBanGroupMemberAsync(memberToUnBanId, groupId);
-    }
-
-    public async Task<PaginationResultModel<BannedUserInGroupModel>> GetAllBannedUser(int userId,int groupId, PaginationModel pagination, CancellationToken cancellationToken = default)
-    {
-        var userDb = await _userRepository.GetByIdAsync(userId, cancellationToken);
-        _logger.LogAndThrowErrorIfNull(userDb, new UserNotFoundException($"User with this Id {userId} not found"));
-        var groupDb = await _groupRepository.GetByIdAsync(groupId, cancellationToken);
-        _logger.LogAndThrowErrorIfNull(groupDb, new ChatNotFoundException($"Group with this Id {groupId} not found"));
-
-        var IsCreator = await IsUserCreatorAsync(userId, groupId, cancellationToken);
-        if (!IsCreator)
+        if (!hasUserAccess && !groupMemberDb.IsCreator)
         {
             throw new NoRightException($"You have no rights for it");
         }
@@ -563,7 +616,7 @@ public class GroupService : IGroupService
 
         var roles = await _roleGroupRepository.GetAll().Where(r => r.Group == groupDb).Pagination(pagination.CurrentPage, pagination.PageSize).ToListAsync(cancellationToken);
         var rolesModels = _mapper.Map<IEnumerable<RoleGroupModel>>(roles);
-        
+
         var paginationModel = new PaginationResultModel<RoleGroupModel>
         {
             Data = rolesModels,

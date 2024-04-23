@@ -1,10 +1,8 @@
 ﻿namespace SocialNetwork.BLL.Models;
 
-public class FriendRequestModel : BaseModel
+public class FriendRequestModel : BaseRequestModel
 {
         
-        public int SenderId { get; set; }
-        public int ReceiverId { get; set; }
-        public UserModel Sender { get; set; } = null!;
-        public UserModel Receiver { get; set; } = null!;
+        public int ToUserId { get; set; }
+        public UserModel ToUser { get; set; } = null!;
 }

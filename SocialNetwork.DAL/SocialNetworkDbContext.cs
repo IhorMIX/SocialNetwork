@@ -38,6 +38,9 @@ public class SocialNetworkDbContext : DbContext
     public DbSet<GroupMember> GroupMembers { get; set; }
     public DbSet<BannedUserList> BannedUserLists { get; set; }
     public DbSet<RoleGroup> RoleGroups { get; set; }
+    public DbSet<BaseRequestEntity> Requests { get; set; }
+    public DbSet<GroupRequestNotification> GroupRequestNotifications { get; set; }
+    public DbSet<GroupRequest> GroupRequests { get; set; }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(SocialNetworkDbContext).Assembly);

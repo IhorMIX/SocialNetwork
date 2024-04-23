@@ -2,13 +2,24 @@
 using SocialNetwork.BLL.Models;
 using SocialNetwork.BLL.Services;
 using SocialNetwork.BLL.Services.Interfaces;
+using SocialNetwork.DAL.Repository.Interfaces;
+using SocialNetwork.DAL.Repository;
 using SocialNetwork.Test.Helpers;
 
 namespace SocialNetwork.Test.Services;
 
 public class ReactionServiceTest : BaseMessageTestService<IReactionService, ReactionService>
 {
-    
+    protected override void SetUpAdditionalDependencies(IServiceCollection services)
+    {
+        services.AddScoped<IGroupRepository, GroupRepository>();
+        services.AddScoped<IGroupService, GroupService>();
+        services.AddScoped<IBannedUserListRepository, BannedUserListRepository>();
+        services.AddScoped<IGroupMemberRepository, GroupMemberRepository>();
+        services.AddScoped<IRoleGroupRepository, RoleGroupRepository>();
+        base.SetUpAdditionalDependencies(services);
+
+    }
     [Test]
     public async Task CreateMessages_AddReactions_EditReaction()
     {

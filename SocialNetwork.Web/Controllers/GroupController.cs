@@ -79,15 +79,15 @@ public class GroupController : ControllerBase
         _logger.LogInformation("Start to delete user from group");
         var userId = User.GetUserId();
         await _groupService.KickMember(userId, kickGroupMemberModel.GroupId, kickGroupMemberModel.GroupMemberId, cancellationToken);
-        _logger.LogInformation("User was deleted from group");
+        _logger.LogInformation("GroupMember was deleted from group");
         return Ok();
     }
 
     [HttpPost("make-host")]
-    public async Task<IActionResult> MakeHost([FromQuery] int groupId, [FromQuery] int groupMemberId, CancellationToken cancellationToken)
+    public async Task<IActionResult> MakeHost([FromQuery] int groupId, [FromQuery] int userId, CancellationToken cancellationToken)
     {
-        var userId = User.GetUserId();
-        await _groupService.MakeHost(userId, groupId, groupMemberId, cancellationToken);
+        var TokenUserId = User.GetUserId();
+        await _groupService.MakeHost(TokenUserId, groupId, userId, cancellationToken);
         return Ok();
     }
 
@@ -96,17 +96,17 @@ public class GroupController : ControllerBase
     {
         _logger.LogInformation("Start to ban member");
         var userId = User.GetUserId();
-        await _groupService.BanGroupMember(userId, banGroupMemberModel.GroupId,banGroupMemberModel.BannedGroupMemberId, banGroupMemberModel.Reason, cancellationToken);
+        await _groupService.BanGroupMember(userId, banGroupMemberModel.GroupId, banGroupMemberModel.BannedGroupMemberId, banGroupMemberModel.Reason, cancellationToken);
         _logger.LogInformation("Member was banned");
         return Ok();
     }
 
     [HttpPost("unban-member")]
-    public async Task<IActionResult> UnBanMember([FromQuery] int groupId, [FromQuery] int memberToUnBanId, CancellationToken cancellationToken)
+    public async Task<IActionResult> UnBanMember([FromQuery] int groupId, [FromQuery] int userToUnBanId, CancellationToken cancellationToken)
     {
         _logger.LogInformation("Start to unban member");
         var userId = User.GetUserId();
-        await _groupService.UnBanGroupMember(userId, groupId, memberToUnBanId, cancellationToken);
+        await _groupService.UnBanGroupMember(userId, groupId, userToUnBanId, cancellationToken);
         _logger.LogInformation("Member was unbanned");
         return Ok();
     }

@@ -65,9 +65,6 @@ public class Startup
         services.AddScoped<IFriendshipRepository, FriendshipRepository>();
         services.AddScoped<IFriendshipService, FriendshipService>();
         
-        services.AddScoped<IFriendRequestRepository, FriendRequestRepository>();
-        services.AddScoped<IFriendRequestService, FriendRequestService>();
-        
         services.AddScoped<IChatService,ChatService>();
         services.AddScoped<IChatRepository,ChatRepository>();
         services.AddScoped<IRoleRepository,RoleRepository>();
@@ -92,6 +89,9 @@ public class Startup
         services.AddScoped<IGroupMemberRepository, GroupMemberRepository>();
         services.AddScoped<IRoleGroupRepository, RoleGroupRepository>();
         services.AddScoped<IBannedUserListRepository, BannedUserListRepository>();
+
+        services.AddScoped<IRequestRepository, RequestRepository>();
+        services.AddScoped<IRequestService, RequestService>();
 
         services.AddSingleton<IDbReadySignal, DbContextReadySignal>();
         services.AddSingleton<DelayedWriter>();

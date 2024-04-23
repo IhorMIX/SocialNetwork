@@ -18,7 +18,6 @@ public class UserServiceTest : DefaultServiceTest<IUserService, UserService>
 {
     protected override void SetUpAdditionalDependencies(IServiceCollection services)
     {
-        services.AddScoped<IFriendRequestRepository, FriendRequestRepository>();
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<IFriendshipService, FriendshipService>();
@@ -26,12 +25,20 @@ public class UserServiceTest : DefaultServiceTest<IUserService, UserService>
         services.AddScoped<IBlackListService, BlackListService>();
         services.AddScoped<IBlackListRepository, BlackListRepository>();
 
+        services.AddScoped<IRequestService, RequestService>();
+        services.AddScoped<IRequestRepository, RequestRepository>();
+
         services.AddScoped<IChatService, ChatService>();
         services.AddScoped<IRoleRepository, RoleRepository>();
         services.AddScoped<IChatRepository, ChatRepository>();
         services.AddScoped<IChatMemberRepository, ChatMemberRepository>();
         services.AddScoped<IFriendshipRepository, FriendshipRepository>();
-        services.AddScoped<IFriendRequestRepository, FriendRequestRepository>();
+        services.AddScoped<IGroupRepository, GroupRepository>();
+        services.AddScoped<IGroupService, GroupService>();
+        services.AddScoped<IBannedUserListRepository, BannedUserListRepository>();
+        services.AddScoped<IGroupMemberRepository, GroupMemberRepository>();
+        services.AddScoped<IRoleGroupRepository, RoleGroupRepository>();
+
         
         services.AddScoped<INotificationRepository, NotificationRepository>();
         services.AddScoped<INotificationService, NotificationService>();

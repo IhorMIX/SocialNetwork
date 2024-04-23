@@ -4,6 +4,7 @@ using SocialNetwork.BLL.Models;
 using SocialNetwork.BLL.Services;
 using SocialNetwork.BLL.Services.Interfaces;
 using SocialNetwork.DAL.Entity.Enums;
+using SocialNetwork.DAL.Repository;
 using SocialNetwork.DAL.Repository.Interfaces;
 using SocialNetwork.Test.Helpers;
 
@@ -11,6 +12,27 @@ namespace SocialNetwork.Test.Services;
 
 public class ChatServiceTest : BaseMessageTestService<IChatService, ChatService>
 {
+    protected override void SetUpAdditionalDependencies(IServiceCollection services)
+    {
+        services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<IUserService, UserService>();
+
+        services.AddScoped<IGroupService, GroupService>();
+        services.AddScoped<IGroupRepository, GroupRepository>();
+        services.AddScoped<IGroupMemberRepository, GroupMemberRepository>();
+        services.AddScoped<IRoleGroupRepository, RoleGroupRepository>();
+
+        services.AddScoped<IFriendshipRepository, FriendshipRepository>();
+        services.AddScoped<IFriendshipService, FriendshipService>();
+
+        services.AddScoped<IBannedUserListRepository, BannedUserListRepository>();
+        services.AddScoped<IRoleRepository, RoleRepository>();
+        services.AddScoped<IRoleGroupRepository, RoleGroupRepository>();
+        services.AddScoped<IGroupRepository, GroupRepository>();
+        services.AddScoped<IGroupService, GroupService>();
+        base.SetUpAdditionalDependencies(services);
+    }
+
     [Test]
     public async Task CreateP2PChat_Ok_ChatCreated()
     {

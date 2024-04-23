@@ -17,16 +17,23 @@ namespace SocialNetwork.Web.MapperConfiguration
             CreateMap<FriendshipModel, Friendship>().ReverseMap();
             CreateMap<FriendRequestModel, FriendRequest>().ReverseMap();
             CreateMap<BlackListModel, BlackList>().ReverseMap();
-            CreateMap<FriendRequestModel, FriendRequestViewModel>().ReverseMap();
+            //CreateMap<FriendRequestModel, FriendRequestViewModel>().ReverseMap();
+            //CreateMap<GroupRequestModel, GroupRequestViewModel>().ReverseMap();
+            CreateMap<BaseRequestViewModel, BaseRequestModel>()
+                .ForMember(dest => dest.SenderId, opt => opt.Ignore())
+                .ReverseMap();
 
             CreatePaginationResultMapping<BannedUserViewModel, UserModel>();
             CreatePaginationResultMapping<FriendViewModel, UserModel>();
-            CreatePaginationResultMapping<FriendRequestViewModel, FriendRequestModel>();
+            CreatePaginationResultMapping<BaseRequestViewModel, BaseRequestModel>();
+            //CreatePaginationResultMapping<FriendRequestViewModel, FriendRequestModel>();
+            //CreatePaginationResultMapping<GroupRequestViewModel, GroupRequestModel>();
             CreatePaginationResultMapping<ChatViewModel, ChatModel>();
             CreatePaginationResultMapping<RoleViewModel, RoleModel>();
             CreatePaginationResultMapping<ChatMemberViewModel, ChatMemberModel>();
             CreatePaginationResultMapping<BannedUsersInGroupViewModel, BannedUserInGroupModel>();
             CreatePaginationResultMapping<BannedUserList, BannedUserInGroupModel>();
+            
 
             CreatePaginationResultMapping<GroupViewModel, GroupModel>();
             CreatePaginationResultMapping<GroupMemberViewModel, GroupMemberModel>();
@@ -220,7 +227,8 @@ namespace SocialNetwork.Web.MapperConfiguration
                 .ReverseMap();
 
             CreateMap<BaseNotificationEntity, BaseNotificationModel>().ReverseMap();
-           
+            CreateMap<BaseRequestEntity, BaseRequestModel>().ReverseMap();
+
             CreateMap<FriendRequestNotification, FriendRequestNotificationModel>()
                 .IncludeBase<BaseNotificationEntity, BaseNotificationModel>();
 

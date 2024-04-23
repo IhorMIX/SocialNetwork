@@ -11,17 +11,23 @@ using SocialNetwork.Test.Helpers;
 
 namespace SocialNetwork.Test.Services;
 
-public class GroupServiceTest : BaseMessageTestService<IGroupService, GroupService>
+public class GroupServiceTest : DefaultServiceTest<IGroupService, GroupService>
 {
     protected override void SetUpAdditionalDependencies(IServiceCollection services)
     {
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IUserService, UserService>();
+
         services.AddScoped<IGroupService, GroupService>();
         services.AddScoped<IGroupRepository, GroupRepository>();
         services.AddScoped<IGroupMemberRepository, GroupMemberRepository>();
         services.AddScoped<IRoleGroupRepository, RoleGroupRepository>();
+
+        services.AddScoped<IFriendshipRepository, FriendshipRepository>();
+        services.AddScoped<IFriendshipService, FriendshipService>();
+
         services.AddScoped<IBannedUserListRepository, BannedUserListRepository>();
+        services.AddScoped<IRequestRepository, RequestRepository>();
         base.SetUpAdditionalDependencies(services);
     }
     [Test]
@@ -38,6 +44,8 @@ public class GroupServiceTest : BaseMessageTestService<IGroupService, GroupServi
         await Service.CreateGroup(user1.Id, new GroupModel
         {
             Name = "Group1",
+            IsPrivate = false,
+            Description = "hi",
             Logo = "null",
         });
 
@@ -69,6 +77,8 @@ public class GroupServiceTest : BaseMessageTestService<IGroupService, GroupServi
         await Service.CreateGroup(user1.Id, new GroupModel
         {
             Name = "Group1",
+            IsPrivate = false,
+            Description = "hi",
             Logo = "null",
         });
 
@@ -100,6 +110,8 @@ public class GroupServiceTest : BaseMessageTestService<IGroupService, GroupServi
         await Service.CreateGroup(user1.Id, new GroupModel
         {
             Name = "Group1",
+            IsPrivate = false,
+            Description = "hi",
             Logo = "null",
         });
 
@@ -131,6 +143,8 @@ public class GroupServiceTest : BaseMessageTestService<IGroupService, GroupServi
         await Service.CreateGroup(user1.Id, new GroupModel
         {
             Name = "Group1",
+            IsPrivate = false,
+            Description = "hi",
             Logo = "null",
         });
 
@@ -151,6 +165,7 @@ public class GroupServiceTest : BaseMessageTestService<IGroupService, GroupServi
     public async Task CreateGroup_UserJoinCreatorKickHim_Success()
     {
         var userService = ServiceProvider.GetRequiredService<IUserService>();
+        var groupMemberRepository = ServiceProvider.GetRequiredService<IGroupMemberRepository>();
         var user1 = await UserModelHelper.CreateTestDataAsync(userService);
         var user2 = await UserModelHelper.CreateTestDataAsync(userService);
         user1 = await userService.GetUserByLogin(user1.Login);
@@ -161,6 +176,8 @@ public class GroupServiceTest : BaseMessageTestService<IGroupService, GroupServi
         await Service.CreateGroup(user1.Id, new GroupModel
         {
             Name = "Group1",
+            IsPrivate = false,
+            Description = "hi",
             Logo = "null",
         });
 
@@ -174,7 +191,8 @@ public class GroupServiceTest : BaseMessageTestService<IGroupService, GroupServi
         var group = groupList.Data.First();
 
         await Service.JoinGroup(group.Id, user2.Id);
-        await Service.KickMember(user1.Id, group.Id, user2.Id);
+        var groupMember = await groupMemberRepository.GetByUserIdAndGroupId(user2.Id, group.Id);
+        await Service.KickMember(user1.Id, group.Id, groupMember!.Id);
 
         Assert.That((await Service.GetGroupMembers(user1.Id, paginationModel, group.Id)).Data.Count() == 1);
     }
@@ -195,16 +213,22 @@ public class GroupServiceTest : BaseMessageTestService<IGroupService, GroupServi
         await Service.CreateGroup(user1!.Id, new GroupModel
         {
             Name = "Group1",
+            IsPrivate = false,
+            Description = "hi",
             Logo = "null",
         });
         await Service.CreateGroup(user1.Id, new GroupModel
         {
             Name = "Group2",
+            IsPrivate = false,
+            Description = "hi",
             Logo = "null",
         });
         await Service.CreateGroup(user1.Id, new GroupModel
         {
             Name = "Group3",
+            IsPrivate = false,
+            Description = "hi",
             Logo = "null",
         });
 
@@ -226,6 +250,8 @@ public class GroupServiceTest : BaseMessageTestService<IGroupService, GroupServi
         await Service.CreateGroup(user1!.Id, new GroupModel
         {
             Name = "GroupLeave",
+            IsPrivate = false,
+            Description = "hi",
             Logo = "null",
         });
         var paginationModel = new PaginationModel
@@ -258,11 +284,15 @@ public class GroupServiceTest : BaseMessageTestService<IGroupService, GroupServi
         await Service.CreateGroup(user1.Id, new GroupModel
         {
             Name = "Group1",
+            IsPrivate = false,
+            Description = "hi",
             Logo = "null",
         });
         GroupModel groupModel = new GroupModel
         {
             Name = "GroupEdited",
+            IsPrivate = false,
+            Description = "hi",
             Logo = "null",
         };
         var paginationModel = new PaginationModel
@@ -298,6 +328,8 @@ public class GroupServiceTest : BaseMessageTestService<IGroupService, GroupServi
         await Service.CreateGroup(user1!.Id, new GroupModel
         {
             Name = "Group1",
+            IsPrivate = false,
+            Description = "hi",
             Logo = "null",
         });
 
@@ -365,6 +397,8 @@ public class GroupServiceTest : BaseMessageTestService<IGroupService, GroupServi
         await Service.CreateGroup(user1!.Id, new GroupModel
         {
             Name = "Group1",
+            IsPrivate = false,
+            Description = "hi",
             Logo = "null",
         });
 
@@ -424,6 +458,8 @@ public class GroupServiceTest : BaseMessageTestService<IGroupService, GroupServi
         await Service.CreateGroup(user1!.Id, new GroupModel
         {
             Name = "Group1",
+            IsPrivate = false,
+            Description = "hi",
             Logo = "null",
         });
 
@@ -461,6 +497,7 @@ public class GroupServiceTest : BaseMessageTestService<IGroupService, GroupServi
     public async Task CreateGroup_BanMember_AssertSuccess()
     {
         var userService = ServiceProvider.GetRequiredService<IUserService>();
+        var groupMemberRepository = ServiceProvider.GetRequiredService<IGroupMemberRepository>();
         var user1 = await UserModelHelper.CreateTestDataAsync(userService);
         var user2 = await UserModelHelper.CreateTestDataAsync(userService);
 
@@ -474,6 +511,8 @@ public class GroupServiceTest : BaseMessageTestService<IGroupService, GroupServi
         await Service.CreateGroup(user1!.Id, new GroupModel
         {
             Name = "Group1",
+            IsPrivate = false,
+            Description = "hi",
             Logo = "null",
         });
 
@@ -491,7 +530,9 @@ public class GroupServiceTest : BaseMessageTestService<IGroupService, GroupServi
         group = (await Service.FindGroupByName(user1.Id, paginationModel, "Group1")).Data.First();
         Assert.That(group.GroupMembers!.Count == 2);
 
-        await Service.BanGroupMember(user1.Id,group.Id, user2.Id,"toxic");
+        var groupMember = await groupMemberRepository.GetByUserIdAndGroupId(user2.Id, group.Id);
+
+        await Service.BanGroupMember(user1.Id,group.Id, groupMember!.Id,"toxic");
 
         group = (await Service.FindGroupByName(user1.Id, paginationModel, "Group1")).Data.First();
         Assert.That(group.GroupMembers!.Count == 1);
@@ -501,6 +542,7 @@ public class GroupServiceTest : BaseMessageTestService<IGroupService, GroupServi
     public async Task CreateGroup_UnBanMember_AssertSuccess()
     {
         var userService = ServiceProvider.GetRequiredService<IUserService>();
+        var groupMemberRepository = ServiceProvider.GetRequiredService<IGroupMemberRepository>();
         var user1 = await UserModelHelper.CreateTestDataAsync(userService);
         var user2 = await UserModelHelper.CreateTestDataAsync(userService);
 
@@ -514,6 +556,8 @@ public class GroupServiceTest : BaseMessageTestService<IGroupService, GroupServi
         await Service.CreateGroup(user1!.Id, new GroupModel
         {
             Name = "Group1",
+            IsPrivate = false,
+            Description = "hi",
             Logo = "null",
         });
 
@@ -531,7 +575,9 @@ public class GroupServiceTest : BaseMessageTestService<IGroupService, GroupServi
         group = (await Service.FindGroupByName(user1.Id, paginationModel, "Group1")).Data.First();
         Assert.That(group.GroupMembers!.Count == 2);
 
-        await Service.BanGroupMember(user1.Id, group.Id, user2.Id, "toxic");
+        var groupMember = await groupMemberRepository.GetByUserIdAndGroupId(user2.Id, group.Id);
+
+        await Service.BanGroupMember(user1.Id, group.Id, groupMember!.Id, "toxic");
         Assert.That((await Service.GetAllBannedUser(user1.Id,group.Id, paginationModel)).Data.Count() == 1);
 
         group = (await Service.FindGroupByName(user1.Id, paginationModel, "Group1")).Data.First();
