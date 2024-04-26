@@ -39,7 +39,7 @@ public class NotificationEntityTest : BaseMessageTestService<INotificationServic
 
         base.SetUpAdditionalDependencies(services);
     }
-
+    //TODO:notificationTest
     //[Test]
     //public async Task CreateNewFriendRequest_CheckFriendRequestNotificationEntity_OK()
     //{
@@ -63,6 +63,7 @@ public class NotificationEntityTest : BaseMessageTestService<INotificationServic
     //    Assert.That(notificationModels.First().IsRead is false);
     //}
 
+    //TODO:notificationTest
     //[Test]
     //public async Task CreateFriendRequestNotification_ChangeReadProp_DeleteNotification()
     //{
@@ -80,14 +81,14 @@ public class NotificationEntityTest : BaseMessageTestService<INotificationServic
     //        ToUserId = user2.Id,
     //    };
     //    await requestService.SendFriendRequestAsync(friendrequestModel);
-        
+
     //    var notifications = await Service.GetByUserId(createdUser2!.Id);
     //    var notification = notifications.First();
     //    await Service.ReadNotification(createdUser2.Id, notification!.Id);
-        
+
     //    notification = await Service.GetByIdAsync(notification.Id);
     //    Assert.That(notification!.IsRead);
-    
+
     //    await Service.RemoveNotification(createdUser2.Id, notification.Id);
     //    Assert.ThrowsAsync<NotificationNotFoundException>(async () => await Service.GetByIdAsync(notification.Id));
     //}

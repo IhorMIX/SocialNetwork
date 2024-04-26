@@ -54,21 +54,21 @@ public class GroupController : ControllerBase
     }
 
     [HttpPost("join")]
-    public async Task<IActionResult> AddGroupMember([FromBody] AddUserInGroupModel addUserInGroupModel, CancellationToken cancellationToken)
+    public async Task<IActionResult> JoinGroup([FromBody] int groupId, CancellationToken cancellationToken)
     {
         _logger.LogInformation("Start to join user the group");
         var userId = User.GetUserId();
-        await _groupService.JoinGroup(addUserInGroupModel.GroupId, userId, cancellationToken);
+        await _groupService.JoinGroup(groupId, userId, cancellationToken);
         _logger.LogInformation("User joined the group");
         return Ok();
     }
 
     [HttpDelete("leave")]
-    public async Task<IActionResult> DelGroupMember([FromBody] AddUserInGroupModel addUserInGroupModel, CancellationToken cancellationToken)
+    public async Task<IActionResult> LeaveGroup([FromBody] int groupId, CancellationToken cancellationToken)
     {
         _logger.LogInformation("Start to delete groupMember from group");
         var userId = User.GetUserId();
-        await _groupService.LeaveGroup(addUserInGroupModel.GroupId, userId, cancellationToken);
+        await _groupService.LeaveGroup(groupId, userId, cancellationToken);
         _logger.LogInformation("User leave from group");
         return Ok();
     }

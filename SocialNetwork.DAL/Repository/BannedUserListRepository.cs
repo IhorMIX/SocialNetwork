@@ -49,7 +49,7 @@ namespace SocialNetwork.DAL.Repository
             CancellationToken cancellationToken = default)
         {
             var bannedUser = await _socialNetworkDbContext.BannedUserLists
-                 .Where(b => b.User.Id == needToUnBanUserId /*&& b.Group.Id == groupId*/)
+                 .Where(b => b.User.Id == needToUnBanUserId && b.Group.Id == groupId)
                  .SingleOrDefaultAsync(cancellationToken);
             _socialNetworkDbContext.BannedUserLists.Remove(bannedUser!);
             await _socialNetworkDbContext.SaveChangesAsync(cancellationToken);

@@ -45,10 +45,8 @@ namespace SocialNetwork.DAL.Repository
         public async Task AddGroupMemberAsync(GroupMember groupMember, Group group,
         CancellationToken cancellationToken = default)
         {
-            if (group.GroupMembers == null)
-                group.GroupMembers = new List<GroupMember>();
             group.GroupMembers.Add(groupMember);
-            _socialNetworkDbContext.GroupMembers.AddRange(groupMember);
+            _socialNetworkDbContext.Groups.Update(group);
             await _socialNetworkDbContext.SaveChangesAsync(cancellationToken);
         }
 

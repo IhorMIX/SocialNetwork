@@ -18,7 +18,6 @@ namespace SocialNetwork.BLL.Services
         private readonly ILogger<BlackListService> _logger;
         private readonly IMapper _mapper;
         private readonly IFriendshipService _friendshipService;
-        //private readonly IFriendRequestRepository _friendRequestRepository;
         private readonly IRequestRepository _requestRepository;
 
         public BlackListService(IUserRepository userRepository, IUserService userService, 

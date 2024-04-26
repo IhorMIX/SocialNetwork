@@ -9,9 +9,9 @@ namespace SocialNetwork.DAL.Repository.Interfaces
 {
     public interface IGroupMemberRepository : IBasicRepository<GroupMember>
     {
-        public Task<GroupMember?> GetByUserIdAndGroupId(int userId, int groupId,
+        public Task<GroupMember?> GetByUserIdAndGroupIdAsync(int userId, int groupId,
        CancellationToken cancellationToken = default);
-        public Task UpdateGroupMember(GroupMember groupMember, CancellationToken cancellationToken = default);
-        public Task SetRole(List<GroupMember> groupMembers, CancellationToken cancellationToken = default);
+        public Task UpdateGroupMemberAsync(GroupMember groupMember, CancellationToken cancellationToken = default);
+        public Task UpdateGroupMemberAsync(List<GroupMember> groupMembers, CancellationToken cancellationToken = default);
     }
 }

@@ -12,8 +12,8 @@ namespace SocialNetwork.DAL.Entity
         public string Description { get; set; } = null!;
         public bool IsPrivate { get; set; }
         public string Logo { get; set; } = null!;
-        public ICollection<RoleGroup>? RoleGroups { get; set; }
-        public ICollection<GroupMember>? GroupMembers { get; set; }
-        public ICollection<BannedUserList>? BannedUsers { get; set; }
+        public ICollection<RoleGroup> RoleGroups { get; set; } = null!;
+        public ICollection<GroupMember> GroupMembers { get; set; } = null!;
+        public ICollection<BannedUserList> BannedUsers { get; set; } = null!;
     }
 }

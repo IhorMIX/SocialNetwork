@@ -191,7 +191,7 @@ public class GroupServiceTest : DefaultServiceTest<IGroupService, GroupService>
         var group = groupList.Data.First();
 
         await Service.JoinGroup(group.Id, user2.Id);
-        var groupMember = await groupMemberRepository.GetByUserIdAndGroupId(user2.Id, group.Id);
+        var groupMember = await groupMemberRepository.GetByUserIdAndGroupIdAsync(user2.Id, group.Id);
         await Service.KickMember(user1.Id, group.Id, groupMember!.Id);
 
         Assert.That((await Service.GetGroupMembers(user1.Id, paginationModel, group.Id)).Data.Count() == 1);
@@ -530,7 +530,7 @@ public class GroupServiceTest : DefaultServiceTest<IGroupService, GroupService>
         group = (await Service.FindGroupByName(user1.Id, paginationModel, "Group1")).Data.First();
         Assert.That(group.GroupMembers!.Count == 2);
 
-        var groupMember = await groupMemberRepository.GetByUserIdAndGroupId(user2.Id, group.Id);
+        var groupMember = await groupMemberRepository.GetByUserIdAndGroupIdAsync(user2.Id, group.Id);
 
         await Service.BanGroupMember(user1.Id,group.Id, groupMember!.Id,"toxic");
 
@@ -575,7 +575,7 @@ public class GroupServiceTest : DefaultServiceTest<IGroupService, GroupService>
         group = (await Service.FindGroupByName(user1.Id, paginationModel, "Group1")).Data.First();
         Assert.That(group.GroupMembers!.Count == 2);
 
-        var groupMember = await groupMemberRepository.GetByUserIdAndGroupId(user2.Id, group.Id);
+        var groupMember = await groupMemberRepository.GetByUserIdAndGroupIdAsync(user2.Id, group.Id);
 
         await Service.BanGroupMember(user1.Id, group.Id, groupMember!.Id, "toxic");
         Assert.That((await Service.GetAllBannedUser(user1.Id,group.Id, paginationModel)).Data.Count() == 1);

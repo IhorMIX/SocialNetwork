@@ -25,7 +25,7 @@ public class GroupRoleController : ControllerBase
         _groupService = groupService;
     }
 
-    [HttpPost("role")]
+    [HttpPost]
     public async Task<IActionResult> AddRole([FromBody] CreateRoleGroupModel createRoleGroupModel, CancellationToken cancellationToken)
     {
         _logger.LogInformation("Start to add role");
@@ -34,7 +34,7 @@ public class GroupRoleController : ControllerBase
         return Ok();
     }
 
-    [HttpDelete("role")]
+    [HttpDelete]
     public async Task<IActionResult> DelRole([FromBody] ForRoleGroupModel forRoleGroupModel, CancellationToken cancellationToken)
     {
         _logger.LogInformation("Start to delete role");

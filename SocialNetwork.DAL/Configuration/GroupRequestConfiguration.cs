@@ -8,11 +8,6 @@ namespace SocialNetwork.DAL.Configuration
     {
         public void Configure(EntityTypeBuilder<GroupRequest> builder)
         {
-            //builder.HasKey(f => new { f.Id, f.SenderId, f.ToGroupId });
-
-            //builder.Property(f => f.Id)
-            //    .ValueGeneratedOnAdd();
-
             builder.HasOne(i => i.ToGroup)
                 .WithMany()
                 .HasForeignKey(i => i.ToGroupId)

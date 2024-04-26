@@ -35,7 +35,7 @@ namespace SocialNetwork.DAL.Repository
            .Include(c => c.User)
            .FirstOrDefaultAsync(i => i.Id == id, cancellationToken);
         }
-        public async Task<GroupMember?> GetByUserIdAndGroupId(int userId, int groupId,
+        public async Task<GroupMember?> GetByUserIdAndGroupIdAsync(int userId, int groupId,
         CancellationToken cancellationToken = default)
         {
             return await _socialNetworkDbContext.GroupMembers
@@ -45,12 +45,12 @@ namespace SocialNetwork.DAL.Repository
                 .Include(c => c.User).ThenInclude(i => i.Profile)
                 .FirstOrDefaultAsync(i => i.User.Id == userId && i.Group.Id == groupId, cancellationToken);
         }
-        public async Task UpdateGroupMember(GroupMember groupMember, CancellationToken cancellationToken = default)
+        public async Task UpdateGroupMemberAsync(GroupMember groupMember, CancellationToken cancellationToken = default)
         {
             _socialNetworkDbContext.GroupMembers.Update(groupMember);
             await _socialNetworkDbContext.SaveChangesAsync(cancellationToken);
         }
-        public async Task SetRole(List<GroupMember> groupMembers, CancellationToken cancellationToken = default)
+        public async Task UpdateGroupMemberAsync(List<GroupMember> groupMembers, CancellationToken cancellationToken = default)
         {
             _socialNetworkDbContext.GroupMembers.UpdateRange(groupMembers);
             await _socialNetworkDbContext.SaveChangesAsync(cancellationToken);

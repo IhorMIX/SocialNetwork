@@ -95,6 +95,7 @@ public class RequestService : IRequestService
                 CreatedAt = DateTime.Now,
             }, cancellationToken);
 
+            //TODO:Notification
             // in notification box
             //return await _notificationRepository.CreateNotification(new FriendRequestNotification()
             //{
@@ -160,7 +161,7 @@ public class RequestService : IRequestService
         {
             throw new RequestException("Invalid request type.");
         }
-
+        //TODO:Notification
         //// in notification box
         //return await _notificationRepository.CreateNotification(new FriendRequestNotification()
         //{
@@ -264,7 +265,7 @@ public class RequestService : IRequestService
             var groupModel = await _groupRepository.GetByIdAsync(g.ToGroupId, cancellationToken);
             _logger.LogAndThrowErrorIfNull(groupModel, new GroupNotFoundException($"Group by id {groupModel!.Id} not found"));
 
-            var groupMemberdb = await _groupMemberRepository.GetByUserIdAndGroupId(userId, g.ToGroupId, cancellationToken);
+            var groupMemberdb = await _groupMemberRepository.GetByUserIdAndGroupIdAsync(userId, g.ToGroupId, cancellationToken);
             _logger.LogAndThrowErrorIfNull(groupMemberdb, new UserNotFoundException($"User with this Id {userId} not found"));
 
             var userInGroup = await _groupRepository.IsUserInGroupAsync(g.SenderId, groupModel, cancellationToken);
@@ -293,7 +294,7 @@ public class RequestService : IRequestService
         {
             throw new RequestException("Invalid request type.");
         }
-
+        //TODO:Notification
         //// in notification box
         //return await _notificationRepository.CreateNotification(new FriendRequestNotification()
         //{
@@ -318,7 +319,7 @@ public class RequestService : IRequestService
 
         if (groupRequest is GroupRequest g)
         {
-            var groupMemberdb = await _groupMemberRepository.GetByUserIdAndGroupId(userId, g.ToGroupId, cancellationToken);
+            var groupMemberdb = await _groupMemberRepository.GetByUserIdAndGroupIdAsync(userId, g.ToGroupId, cancellationToken);
             _logger.LogAndThrowErrorIfNull(groupMemberdb, new UserNotFoundException($"User with this Id {userId} not found"));
 
             var access = new List<GroupAccess>
@@ -382,7 +383,7 @@ public class RequestService : IRequestService
     public async Task<PaginationResultModel<BaseRequestModel>> GetAllIncomeFriendRequest(int userId, PaginationModel pagination, CancellationToken cancellationToken = default)
     {
         var userRequests = await _requestRepository.GetAll()
-            .Where(u => (u as FriendRequest)!.ToUserId == userId)
+            .Where(u =>u is FriendRequest && ((FriendRequest)u).ToUserId == userId)
             .Pagination(pagination.CurrentPage, pagination.PageSize)
             .ToListAsync(cancellationToken);
 
@@ -402,7 +403,7 @@ public class RequestService : IRequestService
     public async Task<PaginationResultModel<BaseRequestModel>> GetAllIncomeGroupRequest(int userId, PaginationModel pagination, CancellationToken cancellationToken = default)
     {
         var userRequests = await _requestRepository.GetAll()
-            .Where(u => (u as GroupRequest)!.ToGroupId == userId)
+            .Where(u => u is GroupRequest && ((GroupRequest)u).ToGroupId == userId)
             .Pagination(pagination.CurrentPage, pagination.PageSize)
             .ToListAsync(cancellationToken);
 
