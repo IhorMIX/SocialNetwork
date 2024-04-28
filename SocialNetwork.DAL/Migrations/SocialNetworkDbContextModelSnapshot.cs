@@ -132,7 +132,7 @@ namespace SocialNetwork.DAL.Migrations
                     b.HasDiscriminator<string>("Discriminator").HasValue("BaseFileEntity");
 
                     b.UseTphMappingStrategy();
-                });
+                }));
 
             modelBuilder.Entity("SocialNetwork.DAL.Entity.BaseRequestEntity", b =>
                 {
@@ -948,7 +948,7 @@ namespace SocialNetwork.DAL.Migrations
                     b.Navigation("ToReplyComment");
 
                     b.Navigation("User");
-                });
+                }));
 
             modelBuilder.Entity("SocialNetwork.DAL.Entity.FriendRequest", b =>
                 {
@@ -1165,7 +1165,7 @@ namespace SocialNetwork.DAL.Migrations
                         .IsRequired();
 
                     b.Navigation("Message");
-                });
+                }));
 
             modelBuilder.Entity("SocialNetwork.DAL.Entity.FileInPost", b =>
                 {
