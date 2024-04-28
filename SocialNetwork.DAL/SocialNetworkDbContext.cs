@@ -33,12 +33,17 @@ public class SocialNetworkDbContext : DbContext
     public DbSet<UserPost> UserPosts { get; set; }
 
     public DbSet<BlackList> BlackLists { get; set; }
+    
     public DbSet<FriendRequestNotification> FriendRequestNotifications { get; set; }
     public DbSet<ChatNotification> ChatFriendRequestNotifications { get; set; }
     public DbSet<MessageNotification> MessageNotifications { get; set; }
     public DbSet<ReactionNotification> ReactionNotifications { get; set; }
+    public DbSet<LikeNotification> LikePostNotifications { get; set; }
+    public DbSet<CommentNotification> CommentPostNotifications { get; set; }
     public DbSet<NotificationEntity> Notifications { get; set; }
     public DbSet<MessageReadStatus> MessageReadStatuses { get; set; }
+    public DbSet<LikePost> LikePost { get; set; }
+    public DbSet<CommentPost> CommentPost { get; set; }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(SocialNetworkDbContext).Assembly);

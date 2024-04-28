@@ -28,6 +28,8 @@ namespace SocialNetwork.Web.MapperConfiguration
             CreatePaginationResultMapping<MessageViewModel, MessageModel>();
             CreatePaginationResultMapping<BasePostViewModel, BasePostModel>();
             CreatePaginationResultMapping<UserPostViewModel, UserPostModel>();
+            CreatePaginationResultMapping<LikePostViewModel, LikePostModel>();
+            CreatePaginationResultMapping<CommentPostViewModel, CommentPostModel>();
             
             void CreatePaginationResultMapping<TViewModel, TModel>()
             {
@@ -276,7 +278,21 @@ namespace SocialNetwork.Web.MapperConfiguration
             
             CreateMap<BasePostViewModel, BasePostModel>()
                 .ReverseMap();
+
+            CreateMap<LikePostModel, LikePost>()
+                .ReverseMap();
             
+            CreateMap<CommentPostModel, CommentPost>()
+                .ReverseMap();
+            
+            CreateMap<CommentPostViewModel, CommentPostModel>()
+                .ForMember(r => r.Post, opt => opt.Ignore())
+                .ForMember(r => r.ToReplyComment, opt => opt.Ignore())
+                .ReverseMap();
+            
+            CreateMap<LikePostViewModel, LikePostModel>()
+                .ForMember(r => r.Post, opt => opt.Ignore())
+                .ReverseMap();
         }
     }
 }
