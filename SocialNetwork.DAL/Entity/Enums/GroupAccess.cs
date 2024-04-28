@@ -11,7 +11,7 @@ namespace SocialNetwork.DAL.Entity.Enums
         CreatePost,
         DeletedPost,
         EditRoles,
-        InviteToGroupMembers,
+        AcceptToGroup,
         DelGroupMembers,
         BanGroupMembers,
         MuteGroupMembers,

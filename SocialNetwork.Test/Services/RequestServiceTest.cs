@@ -29,7 +29,7 @@ public class RequestServiceTest : DefaultServiceTest<IRequestService, RequestSer
         services.AddScoped<IRequestService , RequestService>();
         services.AddScoped<IRequestRepository , RequestRepository>();
 
-        services.AddScoped<IBannedUserListRepository, BannedUserListRepository>();
+        services.AddScoped<IGroupBannedListRepository, GroupBannedListRepository>();
         services.AddScoped<IBlackListService, BlackListService>();
         services.AddScoped<IBlackListRepository, BlackListRepository>();
         base.SetUpAdditionalDependencies(services);

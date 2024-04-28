@@ -9,11 +9,11 @@ using System.Threading.Tasks;
 
 namespace SocialNetwork.DAL.Repository
 {
-    public class BannedUserListRepository : IBannedUserListRepository
+    public class GroupBannedListRepository : IGroupBannedListRepository
     {
         private readonly SocialNetworkDbContext _socialNetworkDbContext;
 
-        public BannedUserListRepository(SocialNetworkDbContext socialNetworkDbContext)
+        public GroupBannedListRepository(SocialNetworkDbContext socialNetworkDbContext)
         {
             _socialNetworkDbContext = socialNetworkDbContext;
         }

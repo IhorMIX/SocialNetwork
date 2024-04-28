@@ -27,7 +27,7 @@ public class BlackListServiceTest : BaseMessageTestService<IBlackListService, Bl
         services.AddScoped<IGroupService, GroupService>();
         services.AddScoped<IGroupMemberRepository, GroupMemberRepository>();
         services.AddScoped<IRoleGroupRepository, RoleGroupRepository>();
-        services.AddScoped<IBannedUserListRepository, BannedUserListRepository>();
+        services.AddScoped<IGroupBannedListRepository, GroupBannedListRepository>();
         
         services.AddScoped<IBlackListService, BlackListService>();
         services.AddScoped<IBlackListRepository, BlackListRepository>();

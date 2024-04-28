@@ -4,7 +4,7 @@ namespace SocialNetwork.DAL.Repository.Interfaces
 {
     public interface IGroupRepository : IBasicRepository<Group>
     {
-        Task<int> CreateGroup(Group group, CancellationToken cancellationToken = default);
+        Task<Group> CreateGroup(Group group, CancellationToken cancellationToken = default);
         Task DeleteGroupAsync(Group group, CancellationToken cancellationToken = default);
         Task AddGroupMemberAsync(GroupMember groupMember, Group group, CancellationToken cancellationToken = default);
         Task DelGroupMemberAsync(int userId, Group group, CancellationToken cancellationToken = default);

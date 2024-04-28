@@ -24,13 +24,13 @@ public class RequestService : IRequestService
     private readonly IFriendshipRepository _friendshipRepository;
     private readonly IFriendshipService _friendshipService;
     private readonly IGroupRepository _groupRepository;
-    private readonly IBannedUserListRepository _bannedUserListRepository;
+    private readonly IGroupBannedListRepository _bannedUserListRepository;
     private readonly IGroupService _groupService;
     private readonly IGroupMemberRepository _groupMemberRepository;
 
     public RequestService(IRequestRepository requestRepository, ILogger<RequestService> logger, IMapper mapper, IUserService userService,
         IBlackListService blackListService, IFriendshipRepository friendshipRepository, IGroupRepository groupRepository,
-        IFriendshipService friendshipService, IBannedUserListRepository bannedUserListRepository, IGroupService groupService, IGroupMemberRepository groupMemberRepository)
+        IFriendshipService friendshipService, IGroupBannedListRepository bannedUserListRepository, IGroupService groupService, IGroupMemberRepository groupMemberRepository)
     {
         _requestRepository = requestRepository;
         _logger = logger;
@@ -278,7 +278,7 @@ public class RequestService : IRequestService
 
             var access = new List<GroupAccess>
             {
-                GroupAccess.InviteToGroupMembers
+                GroupAccess.AcceptToGroup
             };
             var hasUserAccess = groupMemberdb!.RoleGroup.HasAccess(access);
 
@@ -324,7 +324,7 @@ public class RequestService : IRequestService
 
             var access = new List<GroupAccess>
             {
-                GroupAccess.InviteToGroupMembers
+                GroupAccess.AcceptToGroup
             };
             var hasUserAccess = groupMemberdb!.RoleGroup.HasAccess(access);
 

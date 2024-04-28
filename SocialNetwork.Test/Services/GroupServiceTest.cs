@@ -26,7 +26,7 @@ public class GroupServiceTest : DefaultServiceTest<IGroupService, GroupService>
         services.AddScoped<IFriendshipRepository, FriendshipRepository>();
         services.AddScoped<IFriendshipService, FriendshipService>();
 
-        services.AddScoped<IBannedUserListRepository, BannedUserListRepository>();
+        services.AddScoped<IGroupBannedListRepository, GroupBannedListRepository>();
         services.AddScoped<IRequestRepository, RequestRepository>();
         base.SetUpAdditionalDependencies(services);
     }

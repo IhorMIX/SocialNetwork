@@ -34,7 +34,7 @@ public class ChatServiceTest : BaseMessageTestService<IChatService, ChatService>
         services.AddScoped<INotificationRepository, NotificationRepository>();
         services.AddScoped<INotificationService, NotificationService>();
 
-        services.AddScoped<IBannedUserListRepository, BannedUserListRepository>();
+        services.AddScoped<IGroupBannedListRepository, GroupBannedListRepository>();
         services.AddScoped<IRoleRepository, RoleRepository>();
         services.AddScoped<IRoleGroupRepository, RoleGroupRepository>();
         services.AddScoped<IGroupRepository, GroupRepository>();

@@ -29,7 +29,7 @@ public class MessageServiceTest : BaseMessageTestService<IMessageService, Messag
         services.AddScoped<IGroupRepository, GroupRepository>();
         services.AddScoped<IGroupMemberRepository, GroupMemberRepository>();
         services.AddScoped<IRoleGroupRepository, RoleGroupRepository>();
-        services.AddScoped<IBannedUserListRepository, BannedUserListRepository>();
+        services.AddScoped<IGroupBannedListRepository, GroupBannedListRepository>();
 
         services.AddScoped<IChatService, ChatService>();
 

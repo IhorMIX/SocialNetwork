@@ -35,7 +35,7 @@ public class UserServiceTest : DefaultServiceTest<IUserService, UserService>
         services.AddScoped<IFriendshipRepository, FriendshipRepository>();
         services.AddScoped<IGroupRepository, GroupRepository>();
         services.AddScoped<IGroupService, GroupService>();
-        services.AddScoped<IBannedUserListRepository, BannedUserListRepository>();
+        services.AddScoped<IGroupBannedListRepository, GroupBannedListRepository>();
         services.AddScoped<IGroupMemberRepository, GroupMemberRepository>();
         services.AddScoped<IRoleGroupRepository, RoleGroupRepository>();
 

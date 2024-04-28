@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace SocialNetwork.DAL.Repository.Interfaces
 {
-    public interface IBannedUserListRepository : IBasicRepository<BannedUserList>
+    public interface IGroupBannedListRepository : IBasicRepository<BannedUserList>
     {
         public Task BanGroupMemberAsync(User needToBanUser, Group group, string reason,
             CancellationToken cancellationToken = default);

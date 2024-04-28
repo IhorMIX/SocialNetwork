@@ -92,7 +92,7 @@ public class Startup
         services.AddScoped<IGroupRepository, GroupRepository>();
         services.AddScoped<IGroupMemberRepository, GroupMemberRepository>();
         services.AddScoped<IRoleGroupRepository, RoleGroupRepository>();
-        services.AddScoped<IBannedUserListRepository, BannedUserListRepository>();
+        services.AddScoped<IGroupBannedListRepository, GroupBannedListRepository>();
 
         services.AddScoped<IRequestRepository, RequestRepository>();
         services.AddScoped<IRequestService, RequestService>();

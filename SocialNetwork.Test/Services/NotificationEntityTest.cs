@@ -32,7 +32,7 @@ public class NotificationEntityTest : BaseMessageTestService<INotificationServic
         services.AddScoped<IRequestRepository, RequestRepository>();
         services.AddScoped<IRequestService, RequestService>();
 
-        services.AddScoped<IBannedUserListRepository, BannedUserListRepository>();
+        services.AddScoped<IGroupBannedListRepository, GroupBannedListRepository>();
 
         services.AddScoped<INotificationRepository, NotificationRepository>();
         services.AddScoped<INotificationService, NotificationService>();

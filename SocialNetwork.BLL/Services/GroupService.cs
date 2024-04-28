@@ -22,7 +22,7 @@ public class GroupService : IGroupService
     private readonly IRoleGroupRepository _roleGroupRepository;
     private readonly ILogger<GroupService> _logger;
     private readonly IMapper _mapper;
-    private readonly IBannedUserListRepository _bannedUserListRepository;
+    private readonly IGroupBannedListRepository _bannedUserListRepository;
 
 
     public GroupService(
@@ -32,7 +32,7 @@ public class GroupService : IGroupService
         IMapper mapper,
         IUserRepository userRepository,
         IRoleGroupRepository roleGroupRepository,
-        IBannedUserListRepository bannedUserListRepository)
+        IGroupBannedListRepository bannedUserListRepository)
     {
         _groupRepository = groupRepository;
         _groupMemberRepository = groupMemberRepository;
@@ -55,9 +55,8 @@ public class GroupService : IGroupService
         var userDb = await _userRepository.GetByIdAsync(userId, cancellationToken);
         _logger.LogAndThrowErrorIfNull(userDb, new UserNotFoundException($"User with this Id {userId} not found"));
 
-        var groupId = await _groupRepository.CreateGroup(_mapper.Map<Group>(groupModel), cancellationToken);
-        var groupDb = await _groupRepository.GetByIdAsync(groupId, cancellationToken);
-        _logger.LogAndThrowErrorIfNull(groupDb, new GroupNotFoundException($"Group with this Id {groupId} not found"));
+        var groupDb = await _groupRepository.CreateGroup(_mapper.Map<Group>(groupModel), cancellationToken);
+        _logger.LogAndThrowErrorIfNull(groupDb, new GroupNotFoundException($"Group with this Id {groupDb.Id} not found"));
 
         var member = new GroupMember
         {
@@ -65,7 +64,7 @@ public class GroupService : IGroupService
             User = userDb!,
             IsCreator = true,
         }; await _groupRepository.AddGroupMemberAsync(member, groupDb!, cancellationToken);
-        return _mapper.Map<GroupModel>(await _groupRepository.GetByIdAsync(groupId, cancellationToken));
+        return _mapper.Map<GroupModel>(await _groupRepository.GetByIdAsync(groupDb.Id, cancellationToken));
     }
 
     public async Task DeleteGroup(int userId, int groupId, CancellationToken cancellationToken = default)
@@ -360,17 +359,6 @@ public class GroupService : IGroupService
         var groupDb = await _groupRepository.GetByIdAsync(groupId, cancellationToken);
         _logger.LogAndThrowErrorIfNull(groupDb, new GroupNotFoundException($"Group with this Id {groupId} not found"));
 
-        var access = new List<GroupAccess>
-        {
-            GroupAccess.EditRoles
-        };
-        var hasUserAccess = groupMemberDb!.RoleGroup.HasAccess(access);
-
-        if (!hasUserAccess && !groupMemberDb.IsCreator)
-        {
-            throw new NoRightException($"You have no rights for it");
-        }
-
         var role = await _roleGroupRepository.GetAll()
             .Where(r => r.Id == roleId && r.Group == groupDb).SingleOrDefaultAsync(cancellationToken);
         _logger.LogAndThrowErrorIfNull(role, new RoleNotFoundException($"Role not found"));
@@ -594,6 +582,7 @@ public class GroupService : IGroupService
 
         return paginationModel;
     }
+    //TODO ElasticSearch for groups
     public async Task<PaginationResultModel<GroupModel>> FindGroupByName(int userId, PaginationModel pagination, string groupName,
         CancellationToken cancellationToken = default)
     {

@@ -30,11 +30,11 @@ namespace SocialNetwork.DAL.Repository
                 .FirstOrDefaultAsync(i => i.Id == id, cancellationToken);
         }
 
-        public async Task<int> CreateGroup(Group group, CancellationToken cancellationToken = default)
+        public async Task<Group> CreateGroup(Group group, CancellationToken cancellationToken = default)
         {
             var groupEntity = await _socialNetworkDbContext.Groups.AddAsync(group, cancellationToken);
             await _socialNetworkDbContext.SaveChangesAsync(cancellationToken);
-            return groupEntity.Entity.Id;
+            return groupEntity.Entity;
         }
 
         public async Task DeleteGroupAsync(Group group, CancellationToken cancellationToken = default)

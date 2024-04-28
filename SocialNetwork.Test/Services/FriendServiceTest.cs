@@ -34,7 +34,7 @@ public class FriendServiceTest : DefaultServiceTest<IFriendshipService, Friendsh
         services.AddScoped<IRequestRepository, RequestRepository>();
         services.AddScoped<IRequestService, RequestService>();
 
-        services.AddScoped<IBannedUserListRepository, BannedUserListRepository>();
+        services.AddScoped<IGroupBannedListRepository, GroupBannedListRepository>();
         services.AddScoped<IRoleRepository, RoleRepository>();
         services.AddScoped<IRoleGroupRepository, RoleGroupRepository>();
         services.AddScoped<IGroupMemberRepository, GroupMemberRepository>();
