@@ -17,6 +17,8 @@ public class PostRepository : IPostRepository
     {
         return _socialNetworkDbContext.Posts
             .Include(r => r.Files)
+            .Include(r => r.Comments)
+            .Include(r => r.Likes)
             .Include(r => (r as UserPost)!.User).ThenInclude(r => r.Profile)
             //.Include(r => (r as GroupPost)!.Group)
             .AsQueryable();
@@ -26,6 +28,8 @@ public class PostRepository : IPostRepository
     {
         return await _socialNetworkDbContext.Posts
             .Include(r => r.Files)
+            .Include(r => r.Comments)
+            .Include(r => r.Likes)
             .Include(r => (r as UserPost)!.User).ThenInclude(r => r.Profile)
             //.Include(r => (r as GroupPost)!.Group)
             .FirstOrDefaultAsync(r => r.Id == id, cancellationToken);

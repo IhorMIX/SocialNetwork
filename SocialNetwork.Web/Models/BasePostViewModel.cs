@@ -5,4 +5,5 @@ public class BasePostViewModel
     public int Id { get; set; }
     public string Text { get; set; } = null!;
     public DateTime CreatedAt { get; set; }
+    public ICollection<LikePostViewModel> Likes { get; set; } = null!;
 }

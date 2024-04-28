@@ -97,6 +97,13 @@ public class Startup
         services.AddScoped<IRequestRepository, RequestRepository>();
         services.AddScoped<IRequestService, RequestService>();
 
+        
+        services.AddScoped<ILikePostRepository, LikePostRepository>();
+        services.AddScoped<ICommentPostRepository, CommentPostRepository>();
+        
+        services.AddScoped<ILikePostService, LikePostService>();
+        services.AddScoped<ICommentPostService, CommentPostService>();
+        
         services.AddSingleton<IDbReadySignal, DbContextReadySignal>();
         services.AddSingleton<DelayedWriter>();
         services.AddSingleton<IUserInChatTracker, UserInChatTracker>();

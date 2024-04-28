@@ -32,6 +32,8 @@ namespace SocialNetwork.Web.MapperConfiguration
             CreatePaginationResultMapping<MessageViewModel, MessageModel>();
             CreatePaginationResultMapping<BasePostViewModel, BasePostModel>();
             CreatePaginationResultMapping<UserPostViewModel, UserPostModel>();
+            CreatePaginationResultMapping<LikePostViewModel, LikePostModel>();
+            CreatePaginationResultMapping<CommentPostViewModel, CommentPostModel>();
             
             CreatePaginationResultMapping<BannedUsersInGroupViewModel, BannedUserInGroupModel>();
             CreatePaginationResultMapping<BannedUserList, BannedUserInGroupModel>();
@@ -325,27 +327,42 @@ namespace SocialNetwork.Web.MapperConfiguration
 
             CreateMap<GroupMember, User>().ReverseMap();
 
-            CreateMap<GroupModel, Group>().ReverseMap(); //+
+            CreateMap<GroupModel, Group>().ReverseMap(); 
 
-            CreateMap<GroupMemberModel, GroupMember>().ReverseMap();//+
+            CreateMap<GroupMemberModel, GroupMember>().ReverseMap();
 
             CreateMap<GroupCreateViewModel, GroupModel>()
                 .ForMember(dest => dest.GroupMembers, opt => opt.Ignore())
                 .ForMember(dest => dest.Roles, opt => opt.Ignore())
-                .ReverseMap(); //+
+                .ReverseMap();
 
             CreateMap<GroupMemberViewModel, GroupMemberModel>()
                 .ForMember(dest => dest.Group, opt => opt.Ignore())
                 .ForMember(dest => dest.RoleGroup, opt => opt.Ignore())
-                .ReverseMap(); //+
+                .ReverseMap();
 
             CreateMap<GroupViewModel, GroupModel>()
                 .ForMember(dest => dest.GroupMembers, opt => opt.Ignore())
                 .ForMember(dest => dest.Roles, opt => opt.Ignore())
-                .ReverseMap(); //+
+                .ReverseMap();
 
             CreateMap<BannedUserList, BannedUserInGroupModel>().ReverseMap();
             CreateMap<BannedUsersInGroupViewModel, BannedUserInGroupModel>().ReverseMap();
+
+            CreateMap<LikePostModel, LikePost>()
+                .ReverseMap();
+            
+            CreateMap<CommentPostModel, CommentPost>()
+                .ReverseMap();
+            
+            CreateMap<CommentPostViewModel, CommentPostModel>()
+                .ForMember(r => r.Post, opt => opt.Ignore())
+                .ForMember(r => r.ToReplyComment, opt => opt.Ignore())
+                .ReverseMap();
+            
+            CreateMap<LikePostViewModel, LikePostModel>()
+                .ForMember(r => r.Post, opt => opt.Ignore())
+                .ReverseMap();
         }
     }
 }
