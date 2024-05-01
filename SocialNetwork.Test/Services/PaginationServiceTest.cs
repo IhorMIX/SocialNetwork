@@ -15,7 +15,7 @@ using SocialNetwork.DAL.Entity;
 
 namespace SocialNetwork.Test.Services
 {
-    public class PaginationServiceTest : BaseMessageTestService<IBlackListService, BlackListService> 
+    public class PaginationServiceTest : DefaultServiceTest<IBlackListService, BlackListService> 
     {
         
         protected override void SetUpAdditionalDependencies(IServiceCollection services)
@@ -24,13 +24,29 @@ namespace SocialNetwork.Test.Services
             services.AddScoped<IUserService, UserService>();
         
             services.AddScoped<IFriendshipService, FriendshipService>();
-            services.AddScoped<IFriendRequestService, FriendRequestService>();
             services.AddScoped<IFriendshipRepository, FriendshipRepository>();
-            services.AddScoped<IFriendRequestRepository, FriendRequestRepository>();
 
             services.AddScoped<IBlackListService, BlackListService>();
             services.AddScoped<IBlackListRepository, BlackListRepository>();
-        
+
+            services.AddScoped<IRequestService, RequestService>();
+            services.AddScoped<IRequestRepository, RequestRepository>();
+
+            services.AddScoped<IRoleRepository, RoleRepository>();
+            services.AddScoped<IRoleGroupRepository, RoleGroupRepository>();
+            services.AddScoped<IGroupMemberRepository, GroupMemberRepository>();
+            services.AddScoped<IChatMemberRepository, ChatMemberRepository>();
+            services.AddScoped<IGroupRepository, GroupRepository>();
+            services.AddScoped<IGroupService, GroupService>();
+ 
+            services.AddScoped<IChatService, ChatService>();
+            services.AddScoped<IChatRepository, ChatRepository>();
+
+            services.AddScoped<IRequestRepository, RequestRepository>();
+            services.AddScoped<IRequestService, RequestService>();
+
+            services.AddScoped<IGroupBannedListRepository, GroupBannedListRepository>();
+
             services.AddScoped<INotificationRepository, NotificationRepository>();
             services.AddScoped<INotificationService, NotificationService>();
             
@@ -55,7 +71,7 @@ namespace SocialNetwork.Test.Services
 
             var paginationModel = new PaginationModel
             {
-                CurrentPage = 2,
+                CurrentPage = 2, //check 2nd page
                 PageSize = 1
             };
 
@@ -228,60 +244,53 @@ namespace SocialNetwork.Test.Services
         public async Task GetAllRequest_MakePaginationModel_SuccessReturned()
         {
             var userService = ServiceProvider.GetRequiredService<IUserService>();
-            var friendRequestService = ServiceProvider.GetRequiredService<IFriendRequestService>();
+            var requestService = ServiceProvider.GetRequiredService<IRequestService>();
             var user1 = await UserModelHelper.CreateTestDataAsync(userService);
             var user2 = await UserModelHelper.CreateTestDataAsync(userService);
-            var user3 = await UserModelHelper.CreateTestDataAsync(userService);
-            var createdUser1 = await userService.GetUserByLogin(user1.Login);
-            var createdUser2 = await userService.GetUserByLogin(user2.Login);
-            var createdUser3 = await userService.GetUserByLogin(user3.Login);
             Assert.That(user1, Is.Not.EqualTo(null));
             Assert.That(user2, Is.Not.EqualTo(null));
-            Assert.That(user3, Is.Not.EqualTo(null));
 
             var paginationModel = new PaginationModel
             {
                 CurrentPage = 1,
                 PageSize = 10
             };
+            var friendrequestModel = new FriendRequestModel
+            {
+                SenderId = user1.Id,
+                ToUserId = user2.Id,
+            };
+            await requestService.SendFriendRequestAsync(friendrequestModel);
 
-            await friendRequestService.SendRequest(createdUser2!.Id, createdUser1!.Id);
-            await friendRequestService.SendRequest(createdUser3!.Id, createdUser1!.Id);
-            Assert.That(friendRequestService.GetByUsersId(createdUser2.Id, createdUser1.Id), Is.Not.EqualTo(null));
-            Assert.That(friendRequestService.GetByUsersId(createdUser3.Id, createdUser1.Id), Is.Not.EqualTo(null));
-
-            var request = await friendRequestService.GetAllIncomeRequest(createdUser1.Id, paginationModel);
-            Assert.That(request.Data.Count() == 2);
+            var request = await requestService.GetAllIncomeFriendRequest(user2!.Id, paginationModel);
+            Assert.That(request.Data.Count() == 1);
         }
 
         [Test]
         public async Task GetAllIncomes_MakePaginationModel_SuccessReturned()
         {
             var userService = ServiceProvider.GetRequiredService<IUserService>();
-            var friendRequestService = ServiceProvider.GetRequiredService<IFriendRequestService>();
+            var requestService = ServiceProvider.GetRequiredService<IRequestService>();
             var user1 = await UserModelHelper.CreateTestDataAsync(userService);
             var user2 = await UserModelHelper.CreateTestDataAsync(userService);
-            var user3 = await UserModelHelper.CreateTestDataAsync(userService);
-            var createdUser1 = await userService.GetUserByLogin(user1.Login);
-            var createdUser2 = await userService.GetUserByLogin(user2.Login);
-            var createdUser3 = await userService.GetUserByLogin(user3.Login);
+
             Assert.That(user1, Is.Not.EqualTo(null));
             Assert.That(user2, Is.Not.EqualTo(null));
-            Assert.That(user3, Is.Not.EqualTo(null));
 
             var paginationModel = new PaginationModel
             {
                 CurrentPage = 1,
                 PageSize = 10
             };
+            var friendrequestModel = new FriendRequestModel
+            {
+                SenderId = user1.Id,
+                ToUserId = user2.Id,
+            };
+            await requestService.SendFriendRequestAsync(friendrequestModel);
 
-            await friendRequestService.SendRequest(createdUser1!.Id, createdUser2!.Id);
-            await friendRequestService.SendRequest(createdUser1!.Id, createdUser3!.Id);
-            Assert.That(friendRequestService.GetByUsersId(createdUser1.Id, createdUser2.Id), Is.Not.EqualTo(null));
-            Assert.That(friendRequestService.GetByUsersId(createdUser1.Id, createdUser3.Id), Is.Not.EqualTo(null));
-
-            var request = await friendRequestService.GetAllSentRequest(createdUser1.Id, paginationModel);
-            Assert.That(request.Data.Count() == 2);
+            var request = await requestService.GetAllSentFriendRequest(user1.Id, paginationModel);
+            Assert.That(request.Data.Count() == 1);
         }
 
         [Test]

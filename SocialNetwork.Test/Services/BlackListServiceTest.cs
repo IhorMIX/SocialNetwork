@@ -18,16 +18,22 @@ public class BlackListServiceTest : BaseMessageTestService<IBlackListService, Bl
         services.AddScoped<IUserService, UserService>();
         
         services.AddScoped<IFriendshipService, FriendshipService>();
-        services.AddScoped<IFriendRequestService, FriendRequestService>();
         services.AddScoped<IFriendshipRepository, FriendshipRepository>();
-        services.AddScoped<IFriendRequestRepository, FriendRequestRepository>();
         
         services.AddScoped<INotificationRepository, NotificationRepository>();
         services.AddScoped<INotificationService, NotificationService>();
+
+        services.AddScoped<IGroupRepository, GroupRepository>();
+        services.AddScoped<IGroupService, GroupService>();
+        services.AddScoped<IGroupMemberRepository, GroupMemberRepository>();
+        services.AddScoped<IRoleGroupRepository, RoleGroupRepository>();
+        services.AddScoped<IGroupBannedListRepository, GroupBannedListRepository>();
         
         services.AddScoped<IBlackListService, BlackListService>();
         services.AddScoped<IBlackListRepository, BlackListRepository>();
-        
+
+        services.AddScoped<IRequestRepository, RequestRepository>();
+        services.AddScoped<IRequestService, RequestService>();
         base.SetUpAdditionalDependencies(services);
     }
     

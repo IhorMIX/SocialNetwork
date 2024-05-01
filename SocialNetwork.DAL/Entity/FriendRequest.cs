@@ -1,10 +1,8 @@
 ﻿namespace SocialNetwork.DAL.Entity;
 
-public class FriendRequest : BaseEntity
+public class FriendRequest : BaseRequestEntity
 {
-    public int SenderId { get; set; }
-    public int ReceiverId { get; set; }
-    public User Sender { get; set; } = null!;
-    public User Receiver { get; set; } = null!;
+    public int ToUserId { get; set; }
+    public User ToUser { get; set; } = null!;
     
 }

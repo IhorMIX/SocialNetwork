@@ -1,73 +1,71 @@
-﻿using System.Text.Json;
-using AutoMapper;
+﻿using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SocialNetwork.BLL.Models;
-using Microsoft.AspNetCore.SignalR;
+using SocialNetwork.BLL.Services;
 using SocialNetwork.BLL.Services.Interfaces;
+using SocialNetwork.DAL.Entity;
+using SocialNetwork.DAL.Entity.Enums;
 using SocialNetwork.Web.Extensions;
-using SocialNetwork.Web.Hubs;
 using SocialNetwork.Web.Models;
 
 namespace SocialNetwork.Web.Controllers;
+
+
 [Authorize]
 [Route("api/[controller]")]
 [ApiController]
 public class FriendRequestController : ControllerBase
 {
-    private readonly ILogger<FriendshipController> _logger;
+
+    private readonly ILogger<FriendRequestController> _logger;
     private readonly IMapper _mapper;
-    private readonly IFriendRequestService _friendRequestService;
-    private readonly IHubContext<NotificationHub> _notificationHubContext;
-    private readonly INotificationService _notificationService;
-    public FriendRequestController(ILogger<FriendshipController> logger, IMapper mapper, IFriendRequestService friendRequestService, IHubContext<NotificationHub> notificationHubContext, INotificationService notificationService)
+    private readonly IRequestService _requestService;
+
+    public FriendRequestController(ILogger<FriendRequestController> logger, IMapper mapper, IRequestService requestService)
     {
         _logger = logger;
         _mapper = mapper;
-        _friendRequestService = friendRequestService;
-        _notificationHubContext = notificationHubContext;
-        _notificationService = notificationService;
+        _requestService = requestService;
     }
 
-    [HttpPost]
-    public async Task<IActionResult> SendRequest([FromQuery]int receiverId, CancellationToken cancellationToken)
+    [HttpPost("{receiverId:int}")]
+    public async Task<IActionResult> SendFriendRequest(int receiverId, CancellationToken cancellationToken = default)
     {
         var userId = User.GetUserId();
-        var notificationId = await _friendRequestService.SendRequest(userId, receiverId, cancellationToken);
-        var notificationModel = await _notificationService.GetByIdAsync(notificationId, cancellationToken);
-        await _notificationHubContext.Clients.Group(notificationModel!.ToUserId.ToString())
-            .SendAsync("ReceivedNotification", JsonSerializer.Serialize(_mapper.Map<BaseNotificationViewModel>(notificationModel)), cancellationToken: cancellationToken);
+        await _requestService.SendFriendRequestAsync(new FriendRequestModel() { SenderId = userId, ToUserId = receiverId }, cancellationToken);
         return Ok();
     }
-    [HttpPost("accept")]
-    public async Task<IActionResult> AcceptRequest([FromQuery]int requestId, CancellationToken cancellationToken)
+
+    [HttpPost("accept/{requestId:int}")]
+    public async Task<IActionResult> AcceptFriendRequest(int requestId, CancellationToken cancellationToken)
     {
         var userId = User.GetUserId();
-        var notificationId = await _friendRequestService.AcceptRequest(userId, requestId, cancellationToken);
-        var notificationModel = await _notificationService.GetByIdAsync(notificationId, cancellationToken);
-        await _notificationHubContext.Clients.Group(notificationModel!.ToUserId.ToString())
-            .SendAsync("ReceivedNotification", JsonSerializer.Serialize(_mapper.Map<BaseNotificationViewModel>(notificationModel)), cancellationToken: cancellationToken);
+        await _requestService.AcceptFriendRequest(userId, requestId, cancellationToken);
         return Ok();
     }
-    [HttpPost("cancel")]
-    public async Task<IActionResult> CancelRequest([FromQuery]int requestId, CancellationToken cancellationToken)
+
+    [HttpPost("cancel/{requestId:int}")]
+    public async Task<IActionResult> CancelFriendRequest(int requestId, CancellationToken cancellationToken)
     {
         var userId = User.GetUserId();
-        await _friendRequestService.CancelRequest(userId, requestId, cancellationToken);
+        await _requestService.CancelFriendRequest(userId, requestId, cancellationToken);
         return Ok();
     }
-    [HttpGet("received")]
-    public async Task<IActionResult> GetAllIncomeRequest([FromQuery] PaginationModel pagination, CancellationToken cancellationToken)
-    {
-        var userId = User.GetUserId();
-        var requests = await _friendRequestService.GetAllIncomeRequest(userId,pagination, cancellationToken);
-        return Ok(_mapper.Map<PaginationResultViewModel<FriendRequestViewModel>>(requests));
-    }
+
     [HttpGet("sent")]
-    public async Task<IActionResult> GetAllSentRequest([FromQuery] PaginationModel pagination, CancellationToken cancellationToken)
+    public async Task<IActionResult> GetAllSentFriendRequest([FromQuery] PaginationModel pagination, CancellationToken cancellationToken)
     {
         var userId = User.GetUserId();
-        var requests = await _friendRequestService.GetAllSentRequest(userId,pagination, cancellationToken);
-        return Ok(_mapper.Map<PaginationResultViewModel<FriendRequestViewModel>>(requests));
+        var requests = await _requestService.GetAllSentFriendRequest(userId, pagination, cancellationToken);
+        return Ok(_mapper.Map<PaginationResultViewModel<BaseRequestViewModel>>(requests));
+    }
+
+    [HttpGet("received")]
+    public async Task<IActionResult> GetAllIncomeFriendRequest([FromQuery] PaginationModel pagination, CancellationToken cancellationToken)
+    {
+        var userId = User.GetUserId();
+        var requests = await _requestService.GetAllIncomeFriendRequest(userId, pagination, cancellationToken);
+        return Ok(_mapper.Map<PaginationResultViewModel<BaseRequestViewModel>>(requests));
     }
 }

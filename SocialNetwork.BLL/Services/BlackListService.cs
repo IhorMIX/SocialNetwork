@@ -18,11 +18,11 @@ namespace SocialNetwork.BLL.Services
         private readonly ILogger<BlackListService> _logger;
         private readonly IMapper _mapper;
         private readonly IFriendshipService _friendshipService;
-        private readonly IFriendRequestRepository _friendRequestRepository;
+        private readonly IRequestRepository _requestRepository;
 
         public BlackListService(IUserRepository userRepository, IUserService userService, 
             IBlackListRepository blackListRepository, ILogger<BlackListService> logger, IMapper mapper, IFriendshipService friendshipService,
-            IFriendRequestRepository friendRequestRepository)
+            IRequestRepository requestRepository)
         {
             _userRepository = userRepository;
             _userService = userService;
@@ -30,7 +30,7 @@ namespace SocialNetwork.BLL.Services
             _logger = logger;
             _mapper = mapper;
             _friendshipService = friendshipService;
-            _friendRequestRepository = friendRequestRepository;
+            _requestRepository = requestRepository;
         }
 
         public async Task<BlackListModel?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
@@ -55,10 +55,11 @@ namespace SocialNetwork.BLL.Services
                     UserId = userDb!.Id,
                     BannedUserId = user2Db!.Id,
                 };
-                await _friendRequestRepository.DeleteFriendRequestAsync(new FriendRequest()
+
+                await _requestRepository.DeleteRequestAsync(new FriendRequest()
                 {
                     SenderId = userDb!.Id,
-                    ReceiverId = user2Db!.Id
+                    ToUserId = user2Db!.Id
                 }, cancellationToken);
 
                 await _friendshipService.DeleteFriendshipAsync(userDb.Id, user2Db.Id, cancellationToken);

@@ -2,8 +2,8 @@
 using SocialNetwork.BLL.Models;
 using SocialNetwork.BLL.Services;
 using SocialNetwork.BLL.Services.Interfaces;
-using SocialNetwork.DAL.Repository;
 using SocialNetwork.DAL.Repository.Interfaces;
+using SocialNetwork.DAL.Repository;
 using SocialNetwork.Test.Helpers;
 
 namespace SocialNetwork.Test.Services;
@@ -17,22 +17,30 @@ public class MessageServiceTest : BaseMessageTestService<IMessageService, Messag
         services.AddScoped<IUserService, UserService>();
         
         services.AddScoped<IFriendshipService, FriendshipService>();
-        services.AddScoped<IFriendRequestService, FriendRequestService>();
         services.AddScoped<IFriendshipRepository, FriendshipRepository>();
-        services.AddScoped<IFriendRequestRepository, FriendRequestRepository>();
         
         services.AddScoped<IMessageService, MessageService>();
         services.AddScoped<IMessageRepository, MessageRepository>();
         services.AddScoped<IReactionRepository, ReactionRepository>();
         services.AddScoped<IReactionService, ReactionService>();
         services.AddScoped<IMessageReadStatusRepository, MessageReadStatusRepository>();
-        
+
+        services.AddScoped<IGroupService, GroupService>();
+        services.AddScoped<IGroupRepository, GroupRepository>();
+        services.AddScoped<IGroupMemberRepository, GroupMemberRepository>();
+        services.AddScoped<IRoleGroupRepository, RoleGroupRepository>();
+        services.AddScoped<IGroupBannedListRepository, GroupBannedListRepository>();
+
+        services.AddScoped<IChatService, ChatService>();
+
         services.AddScoped<INotificationRepository, NotificationRepository>();
         services.AddScoped<INotificationService, NotificationService>();
         
         services.AddScoped<IBlackListService, BlackListService>();
         services.AddScoped<IBlackListRepository, BlackListRepository>();
-        
+
+        services.AddScoped<IRequestRepository, RequestRepository>();
+        services.AddScoped<IRequestService, RequestService>();
         base.SetUpAdditionalDependencies(services);
     }
     

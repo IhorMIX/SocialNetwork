@@ -18,10 +18,10 @@ public class PostServiceTest : DefaultServiceTest<IPostService, PostService>
         services.AddScoped<IUserService, UserService>();
         
         services.AddScoped<IFriendshipService, FriendshipService>();
-        services.AddScoped<IFriendRequestService, FriendRequestService>();
         services.AddScoped<IFriendshipRepository, FriendshipRepository>();
-        services.AddScoped<IFriendRequestRepository, FriendRequestRepository>();
-            
+
+        services.AddScoped<IRequestRepository, RequestRepository>();
+
         services.AddScoped<INotificationRepository, NotificationRepository>();
         services.AddScoped<INotificationService, NotificationService>();
         

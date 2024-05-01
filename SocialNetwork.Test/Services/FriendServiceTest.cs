@@ -16,7 +16,6 @@ public class FriendServiceTest : DefaultServiceTest<IFriendshipService, Friendsh
 {
     protected override void SetUpAdditionalDependencies(IServiceCollection services)
     {
-        services.AddScoped<IFriendRequestRepository, FriendRequestRepository>();
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<IFriendshipService, FriendshipService>();
@@ -28,9 +27,20 @@ public class FriendServiceTest : DefaultServiceTest<IFriendshipService, Friendsh
         services.AddScoped<IRoleRepository, RoleRepository>();
         services.AddScoped<IChatRepository, ChatRepository>();
         services.AddScoped<IChatMemberRepository, ChatMemberRepository>();
-        services.AddScoped<IFriendRequestRepository, FriendRequestRepository>();
+
         services.AddScoped<INotificationRepository, NotificationRepository>();
         services.AddScoped<INotificationService, NotificationService>();
+
+        services.AddScoped<IRequestRepository, RequestRepository>();
+        services.AddScoped<IRequestService, RequestService>();
+
+        services.AddScoped<IGroupBannedListRepository, GroupBannedListRepository>();
+        services.AddScoped<IRoleRepository, RoleRepository>();
+        services.AddScoped<IRoleGroupRepository, RoleGroupRepository>();
+        services.AddScoped<IGroupMemberRepository, GroupMemberRepository>();
+        services.AddScoped<IGroupRepository, GroupRepository>();
+        services.AddScoped<IGroupService, GroupService>();
+
         base.SetUpAdditionalDependencies(services);
     }
     

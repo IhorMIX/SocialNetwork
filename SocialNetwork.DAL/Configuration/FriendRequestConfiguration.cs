@@ -8,19 +8,9 @@ public class FriendRequestConfiguration : IEntityTypeConfiguration<FriendRequest
 {
     public void Configure(EntityTypeBuilder<FriendRequest> builder)
     {
-        builder.HasKey(f => new { f.Id, f.SenderId, f.ReceiverId });
-        
-        builder.Property(f => f.Id)
-            .ValueGeneratedOnAdd();
-        
-        builder.HasOne(i => i.Sender)
-            .WithMany(i => i.Requests)
-            .HasForeignKey(i => i.SenderId)
-            .OnDelete(DeleteBehavior.NoAction);
-        
-        builder.HasOne(i => i.Receiver)
+        builder.HasOne(i => i.ToUser)
             .WithMany()
-            .HasForeignKey(i => i.ReceiverId)
+            .HasForeignKey(i => i.ToUserId)
             .OnDelete(DeleteBehavior.NoAction);
     }
 }

@@ -22,13 +22,16 @@ public class User : BaseEntity
     public AuthorizationInfo? AuthorizationInfo { get; set; }
 
     public IEnumerable<Friendship>? Friends { get; set; }
-    
-    public IEnumerable<FriendRequest>? Requests { get; set; }
-    
+
+    public IEnumerable<BaseRequestEntity>? Requests { get; set; }
+
     public IEnumerable<ChatMember>? ChatMembers { get; set; }
     public IEnumerable<BlackList>? BlackLists { get; set; }
     
     public IEnumerable<NotificationEntity>? Notifications { get; set; }
+    public IEnumerable<GroupMember>? GroupMembers { get; set; }
+    public IEnumerable<BannedUserList>? BansByGroups { get; set; }
+
     public IEnumerable<Message> CreatedMessages { get; set; } = null!;
     
     public IEnumerable<UserPost> Posts { get; set; } = null!;

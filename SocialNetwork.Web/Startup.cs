@@ -65,9 +65,6 @@ public class Startup
         services.AddScoped<IFriendshipRepository, FriendshipRepository>();
         services.AddScoped<IFriendshipService, FriendshipService>();
         
-        services.AddScoped<IFriendRequestRepository, FriendRequestRepository>();
-        services.AddScoped<IFriendRequestService, FriendRequestService>();
-        
         services.AddScoped<IChatService,ChatService>();
         services.AddScoped<IChatRepository,ChatRepository>();
         services.AddScoped<IRoleRepository,RoleRepository>();
@@ -89,6 +86,17 @@ public class Startup
         
         services.AddScoped<IPostRepository, PostRepository>();
         services.AddScoped<IPostService, PostService>();
+
+
+        services.AddScoped<IGroupService, GroupService>();
+        services.AddScoped<IGroupRepository, GroupRepository>();
+        services.AddScoped<IGroupMemberRepository, GroupMemberRepository>();
+        services.AddScoped<IRoleGroupRepository, RoleGroupRepository>();
+        services.AddScoped<IGroupBannedListRepository, GroupBannedListRepository>();
+
+        services.AddScoped<IRequestRepository, RequestRepository>();
+        services.AddScoped<IRequestService, RequestService>();
+
         
         services.AddScoped<ILikePostRepository, LikePostRepository>();
         services.AddScoped<ICommentPostRepository, CommentPostRepository>();
