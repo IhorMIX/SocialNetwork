@@ -26,6 +26,13 @@ jobs:
 
     - name: Run Elasticsearch
       uses: JonasGe/elasticsearch-with-plugins-action@0.1.4
+      with:
+       elasticsearch version: '8.13.4'
+       host port: 9200
+       container port: 9200
+       host node port: 9300
+       node port: 9300
+       discovery type: 'single-node'
             
 
     - name: Build
