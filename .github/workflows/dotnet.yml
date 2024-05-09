@@ -24,6 +24,14 @@ jobs:
     - name: Restore dependencies
       run: dotnet restore
 
+    - name: Configure sysctl limits
+      run: |
+       sudo swapoff -a
+       sudo sysctl -w vm.swappiness=1
+       sudo sysctl -w fs.file-max=262144
+       sudo sysctl -w vm.max_map_count=262144
+
+
     - name: Run Elasticsearch
       uses: JonasGe/elasticsearch-with-plugins-action@0.1.4
       with:
