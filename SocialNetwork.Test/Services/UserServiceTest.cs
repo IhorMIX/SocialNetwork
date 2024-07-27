@@ -175,7 +175,7 @@ public class UserServiceTest : DefaultServiceTest<IUserService, UserService>
     [Test]
     public async Task GetUserByLoginAndPassword_UserNotFound_ThrowsUserNotFoundException()
     {
-        Assert.ThrowsAsync<UserNotFoundException>(async ()
+        Assert.ThrowsAsync<WrongLoginOrPasswordException>(async ()
             => await Service.GetUserByLoginAndPasswordAsync("user.Login", " user.Password"));
         await Task.CompletedTask;
     }
