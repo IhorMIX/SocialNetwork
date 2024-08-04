@@ -174,7 +174,7 @@ public class UserService : IUserService
     {
         var userDb = await _userRepository.GetAll().FirstOrDefaultAsync(i => i.Login == login && i.IsEnabled, cancellationToken);
 
-        _logger.LogAndThrowErrorIfNull(userDb, new UserNotFoundException($"User with this login {login} not found"));
+        _logger.LogAndThrowErrorIfNull(userDb, new WrongLoginOrPasswordException("Wrong login or password"));
 
         if (!PasswordHelper.VerifyHashedPassword(userDb!.Password, password))
         {
