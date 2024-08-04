@@ -108,7 +108,6 @@ namespace SocialNetwork.DAL.Migrations
                     b.ToTable("BannedUserLists");
                 });
 
-            modelBuilder.Entity("SocialNetwork.DAL.Entity.BaseNotificationEntity", b =>
             modelBuilder.Entity("SocialNetwork.DAL.Entity.BaseFileEntity", b =>
                 {
                     b.Property<int>("Id")
@@ -130,35 +129,6 @@ namespace SocialNetwork.DAL.Migrations
                     b.ToTable("Files");
 
                     b.HasDiscriminator<string>("Discriminator").HasValue("BaseFileEntity");
-
-                    b.UseTphMappingStrategy();
-                }));
-
-            modelBuilder.Entity("SocialNetwork.DAL.Entity.BaseRequestEntity", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Discriminator")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("SenderId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("SenderId");
-
-                    b.ToTable("Requests");
-
-                    b.HasDiscriminator<string>("Discriminator").HasValue("BaseRequestEntity");
 
                     b.UseTphMappingStrategy();
                 });
@@ -187,6 +157,35 @@ namespace SocialNetwork.DAL.Migrations
                     b.ToTable("Posts");
 
                     b.HasDiscriminator<string>("Discriminator").HasValue("BasePostEntity");
+
+                    b.UseTphMappingStrategy();
+                });
+
+            modelBuilder.Entity("SocialNetwork.DAL.Entity.BaseRequestEntity", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Discriminator")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("SenderId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SenderId");
+
+                    b.ToTable("Requests");
+
+                    b.HasDiscriminator<string>("Discriminator").HasValue("BaseRequestEntity");
 
                     b.UseTphMappingStrategy();
                 });
@@ -727,14 +726,16 @@ namespace SocialNetwork.DAL.Migrations
                     b.HasDiscriminator().HasValue("FileInPost");
                 });
 
-            modelBuilder.Entity("SocialNetwork.DAL.Entity.GroupRequestNotification", b =>
+            modelBuilder.Entity("SocialNetwork.DAL.Entity.UserPost", b =>
                 {
-                    b.HasBaseType("SocialNetwork.DAL.Entity.BaseNotificationEntity");
+                    b.HasBaseType("SocialNetwork.DAL.Entity.BasePostEntity");
 
-                    b.Property<int>("GroupRequestId")
+                    b.Property<int>("UserId")
                         .HasColumnType("int");
 
-                    b.HasDiscriminator().HasValue("GroupRequestNotification");
+                    b.HasIndex("UserId");
+
+                    b.HasDiscriminator().HasValue("UserPost");
                 });
 
             modelBuilder.Entity("SocialNetwork.DAL.Entity.FriendRequest", b =>
@@ -759,18 +760,6 @@ namespace SocialNetwork.DAL.Migrations
                     b.HasIndex("ToGroupId");
 
                     b.HasDiscriminator().HasValue("GroupRequest");
-                });
-
-            modelBuilder.Entity("SocialNetwork.DAL.Entity.UserPost", b =>
-                {
-                    b.HasBaseType("SocialNetwork.DAL.Entity.BasePostEntity");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
-                    b.HasIndex("UserId");
-
-                    b.HasDiscriminator().HasValue("UserPost");
                 });
 
             modelBuilder.Entity("SocialNetwork.DAL.Entity.ChatNotification", b =>
@@ -805,6 +794,16 @@ namespace SocialNetwork.DAL.Migrations
                         .HasColumnType("int");
 
                     b.HasDiscriminator().HasValue("FriendRequestNotification");
+                });
+
+            modelBuilder.Entity("SocialNetwork.DAL.Entity.GroupRequestNotification", b =>
+                {
+                    b.HasBaseType("SocialNetwork.DAL.Entity.NotificationEntity");
+
+                    b.Property<int>("GroupRequestId")
+                        .HasColumnType("int");
+
+                    b.HasDiscriminator().HasValue("GroupRequestNotification");
                 });
 
             modelBuilder.Entity("SocialNetwork.DAL.Entity.LikeNotification", b =>
@@ -886,6 +885,36 @@ namespace SocialNetwork.DAL.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("SocialNetwork.DAL.Entity.BannedUserList", b =>
+                {
+                    b.HasOne("SocialNetwork.DAL.Entity.Group", "Group")
+                        .WithMany("BannedUsers")
+                        .HasForeignKey("GroupId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("SocialNetwork.DAL.Entity.User", "User")
+                        .WithMany("BansByGroups")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Group");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("SocialNetwork.DAL.Entity.BaseRequestEntity", b =>
+                {
+                    b.HasOne("SocialNetwork.DAL.Entity.User", "Sender")
+                        .WithMany("Requests")
+                        .HasForeignKey("SenderId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Sender");
+                });
+
             modelBuilder.Entity("SocialNetwork.DAL.Entity.BlackList", b =>
                 {
                     b.HasOne("SocialNetwork.DAL.Entity.User", "BannedUser")
@@ -924,7 +953,6 @@ namespace SocialNetwork.DAL.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("SocialNetwork.DAL.Entity.FileEntity", b =>
             modelBuilder.Entity("SocialNetwork.DAL.Entity.CommentPost", b =>
                 {
                     b.HasOne("SocialNetwork.DAL.Entity.BasePostEntity", "Post")
@@ -948,21 +976,9 @@ namespace SocialNetwork.DAL.Migrations
                     b.Navigation("ToReplyComment");
 
                     b.Navigation("User");
-                }));
-
-            modelBuilder.Entity("SocialNetwork.DAL.Entity.FriendRequest", b =>
-                {
-                    b.HasOne("SocialNetwork.DAL.Entity.Message", "Message")
-                        .WithMany("Files")
-                        .HasForeignKey("MessageId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Message");
                 });
 
             modelBuilder.Entity("SocialNetwork.DAL.Entity.Friendship", b =>
-            modelBuilder.Entity("SocialNetwork.DAL.Entity.FriendRequest", b =>
                 {
                     b.HasOne("SocialNetwork.DAL.Entity.User", "FriendUser")
                         .WithMany()
@@ -979,7 +995,7 @@ namespace SocialNetwork.DAL.Migrations
                     b.Navigation("FriendUser");
 
                     b.Navigation("User");
-                }));
+                });
 
             modelBuilder.Entity("SocialNetwork.DAL.Entity.GroupMember", b =>
                 {
@@ -1155,7 +1171,6 @@ namespace SocialNetwork.DAL.Migrations
                     b.Navigation("RoleGroup");
                 });
 
-            modelBuilder.Entity("SocialNetwork.DAL.Entity.ChatNotification", b =>
             modelBuilder.Entity("SocialNetwork.DAL.Entity.FileInMessage", b =>
                 {
                     b.HasOne("SocialNetwork.DAL.Entity.Message", "Message")
@@ -1165,7 +1180,7 @@ namespace SocialNetwork.DAL.Migrations
                         .IsRequired();
 
                     b.Navigation("Message");
-                }));
+                });
 
             modelBuilder.Entity("SocialNetwork.DAL.Entity.FileInPost", b =>
                 {
@@ -1176,6 +1191,17 @@ namespace SocialNetwork.DAL.Migrations
                         .IsRequired();
 
                     b.Navigation("Post");
+                });
+
+            modelBuilder.Entity("SocialNetwork.DAL.Entity.UserPost", b =>
+                {
+                    b.HasOne("SocialNetwork.DAL.Entity.User", "User")
+                        .WithMany("Posts")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("SocialNetwork.DAL.Entity.FriendRequest", b =>
@@ -1198,17 +1224,6 @@ namespace SocialNetwork.DAL.Migrations
                         .IsRequired();
 
                     b.Navigation("ToGroup");
-                });
-
-            modelBuilder.Entity("SocialNetwork.DAL.Entity.UserPost", b =>
-                {
-                    b.HasOne("SocialNetwork.DAL.Entity.User", "User")
-                        .WithMany("Posts")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("SocialNetwork.DAL.Entity.ChatNotification", b =>
